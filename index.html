@@ -253,7 +253,11 @@
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);}
   .empty-state{text-align:center;padding:50px 20px;color:var(--ink-faint);font-size:15px;}
   .empty-state .big{font-size:34px;display:block;margin-bottom:8px;}
-  h2.section-title{font-family:'Playfair Display',serif;font-weight:600;font-size:22px;margin:4px 0 14px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  h2.section-title{
+    font-family:'Playfair Display',serif;font-weight:700;font-size:24px;margin:4px 0 16px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    color:var(--gold-deep);text-shadow:0 1px 0 rgba(255,255,255,.6), 0 2px 6px rgba(150,105,20,.22);
+  }
   .count-pill{display:inline-block;background:var(--gold-pale);color:var(--gold-deep);font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;margin-left:8px;vertical-align:middle;}
   .btn{border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:15px;padding:13px 18px;}
   .btn-gold{background:var(--gold-grad);color:#fff;box-shadow:0 3px 10px rgba(150,110,30,.28);}
@@ -269,19 +273,32 @@
   input[type="text"].field, input[type="date"].field, input[type="number"].field, select.field{
     width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--border);background:#fff;font-size:16px;color:var(--ink);
   }
-  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px;}
+  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
   .btn-grid-5{grid-template-columns:1fr 1fr;}
   .btn-grid-5 .opt-btn-debe{grid-column:1 / -1;}
-  .opt-btn{padding:13px 8px;border-radius:12px;border:1.5px solid var(--border);background:#fff;font-weight:700;font-size:14.5px;color:var(--ink-soft);cursor:pointer;}
-  .opt-btn.selected{border-color:var(--gold);background:var(--gold-pale);color:var(--gold-deep);}
-  .opt-btn-debe{color:var(--red);border-color:var(--red-pale);}
-  .opt-btn-debe.selected{border-color:var(--red);background:var(--red-pale);color:var(--red);}
+  .opt-btn{
+    padding:15px 10px;border-radius:12px;border:2px solid var(--border);background:#fff;
+    font-weight:800;font-size:14.5px;color:var(--ink-soft);cursor:pointer;transition:transform .08s;
+  }
+  .opt-btn:active{transform:scale(.97);}
+  .opt-btn.selected{border-color:var(--gold);background:var(--gold-grad);color:#fff;box-shadow:0 3px 10px rgba(150,110,30,.28);}
+  .opt-btn-debe{color:var(--red);border-color:var(--red);background:var(--red-pale);}
+  .opt-btn-debe.selected{border-color:var(--red);background:linear-gradient(135deg,#D9635A,#B8392F);color:#fff;box-shadow:0 3px 10px rgba(184,57,47,.3);}
+  .opt-btn-sm{padding:9px 8px;font-size:13px;border-radius:10px;}
+  .ajuste-input-wrap{
+    display:flex;align-items:center;gap:6px;margin-top:8px;border:1.5px solid var(--border);
+    border-radius:12px;padding:0 12px;background:#fff;
+  }
+  .ajuste-input-wrap .dollar{font-weight:800;color:var(--ink-soft);font-size:15px;}
+  .ajuste-input-wrap input{border:none;padding:12px 0;font-size:16px;text-align:right;flex:1;background:transparent;}
+  .ajuste-input-wrap input:focus{outline:none;}
+  .ajuste-input-wrap:focus-within{border-color:var(--gold);}
 
   /* ---------- VENDER TAB ---------- */
   .vender-layout{display:flex;gap:18px;align-items:flex-start;}
   .vender-catalog{flex:1 1 auto;min-width:0;}
   .vender-summary{
-    flex:0 0 440px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;
+    flex:0 0 500px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;
     padding:24px;box-shadow:var(--shadow);position:sticky;top:70px;max-height:calc(100vh - 90px);overflow-y:auto;
   }
   .vender-summary h3{font-family:'Playfair Display',serif;font-size:19px;margin:0 0 4px;color:var(--ink);}
@@ -337,10 +354,10 @@
   }
   .prod-card.selected{border-color:var(--gold);}
   .prod-card .img-wrap{
-    height:88px;flex:0 0 88px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;
+    height:132px;flex:0 0 132px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;
     font-family:'Playfair Display',serif;font-weight:700;color:var(--gold-deep);font-size:26px;overflow:hidden;
   }
-  .prod-card .img-wrap img{width:100%;height:100%;object-fit:cover;}
+  .prod-card .img-wrap img{width:100%;height:100%;object-fit:contain;padding:6px;box-sizing:border-box;}
   .icon-visual{width:62%;height:62%;color:var(--gold-deep);opacity:.92;}
   .icon-visual svg{width:100%;height:100%;}
   .costo-thumb-empty .icon-visual{width:70%;height:70%;}
@@ -404,10 +421,12 @@
   .ganancia-badge{font-weight:800;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap;}
   .ganancia-badge.pos{background:var(--green-pale);color:var(--green);}
   .ganancia-badge.neg{background:var(--red-pale);color:var(--red);}
-  .costo-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .costo-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+  @media(max-width:480px){ .costo-fields{grid-template-columns:1fr 1fr;} }
   .mini-field{display:flex;flex-direction:column;gap:4px;}
   .mini-field label{font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.3px;}
   .mini-field input{padding:10px 10px;border-radius:10px;border:1.5px solid var(--border);font-weight:700;font-size:15px;}
+  .mini-field input.neg{color:var(--red);border-color:var(--red);background:var(--red-pale);}
   .costo-row-actions{display:flex;gap:8px;border-top:1px dashed var(--border);padding-top:8px;}
   .link-btn{background:transparent;border:none;color:var(--gold-deep);font-weight:700;font-size:13px;cursor:pointer;padding:2px 0;}
   .link-btn.danger{color:var(--red);}
@@ -448,22 +467,44 @@
   .ventas-layout{display:flex;gap:18px;align-items:flex-start;}
   .ventas-main{flex:1;min-width:0;}
   .ventas-sidebar{
-    flex:0 0 230px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;
-    padding:16px;box-shadow:var(--shadow);position:sticky;top:70px;
+    flex:0 0 260px;background:linear-gradient(180deg,#fff 0%,var(--cream) 100%);
+    border:2px solid var(--border);border-radius:18px;
+    padding:18px;box-shadow:0 4px 16px rgba(150,110,30,.1);position:sticky;top:70px;
   }
   .ventas-sidebar select.field{margin-bottom:12px;}
-  .filter-col{display:flex;flex-direction:column;gap:6px;margin:6px 0 14px;}
+  .filter-col{display:flex;flex-direction:column;gap:7px;margin:6px 0 14px;}
   .chip-v{
-    width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);
-    background:#fff;font-weight:700;font-size:13.5px;color:var(--ink-soft);cursor:pointer;
+    width:100%;text-align:left;padding:12px 14px;border-radius:11px;border:2px solid var(--border);
+    background:#fff;font-weight:800;font-size:14px;color:var(--ink-soft);cursor:pointer;transition:transform .08s;
   }
-  .chip-v.active{background:var(--gold-grad);border-color:var(--gold);color:#fff;}
-  .stat-compact{display:flex;flex-direction:column;padding:10px 0;border-top:1px dashed var(--border);}
-  .stat-compact-lbl{font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.4px;}
-  .stat-compact-val{font-weight:800;font-size:19px;color:var(--gold-deep);font-family:'Inter',sans-serif;}
-  .stat-compact-val.red{color:var(--red);}
-  .stat-compact-sub{font-size:11px;color:var(--ink-faint);font-weight:700;margin-top:1px;}
-  #statMontoDeben.stat-compact-sub{color:var(--red);}
+  .chip-v:active{transform:scale(.98);}
+  .chip-v.active{background:var(--gold-grad);border-color:var(--gold);color:#fff;box-shadow:0 3px 12px rgba(150,110,30,.3);}
+  .stat-compact{
+    position:relative;overflow:hidden;border-radius:15px;padding:14px 16px 13px;margin-bottom:11px;
+    border:2px solid var(--border);background:#fff;
+  }
+  .stat-compact::after{
+    content:attr(data-icon);position:absolute;right:-8px;top:-14px;font-size:54px;opacity:.13;
+    filter:grayscale(1);line-height:1;
+  }
+  .stat-compact-main{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 130%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
+  .stat-compact-gold{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);}
+  .stat-compact-red{background:linear-gradient(135deg,#fff 0%,var(--red-pale) 140%);border-color:#E9BBB4;}
+  .stat-compact-lbl{font-size:10.5px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;position:relative;z-index:1;}
+  .stat-compact-val{
+    font-weight:800;font-size:23px;font-family:'Inter',sans-serif;position:relative;z-index:1;
+    display:block;margin-top:2px;
+  }
+  .stat-compact-main .stat-compact-val, .stat-compact-gold .stat-compact-val{
+    background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(150,105,20,.22));
+  }
+  .stat-compact-val.red{
+    background:linear-gradient(135deg,#D9635A,#8B2E2E);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(139,46,46,.22));
+  }
+  .stat-compact-sub{font-size:11px;color:var(--ink-faint);font-weight:700;margin-top:2px;position:relative;z-index:1;}
+  #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;}
   @media(max-width:880px){
     .ventas-layout{flex-direction:column;}
     .ventas-sidebar{position:static;width:100%;flex:1 1 auto;}
@@ -559,7 +600,6 @@
 <nav class="tabs" id="tabsNav">
   <button class="tab-btn active" data-tab="vender"><span class="ico">🛒</span>Ventas POS</button>
   <button class="tab-btn" data-tab="ventas"><span class="ico">🧾</span>Ventas</button>
-  <button class="tab-btn" data-tab="stock"><span class="ico">📦</span>Stock</button>
   <button class="tab-btn" data-tab="productos"><span class="ico">💰</span>Productos</button>
   <button class="tab-btn" data-tab="proveedores"><span class="ico">🏷️</span>Proveedores</button>
 </nav>
@@ -600,8 +640,15 @@
         </div>
         <div class="field-label">Cliente</div>
         <input type="text" class="field" id="ventaCliente" placeholder="Consumidor final">
-        <div class="field-label">Descuento / recargo ($)</div>
-        <input type="number" class="field" id="ventaAjuste" placeholder="0" value="0">
+        <div class="field-label">Ajuste de precio</div>
+        <div class="btn-grid" style="grid-template-columns:1fr 1fr;">
+          <button class="opt-btn opt-btn-sm selected" data-ajuste-tipo="descuento">Descuento</button>
+          <button class="opt-btn opt-btn-sm" data-ajuste-tipo="recargo">Recargo</button>
+        </div>
+        <div class="ajuste-input-wrap">
+          <span class="dollar">$</span>
+          <input type="number" class="field" id="ventaAjuste" placeholder="0" value="0">
+        </div>
         <div class="venta-total-row" id="ventaSubtotalRow" style="display:none;">
           <span class="lbl">Subtotal</span>
           <span class="val" id="ventaSubtotalSummary" style="font-size:16px;color:var(--ink-soft);">$ 0</span>
@@ -629,14 +676,15 @@
       <aside class="ventas-sidebar">
         <div class="field-label">Período</div>
         <div class="filter-col">
-          <button class="chip-v active" data-f="hoy">Hoy</button>
-          <button class="chip-v" data-f="mes">Este mes</button>
-          <button class="chip-v" data-f="anteriores">Meses anteriores</button>
-          <button class="chip-v" data-f="acumulado">Acumulado</button>
+          <button class="chip-v active" data-f="hoy">☀️ Hoy</button>
+          <button class="chip-v" data-f="mes">📅 Este mes</button>
+          <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
         </div>
         <div class="mini-field" id="mesAnterioresBox" style="display:none;">
-          <label>Elegí el mes</label>
-          <select class="field" id="mesAnteriorSelect"></select>
+          <label>Ver un mes puntual</label>
+          <select class="field" id="mesAnteriorSelect">
+            <option value="">Todos los meses</option>
+          </select>
         </div>
         <div class="field-label">Medio de pago</div>
         <select class="field" id="filtroMedio">
@@ -654,16 +702,18 @@
           <option value="no">No facturados</option>
         </select>
 
-        <div class="stat-compact">
+        <button class="btn btn-outline btn-block" id="btnQuitarFiltros" style="margin-top:14px;">✕ Quitar filtros</button>
+
+        <div class="stat-compact stat-compact-main" data-icon="🧾">
           <span class="stat-compact-lbl">Total del período</span>
           <span class="stat-compact-val" id="totalDia">$ 0</span>
           <span class="stat-compact-sub" id="ventasFiltroLabel">TOTAL DE HOY</span>
         </div>
-        <div class="stat-compact">
+        <div class="stat-compact stat-compact-gold" data-icon="💰">
           <span class="stat-compact-lbl">Facturado</span>
           <span class="stat-compact-val" id="statFacturadoMes">$ 0</span>
         </div>
-        <div class="stat-compact">
+        <div class="stat-compact stat-compact-red" data-icon="⚠️">
           <span class="stat-compact-lbl">Clientes que deben</span>
           <span class="stat-compact-val red" id="statClientesDeben">0</span>
           <span class="stat-compact-sub" id="statMontoDeben">$ 0</span>
@@ -686,16 +736,7 @@
     </div>
   </section>
 
-  <!-- ===================== STOCK ===================== -->
-  <section class="panel" id="panel-stock">
-    <h2 class="section-title">Stock <span class="count-pill" id="stockCount"></span></h2>
-    <div class="search-wrap">
-      <input type="text" class="search" id="searchStock" placeholder="Buscar producto...">
-    </div>
-    <div id="listStock"></div>
-  </section>
-
-  <!-- ===================== PRODUCTOS (costos + admin) ===================== -->
+  <!-- ===================== PRODUCTOS (costos + stock + admin) ===================== -->
   <section class="panel" id="panel-productos">
     <h2 class="section-title">
       Productos
@@ -799,6 +840,7 @@ let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
 let ventasFiltro = 'hoy';
 let ventaMedio = null;
+let ventaAjusteTipo = 'descuento';
 let pinBuffer = '';
 
 const fmt = (n) => '$ ' + Math.round(n).toLocaleString('es-AR');
@@ -899,6 +941,22 @@ function applyPhotoToDOM(id){
     const img = document.createElement('img');
     img.src = src; img.className = 'costo-thumb'; img.alt = '';
     el.replaceWith(img);
+  });
+  document.querySelectorAll(`.costo-row[data-id="${id}"] [data-action="foto"]`).forEach(btn=>{
+    btn.textContent = '🖼️ Cambiar foto';
+  });
+  document.querySelectorAll(`.costo-row[data-id="${id}"]`).forEach(row=>{
+    if(!row.querySelector('[data-action="quitar-foto"]')){
+      const fotoBtn = row.querySelector('[data-action="foto"]');
+      if(fotoBtn){
+        const btn = document.createElement('button');
+        btn.className = 'link-btn danger';
+        btn.dataset.action = 'quitar-foto';
+        btn.dataset.id = id;
+        btn.textContent = 'Quitar foto';
+        fotoBtn.insertAdjacentElement('afterend', btn);
+      }
+    }
   });
 }
 
@@ -1259,10 +1317,11 @@ function renderVentaSummary(){
     }).join('');
   }
 
-  const ajuste = parseFloat(document.getElementById('ventaAjuste').value) || 0;
-  const totalFinal = total - ajuste;
+  const ajusteVal = parseFloat(document.getElementById('ventaAjuste').value) || 0;
+  const signo = ventaAjusteTipo === 'recargo' ? 1 : -1;
+  const totalFinal = total + (signo * ajusteVal);
   const subtotalRow = document.getElementById('ventaSubtotalRow');
-  if(ajuste !== 0){
+  if(ajusteVal !== 0){
     subtotalRow.style.display = 'flex';
     document.getElementById('ventaSubtotalSummary').textContent = fmt(total);
   } else {
@@ -1280,6 +1339,15 @@ function renderVentaSummary(){
 }
 
 document.getElementById('ventaAjuste').addEventListener('input', renderVentaSummary);
+
+document.querySelectorAll('[data-ajuste-tipo]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    ventaAjusteTipo = btn.dataset.ajusteTipo;
+    document.querySelectorAll('[data-ajuste-tipo]').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    renderVentaSummary();
+  });
+});
 
 document.getElementById('ventaItems').addEventListener('click', (e)=>{
   const btn = e.target.closest('.venta-item-qty button');
@@ -1310,8 +1378,9 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
   const fecha = document.getElementById('ventaFecha').value || todayISO();
 
   const {total: rawTotal} = cartCountAndTotal();
-  const ajuste = parseFloat(document.getElementById('ventaAjuste').value) || 0;
-  const totalFinal = rawTotal - ajuste;
+  const ajusteVal = parseFloat(document.getElementById('ventaAjuste').value) || 0;
+  const signo = ventaAjusteTipo === 'recargo' ? 1 : -1;
+  const totalFinal = rawTotal + (signo * ajusteVal);
   const ratio = rawTotal > 0 ? (totalFinal / rawTotal) : 1;
 
   for(const id in CART){
@@ -1327,72 +1396,19 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
 
   CART = {};
   ventaMedio = null;
+  ventaAjusteTipo = 'descuento';
   document.getElementById('ventaCliente').value = '';
   document.getElementById('ventaAjuste').value = 0;
   document.querySelectorAll('#ventaMedioGrid .opt-btn').forEach(x=>x.classList.remove('selected'));
+  document.querySelectorAll('[data-ajuste-tipo]').forEach(b=>b.classList.remove('selected'));
+  document.querySelector('[data-ajuste-tipo="descuento"]').classList.add('selected');
   document.getElementById('ventaFecha').value = todayISO();
 
   renderCatalogo();
   renderVentaSummary();
-  renderStock();
+  renderCostos();
   renderVentas();
   showToast('Venta registrada ✓');
-});
-
-/* ============================================================
-   STOCK
-   ============================================================ */
-function renderStock(){
-  const term = document.getElementById('searchStock').value.trim().toLowerCase();
-  const list = document.getElementById('listStock');
-  let items = PRODUCTS.filter(p=>!term || p.nombre.toLowerCase().includes(term));
-  items.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-  document.getElementById('stockCount').textContent = PRODUCTS.length + ' productos';
-
-  if(items.length===0){
-    list.innerHTML = '<div class="empty-state"><span class="big">🔍</span>No encontramos productos.</div>';
-    return;
-  }
-
-  list.innerHTML = items.map(p=>{
-    const neg = p.stock < 0;
-    return `<div class="stock-row" data-id="${p.id}">
-      <div class="prod-info">
-        <div class="prod-name">${escapeHtml(p.nombre)}</div>
-        <div class="prod-tag">${escapeHtml(titleCase(p.rubro))}</div>
-      </div>
-      <div class="stock-ctrl">
-        <button data-action="minus" data-id="${p.id}">−</button>
-        <input type="number" class="stock-num ${neg?'neg':''}" data-id="${p.id}" value="${p.stock}">
-        <button data-action="plus" data-id="${p.id}">+</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-document.getElementById('searchStock').addEventListener('input', renderStock);
-
-document.getElementById('listStock').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('.stock-ctrl button');
-  if(!btn) return;
-  const id = btn.dataset.id;
-  const p = PRODUCTS.find(x=>x.id===id);
-  if(!p) return;
-  if(btn.dataset.action==='plus') p.stock++; else p.stock--;
-  renderStock();
-  await saveProducts();
-});
-
-document.getElementById('listStock').addEventListener('change', async (e)=>{
-  const inp = e.target.closest('.stock-num');
-  if(!inp) return;
-  const id = inp.dataset.id;
-  const p = PRODUCTS.find(x=>x.id===id);
-  if(!p) return;
-  const val = parseInt(inp.value, 10);
-  p.stock = isNaN(val) ? 0 : val;
-  renderStock();
-  await saveProducts();
 });
 
 /* ============================================================
@@ -1441,6 +1457,7 @@ function renderCostos(){
         <div class="ganancia-badge ${pos?'pos':'neg'}">${fmt(gan)} · ${pct}</div>
       </div>
       <div class="costo-fields">
+        <div class="mini-field"><label>Stock</label><input type="number" class="costo-input ${p.stock<0?'neg':''}" data-id="${p.id}" data-field="stock" value="${p.stock}"></div>
         <div class="mini-field"><label>Costo</label><input type="number" class="costo-input" data-id="${p.id}" data-field="costo" value="${p.costo}"></div>
         <div class="mini-field"><label>Precio venta</label><input type="number" class="costo-input" data-id="${p.id}" data-field="precio" value="${p.precio}"></div>
       </div>
@@ -1463,8 +1480,13 @@ document.getElementById('listCostos').addEventListener('change', async (e)=>{
   const field = inp.dataset.field;
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
-  const val = parseFloat(inp.value);
-  p[field] = isNaN(val) ? 0 : val;
+  if(field==='stock'){
+    const val = parseInt(inp.value, 10);
+    p.stock = isNaN(val) ? 0 : val;
+  } else {
+    const val = parseFloat(inp.value);
+    p[field] = isNaN(val) ? 0 : val;
+  }
   renderCostos();
   await saveProducts();
 });
@@ -1501,7 +1523,7 @@ document.getElementById('listCostos').addEventListener('click', async (e)=>{
     if(!confirm('¿Eliminar "'+p.nombre+'" del catálogo? Esto no borra ventas ya registradas.')) return;
     PRODUCTS = PRODUCTS.filter(x=>x.id!==id);
     await saveProducts();
-    renderCostos(); renderCatalogo(); renderStock(); renderProveedores();
+    renderCostos(); renderCatalogo(); renderProveedores();
     showToast('Producto eliminado');
   }
 });
@@ -1535,7 +1557,7 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
   PRODUCTS.push({ id: 'p_'+Date.now(), nombre: nombre.toUpperCase(), proveedor, costo, precio, rubro, stock, foto });
   await saveProducts();
   document.getElementById('overlayNuevo').classList.remove('show');
-  renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderStock(); renderProveedores();
+  renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
   showToast('Producto agregado ✓');
 });
 
@@ -1589,7 +1611,7 @@ document.getElementById('fileExcel').addEventListener('change', (e)=>{
       });
 
       await saveProducts();
-      renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderStock(); renderProveedores();
+      renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
       showToast(`Importado ✓ ${nuevos} nuevos, ${actualizados} actualizados`);
     }catch(err){
       showToast('No pude leer el archivo. Revisá el formato.');
@@ -1687,10 +1709,20 @@ document.getElementById('btnExportarTodo').addEventListener('click', ()=>{
 
     const ventasData = SALES.map(s=>({
       FECHA: s.fecha, PRODUCTO: s.producto, CANTIDAD: s.cantidad, PRECIO: s.precioUnitario,
+      SUBTOTAL: s.cantidad * s.precioUnitario,
       'MEDIO DE PAGO': s.medioPago||'', CLIENTE: s.cliente, FACTURADO: s.facturado ? 'FACTURADO' : ''
     }));
     const wsVentas = XLSX.utils.json_to_sheet(ventasData);
     XLSX.utils.book_append_sheet(wb, wsVentas, 'VENTAS');
+
+    const proveedoresData = Object.keys(PROV_INFO).sort().map(nombre=>({
+      PROVEEDOR: nombre,
+      TELEFONO: PROV_INFO[nombre].telefono || '',
+      CONTACTO: PROV_INFO[nombre].contacto || '',
+      NOTAS: PROV_INFO[nombre].notas || ''
+    }));
+    const wsProveedores = XLSX.utils.json_to_sheet(proveedoresData);
+    XLSX.utils.book_append_sheet(wb, wsProveedores, 'PROVEEDORES');
 
     const fecha = todayISO();
     XLSX.writeFile(wb, `Desde Casa - Backup ${fecha}.xlsx`);
@@ -1865,7 +1897,7 @@ function populateMesAnteriorSelect(){
   const sel = document.getElementById('mesAnteriorSelect');
   const meses = getMesesConActividad();
   const prev = sel.value;
-  sel.innerHTML = meses.map(m => `<option value="${m}">${formatMes(m)}</option>`).join('');
+  sel.innerHTML = '<option value="">Todos los meses</option>' + meses.map(m => `<option value="${m}">${formatMes(m)}</option>`).join('');
   if(meses.includes(prev)) sel.value = prev;
 }
 
@@ -1875,7 +1907,7 @@ document.querySelectorAll('.filter-col .chip-v').forEach(chip=>{
     chip.classList.add('active');
     ventasFiltro = chip.dataset.f;
     const box = document.getElementById('mesAnterioresBox');
-    if(ventasFiltro === 'anteriores'){
+    if(ventasFiltro === 'acumulado'){
       populateMesAnteriorSelect();
       box.style.display = 'block';
     } else {
@@ -1888,6 +1920,19 @@ document.querySelectorAll('.filter-col .chip-v').forEach(chip=>{
 document.getElementById('mesAnteriorSelect').addEventListener('change', renderVentas);
 document.getElementById('filtroMedio').addEventListener('change', renderVentas);
 document.getElementById('filtroFacturado').addEventListener('change', renderVentas);
+
+document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
+  ventasFiltro = 'acumulado';
+  document.querySelectorAll('.filter-col .chip-v').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.filter-col .chip-v[data-f="acumulado"]').classList.add('active');
+  populateMesAnteriorSelect();
+  document.getElementById('mesAnteriorSelect').value = '';
+  document.getElementById('mesAnterioresBox').style.display = 'block';
+  document.getElementById('filtroMedio').value = '';
+  document.getElementById('filtroFacturado').value = '';
+  renderVentas();
+  showToast('Filtros limpiados ✓');
+});
 
 function aplicarFiltrosSecundarios(items){
   const medio = document.getElementById('filtroMedio').value;
@@ -1925,18 +1970,21 @@ function renderVentas(){
   const todayStr = todayISO();
   const curMonth = todayStr.slice(0,7);
 
-  const labels = {hoy:'TOTAL DE HOY', mes:'TOTAL DE ESTE MES', acumulado:'TOTAL ACUMULADO'};
+  const labels = {hoy:'TOTAL DE HOY', mes:'TOTAL DE ESTE MES'};
 
   if(ventasFiltro==='hoy') items = items.filter(s=>s.fecha===todayStr);
   else if(ventasFiltro==='mes') items = items.filter(s=>s.fecha && s.fecha.slice(0,7)===curMonth);
-  else if(ventasFiltro==='anteriores'){
+  else if(ventasFiltro==='acumulado'){
     const mesElegido = document.getElementById('mesAnteriorSelect').value;
-    items = items.filter(s=>s.fecha && s.fecha.slice(0,7)===mesElegido);
-    document.getElementById('ventasFiltroLabel').textContent = mesElegido ? `TOTAL DE ${formatMes(mesElegido).toUpperCase()}` : 'TOTAL';
+    if(mesElegido){
+      items = items.filter(s=>s.fecha && s.fecha.slice(0,7)===mesElegido);
+      document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${formatMes(mesElegido).toUpperCase()}`;
+    } else {
+      document.getElementById('ventasFiltroLabel').textContent = 'TOTAL ACUMULADO';
+    }
   }
-  // 'acumulado' no filtra por fecha
 
-  if(ventasFiltro!=='anteriores'){
+  if(ventasFiltro==='hoy' || ventasFiltro==='mes'){
     document.getElementById('ventasFiltroLabel').textContent = labels[ventasFiltro] || 'TOTAL';
   }
 
@@ -2055,7 +2103,6 @@ async function boot(){
   renderChipsCatalogo();
   renderCatalogo();
   renderVentaSummary();
-  renderStock();
   renderChipsCostos();
   renderCostos();
   renderProveedores();
