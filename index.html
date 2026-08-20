@@ -431,16 +431,25 @@
     position:absolute;top:8px;right:14px;background:var(--ink);color:#fff;font-size:10px;font-weight:800;
     padding:3px 9px;border-radius:999px;letter-spacing:.3px;
   }
-  .costo-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .costo-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;}
   .costo-thumb{width:52px;height:52px;border-radius:11px;object-fit:cover;flex:0 0 52px;background:var(--gold-pale);}
   .costo-thumb-empty{display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--gold-deep);font-size:17px;}
-  .costo-name{font-weight:800;font-size:15.5px;flex:1;text-transform:uppercase;letter-spacing:.2px;}
+  .costo-name-block{flex:1 1 180px;min-width:140px;}
+  .costo-name{font-weight:800;font-size:15.5px;text-transform:uppercase;letter-spacing:.2px;}
   .costo-prov{font-size:12px;color:var(--ink-faint);font-weight:600;}
-  .ganancia-badge{font-weight:800;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap;}
+  .ganancia-badge{font-weight:800;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap;align-self:center;}
   .ganancia-badge.pos{background:var(--green-pale);color:var(--green);}
   .ganancia-badge.neg{background:var(--red-pale);color:var(--red);}
-  .costo-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
-  @media(max-width:480px){ .costo-fields{grid-template-columns:1fr 1fr;} }
+  .costo-inline-fields{display:flex;gap:8px;flex:0 0 auto;}
+  .mini-field-sm{display:flex;flex-direction:column;gap:3px;width:82px;}
+  .mini-field-sm label{font-size:9.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;}
+  .mini-field-sm input{padding:8px 8px;border-radius:9px;border:1.5px solid var(--border);font-weight:700;font-size:14px;width:100%;}
+  .mini-field-sm input.neg{color:var(--red);border-color:var(--red);background:var(--red-pale);}
+  @media(max-width:640px){
+    .costo-inline-fields{flex-wrap:wrap;flex:1 1 100%;}
+    .mini-field-sm{width:calc(33.33% - 6px);}
+    .ganancia-badge{flex:1 1 100%;text-align:center;}
+  }
   .mini-field{display:flex;flex-direction:column;gap:4px;}
   .mini-field label{font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.3px;}
   .mini-field input{padding:10px 10px;border-radius:10px;border:1.5px solid var(--border);font-weight:700;font-size:15px;}
@@ -451,11 +460,13 @@
 
   /* ---------- Proveedores tab ---------- */
   .prov-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
-  .prov-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .prov-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+  .prov-name-block{flex:1 1 160px;min-width:140px;}
   .prov-name{font-family:'Playfair Display',serif;font-weight:700;font-size:18px;color:var(--gold-deep);}
   .prov-count{font-size:12.5px;color:var(--ink-faint);font-weight:600;}
-  .prov-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-  .prov-fields input{padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:15px;}
+  .prov-inline-fields{display:flex;gap:8px;flex:0 0 auto;flex-wrap:wrap;}
+  .mini-field-wide{width:150px;}
+  .mini-field-wide input{padding:9px 10px;font-size:14px;font-weight:600;}
   textarea.prov-notes{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:14.5px;resize:vertical;min-height:44px;}
   .prov-toggle{background:transparent;border:none;color:var(--gold-deep);font-weight:700;font-size:13.5px;cursor:pointer;padding:4px 0;}
   .prov-products{margin-top:8px;font-size:13.5px;color:var(--ink-soft);max-height:130px;overflow-y:auto;border-top:1px dashed var(--border);padding-top:8px;display:none;}
@@ -508,24 +519,36 @@
   .stat-compact-main{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 130%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
   .stat-compact-gold{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);}
   .stat-compact-red{background:linear-gradient(135deg,#fff 0%,var(--red-pale) 140%);border-color:#E9BBB4;}
-  .stat-compact-lbl{font-size:10.5px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;position:relative;z-index:1;}
+  .stat-compact-lbl{font-size:11.5px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;position:relative;z-index:1;}
   .stat-compact-val{
-    font-weight:800;font-size:23px;font-family:'Inter',sans-serif;position:relative;z-index:1;
-    display:block;margin-top:2px;
+    font-weight:800;font-size:32px;font-family:'Inter',sans-serif;position:relative;z-index:1;
+    display:block;margin-top:3px;color:#7A4F0E;
   }
-  .stat-compact-main .stat-compact-val, .stat-compact-gold .stat-compact-val{
-    background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 1px 1px rgba(150,105,20,.22));
+  .stat-compact-val.red{color:#8B2E2E;}
+  .stat-compact-sub{font-size:12px;color:var(--ink-soft);font-weight:700;margin-top:3px;position:relative;z-index:1;}
+  #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;font-size:14px;}
+
+  .ventas-stats-sticky{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;
+    position:sticky;top:70px;z-index:15;background:var(--cream);padding-top:2px;
   }
-  .stat-compact-val.red{
-    background:linear-gradient(135deg,#D9635A,#8B2E2E);-webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 1px 1px rgba(139,46,46,.22));
-  }
-  .stat-compact-sub{font-size:11px;color:var(--ink-faint);font-weight:700;margin-top:2px;position:relative;z-index:1;}
-  #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;}
+
   @media(max-width:880px){
     .ventas-layout{flex-direction:column;}
     .ventas-sidebar{position:static;width:100%;flex:1 1 auto;}
+    .ventas-stats-sticky{
+      position:fixed;top:58px;left:0;right:0;z-index:30;background:var(--cream);
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
+      margin:0;padding:8px 10px 8px;box-shadow:0 3px 10px rgba(150,110,30,.12);
+      border-bottom:1px solid var(--border);
+    }
+    .ventas-stats-sticky .stat-compact{padding:8px 7px 7px;border-radius:10px;margin-bottom:0;}
+    .ventas-stats-sticky .stat-compact::after{font-size:28px;right:-6px;top:-8px;}
+    .ventas-stats-sticky .stat-compact-lbl{font-size:8.5px;letter-spacing:.2px;}
+    .ventas-stats-sticky .stat-compact-val{font-size:18px;margin-top:2px;}
+    .ventas-stats-sticky .stat-compact-sub{font-size:9px;}
+    #statMontoDeben.stat-compact-sub{font-size:10px;}
+    #panel-ventas{padding-top:104px;}
   }
   .total-dia{background:var(--ink);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .total-dia .lbl{font-size:12px;color:var(--gold-light);font-weight:700;letter-spacing:.4px;}
@@ -703,6 +726,22 @@
 
   <!-- ===================== VENTAS (historial) ===================== -->
   <section class="panel" id="panel-ventas">
+    <div class="ventas-stats-sticky" id="ventasStatsBlock">
+      <div class="stat-compact stat-compact-main" data-icon="🧾">
+        <span class="stat-compact-lbl">Total del período</span>
+        <span class="stat-compact-val" id="totalDia">$ 0</span>
+        <span class="stat-compact-sub" id="ventasFiltroLabel">TOTAL DE HOY</span>
+      </div>
+      <div class="stat-compact stat-compact-gold" data-icon="💰">
+        <span class="stat-compact-lbl">Facturado</span>
+        <span class="stat-compact-val" id="statFacturadoMes">$ 0</span>
+      </div>
+      <div class="stat-compact stat-compact-red" data-icon="⚠️">
+        <span class="stat-compact-lbl">Clientes que deben</span>
+        <span class="stat-compact-val red" id="statClientesDeben">0</span>
+        <span class="stat-compact-sub" id="statMontoDeben">$ 0</span>
+      </div>
+    </div>
     <div class="ventas-layout">
       <aside class="ventas-sidebar">
         <div class="field-label">Período</div>
@@ -713,8 +752,10 @@
           <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
         </div>
         <div class="mini-field" id="diaBox" style="display:none;">
-          <label>Elegí la fecha</label>
+          <label>Desde</label>
           <input type="date" class="field" id="diaSelect">
+          <label style="margin-top:8px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional, para un rango)</span></label>
+          <input type="date" class="field" id="diaSelectHasta">
         </div>
         <div class="mini-field" id="mesAnterioresBox" style="display:none;">
           <label>Ver un mes puntual</label>
@@ -739,21 +780,6 @@
         </select>
 
         <button class="btn btn-outline btn-block" id="btnQuitarFiltros" style="margin-top:14px;">✕ Quitar filtros</button>
-
-        <div class="stat-compact stat-compact-main" data-icon="🧾">
-          <span class="stat-compact-lbl">Total del período</span>
-          <span class="stat-compact-val" id="totalDia">$ 0</span>
-          <span class="stat-compact-sub" id="ventasFiltroLabel">TOTAL DE HOY</span>
-        </div>
-        <div class="stat-compact stat-compact-gold" data-icon="💰">
-          <span class="stat-compact-lbl">Facturado</span>
-          <span class="stat-compact-val" id="statFacturadoMes">$ 0</span>
-        </div>
-        <div class="stat-compact stat-compact-red" data-icon="⚠️">
-          <span class="stat-compact-lbl">Clientes que deben</span>
-          <span class="stat-compact-val red" id="statClientesDeben">0</span>
-          <span class="stat-compact-sub" id="statMontoDeben">$ 0</span>
-        </div>
       </aside>
 
       <div class="ventas-main">
@@ -1497,16 +1523,16 @@ function renderCostos(){
       ${inactivo ? '<div class="badge-sin-stock">SIN STOCK / DISCONTINUADO</div>' : ''}
       <div class="costo-top">
         ${thumb}
-        <div style="flex:1;min-width:0;">
+        <div class="costo-name-block">
           <div class="costo-name">${escapeHtml(p.nombre)}</div>
           <div class="costo-prov">${escapeHtml(p.proveedor ? titleCase(p.proveedor) : 'Sin proveedor')} · ${escapeHtml(titleCase(p.rubro))}</div>
         </div>
+        <div class="costo-inline-fields">
+          <div class="mini-field-sm"><label>Stock</label><input type="number" class="costo-input ${p.stock<0?'neg':''}" data-id="${p.id}" data-field="stock" value="${p.stock}"></div>
+          <div class="mini-field-sm"><label>Costo</label><input type="number" class="costo-input" data-id="${p.id}" data-field="costo" value="${p.costo}"></div>
+          <div class="mini-field-sm"><label>Precio venta</label><input type="number" class="costo-input" data-id="${p.id}" data-field="precio" value="${p.precio}"></div>
+        </div>
         <div class="ganancia-badge ${pos?'pos':'neg'}">${fmt(gan)} · ${pct}</div>
-      </div>
-      <div class="costo-fields">
-        <div class="mini-field"><label>Stock</label><input type="number" class="costo-input ${p.stock<0?'neg':''}" data-id="${p.id}" data-field="stock" value="${p.stock}"></div>
-        <div class="mini-field"><label>Costo</label><input type="number" class="costo-input" data-id="${p.id}" data-field="costo" value="${p.costo}"></div>
-        <div class="mini-field"><label>Precio venta</label><input type="number" class="costo-input" data-id="${p.id}" data-field="precio" value="${p.precio}"></div>
       </div>
       <div class="costo-row-actions">
         <button class="link-btn" data-action="foto" data-id="${p.id}">🖼️ ${PHOTOS[p.id] ? 'Cambiar foto' : 'Subir foto'}</button>
@@ -1879,14 +1905,14 @@ function renderProveedores(){
     const products = PRODUCTS.filter(p=>p.proveedor && p.proveedor.trim()===n).map(p=>p.nombre);
     return `<div class="prov-card" data-name="${escapeHtml(n)}">
       <div class="prov-head">
-        <div>
+        <div class="prov-name-block">
           <div class="prov-name">${escapeHtml(titleCase(n))}</div>
           <div class="prov-count">${map[n]} producto${map[n]===1?'':'s'}</div>
         </div>
-      </div>
-      <div class="prov-fields">
-        <input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="telefono" placeholder="Teléfono" value="${escapeHtml(info.telefono||'')}">
-        <input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="contacto" placeholder="Contacto" value="${escapeHtml(info.contacto||'')}">
+        <div class="prov-inline-fields">
+          <div class="mini-field-sm mini-field-wide"><label>Teléfono</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="telefono" value="${escapeHtml(info.telefono||'')}"></div>
+          <div class="mini-field-sm mini-field-wide"><label>Contacto</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="contacto" value="${escapeHtml(info.contacto||'')}"></div>
+        </div>
       </div>
       <textarea class="prov-notes" data-name="${escapeHtml(n)}" data-field="notas" placeholder="Notas (dirección, condiciones, etc.)">${escapeHtml(info.notas||'')}</textarea>
       <button class="prov-toggle" data-toggle="${escapeHtml(n)}">Ver productos ▾</button>
@@ -1978,6 +2004,7 @@ document.querySelectorAll('.filter-col .chip-v').forEach(chip=>{
 });
 
 document.getElementById('diaSelect').addEventListener('change', renderVentas);
+document.getElementById('diaSelectHasta').addEventListener('change', renderVentas);
 document.getElementById('mesAnteriorSelect').addEventListener('change', renderVentas);
 document.getElementById('filtroMedio').addEventListener('change', renderVentas);
 document.getElementById('filtroFacturado').addEventListener('change', renderVentas);
@@ -1990,6 +2017,7 @@ document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
   document.getElementById('mesAnteriorSelect').value = '';
   document.getElementById('mesAnterioresBox').style.display = 'block';
   document.getElementById('diaBox').style.display = 'none';
+  document.getElementById('diaSelectHasta').value = '';
   document.getElementById('filtroMedio').value = '';
   document.getElementById('filtroFacturado').value = '';
   renderVentas();
@@ -2036,9 +2064,17 @@ function renderVentas(){
 
   if(ventasFiltro==='hoy') items = items.filter(s=>s.fecha===todayStr);
   else if(ventasFiltro==='dia'){
-    const diaElegido = document.getElementById('diaSelect').value || todayStr;
-    items = items.filter(s=>s.fecha===diaElegido);
-    document.getElementById('ventasFiltroLabel').textContent = `TOTAL DEL ${diaElegido.split('-').reverse().join('/')}`;
+    const desde = document.getElementById('diaSelect').value || todayStr;
+    const hasta = document.getElementById('diaSelectHasta').value;
+    if(hasta && hasta !== desde){
+      const d1 = desde < hasta ? desde : hasta;
+      const d2 = desde < hasta ? hasta : desde;
+      items = items.filter(s=>s.fecha && s.fecha>=d1 && s.fecha<=d2);
+      document.getElementById('ventasFiltroLabel').textContent = `TOTAL ${d1.split('-').reverse().join('/')} A ${d2.split('-').reverse().join('/')}`;
+    } else {
+      items = items.filter(s=>s.fecha===desde);
+      document.getElementById('ventasFiltroLabel').textContent = `TOTAL DEL ${desde.split('-').reverse().join('/')}`;
+    }
   }
   else if(ventasFiltro==='mes') items = items.filter(s=>s.fecha && s.fecha.slice(0,7)===curMonth);
   else if(ventasFiltro==='acumulado'){
