@@ -441,9 +441,9 @@
   .ganancia-badge.pos{background:var(--green-pale);color:var(--green);}
   .ganancia-badge.neg{background:var(--red-pale);color:var(--red);}
   .costo-inline-fields{display:flex;gap:8px;flex:0 0 auto;}
-  .mini-field-sm{display:flex;flex-direction:column;gap:3px;width:82px;}
-  .mini-field-sm label{font-size:9.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;}
-  .mini-field-sm input{padding:8px 8px;border-radius:9px;border:1.5px solid var(--border);font-weight:700;font-size:14px;width:100%;}
+  .mini-field-sm{display:flex;flex-direction:column;gap:4px;width:112px;}
+  .mini-field-sm label{font-size:11px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;}
+  .mini-field-sm input{padding:10px 10px;border-radius:10px;border:1.5px solid var(--border);font-weight:700;font-size:16px;width:100%;}
   .mini-field-sm input.neg{color:var(--red);border-color:var(--red);background:var(--red-pale);}
   @media(max-width:640px){
     .costo-inline-fields{flex-wrap:wrap;flex:1 1 100%;}
@@ -465,8 +465,8 @@
   .prov-name{font-family:'Playfair Display',serif;font-weight:700;font-size:18px;color:var(--gold-deep);}
   .prov-count{font-size:12.5px;color:var(--ink-faint);font-weight:600;}
   .prov-inline-fields{display:flex;gap:8px;flex:0 0 auto;flex-wrap:wrap;}
-  .mini-field-wide{width:150px;}
-  .mini-field-wide input{padding:9px 10px;font-size:14px;font-weight:600;}
+  .mini-field-wide{width:210px;}
+  .mini-field-wide input{padding:10px 12px;font-size:15.5px;font-weight:600;}
   textarea.prov-notes{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:14.5px;resize:vertical;min-height:44px;}
   .prov-toggle{background:transparent;border:none;color:var(--gold-deep);font-weight:700;font-size:13.5px;cursor:pointer;padding:4px 0;}
   .prov-products{margin-top:8px;font-size:13.5px;color:var(--ink-soft);max-height:130px;overflow-y:auto;border-top:1px dashed var(--border);padding-top:8px;display:none;}
@@ -559,6 +559,10 @@
     position:sticky;top:0;background:var(--ink);color:#fff;text-align:left;padding:12px 14px;font-size:11.5px;
     text-transform:uppercase;letter-spacing:.5px;font-weight:700;white-space:nowrap;
   }
+  table.ventas-table thead th[data-sort]{cursor:pointer;user-select:none;}
+  table.ventas-table thead th[data-sort]:hover{background:#3A3020;}
+  .sort-arrow{display:inline-block;width:10px;font-size:10px;opacity:.45;}
+  th[data-sort].sort-active .sort-arrow{opacity:1;color:var(--gold-light);}
   table.ventas-table td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
   table.ventas-table tbody tr:nth-child(even){background:#FCFAF4;}
@@ -738,8 +742,8 @@
       </div>
       <div class="stat-compact stat-compact-red" data-icon="⚠️">
         <span class="stat-compact-lbl">Clientes que deben</span>
-        <span class="stat-compact-val red" id="statClientesDeben">0</span>
-        <span class="stat-compact-sub" id="statMontoDeben">$ 0</span>
+        <span class="stat-compact-val red" id="statMontoDeben">$ 0</span>
+        <span class="stat-compact-sub" id="statClientesDeben">0 clientes</span>
       </div>
     </div>
     <div class="ventas-layout">
@@ -786,9 +790,16 @@
         <div class="table-wrap">
           <table class="ventas-table">
             <thead>
-              <tr>
-                <th>Fecha</th><th>Producto</th><th>Cant.</th><th>$ Precio</th><th>$ Subtotal</th>
-                <th>Medio de pago</th><th>Facturado</th><th>Cliente</th><th></th>
+              <tr id="ventasTheadRow">
+                <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
+                <th data-sort="producto">Producto <span class="sort-arrow"></span></th>
+                <th data-sort="cantidad">Cant. <span class="sort-arrow"></span></th>
+                <th data-sort="precio">$ Precio <span class="sort-arrow"></span></th>
+                <th data-sort="subtotal">$ Subtotal <span class="sort-arrow"></span></th>
+                <th data-sort="medio">Medio de pago <span class="sort-arrow"></span></th>
+                <th data-sort="facturado">Facturado <span class="sort-arrow"></span></th>
+                <th data-sort="cliente">Cliente <span class="sort-arrow"></span></th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="ventasTbody"></tbody>
@@ -844,7 +855,9 @@
     <input type="number" class="field" id="npPrecio" value="0">
     <div class="field-label">Stock inicial</div>
     <input type="number" class="field" id="npStock" value="1">
-    <div class="field-label">Foto (URL, opcional)</div>
+    <div class="field-label">Foto del producto (opcional)</div>
+    <input type="file" accept="image/*" class="field" id="npFotoFile" style="padding:10px;">
+    <div style="text-align:center;font-size:11.5px;color:var(--ink-faint);margin:8px 0;font-weight:700;">— o pegá un link de una foto —</div>
     <input type="text" class="field" id="npFoto" placeholder="https://...">
     <div class="modal-actions">
       <button class="btn btn-gold btn-lg btn-block" id="btnGuardarNuevo">Guardar producto</button>
@@ -891,6 +904,8 @@ let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
 let ventasFiltro = 'hoy';
+let ventasSortField = 'fecha';
+let ventasSortDir = 'desc';
 let ventaMedio = null;
 let ventaAjusteTipo = 'descuento';
 let pinBuffer = '';
@@ -1617,6 +1632,7 @@ document.getElementById('btnNuevoProducto').addEventListener('click', ()=>{
   document.getElementById('npPrecio').value = 0;
   document.getElementById('npStock').value = 1;
   document.getElementById('npFoto').value = '';
+  document.getElementById('npFotoFile').value = '';
   document.getElementById('rubrosList').innerHTML = getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(titleCase(r))}">`).join('');
   document.getElementById('provsList').innerHTML = [...new Set(PRODUCTS.map(p=>p.proveedor).filter(Boolean))].sort().map(p=>`<option value="${escapeHtml(titleCase(p))}">`).join('');
   document.getElementById('overlayNuevo').classList.add('show');
@@ -1633,9 +1649,22 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
   const precio = parseFloat(document.getElementById('npPrecio').value) || 0;
   const stock = parseInt(document.getElementById('npStock').value,10) || 0;
   const foto = document.getElementById('npFoto').value.trim();
+  const fotoFile = document.getElementById('npFotoFile').files[0];
 
-  PRODUCTS.push({ id: 'p_'+Date.now(), nombre: nombre.toUpperCase(), proveedor, costo, precio, rubro, stock, foto });
+  const newId = 'p_'+Date.now();
+  PRODUCTS.push({ id: newId, nombre: nombre.toUpperCase(), proveedor, costo, precio, rubro, stock, foto });
   await saveProducts();
+
+  if(fotoFile){
+    try{
+      const dataUrl = await compressImageFile(fotoFile);
+      await window.storage.set('dc_photo_'+newId, dataUrl, true);
+      PHOTOS[newId] = dataUrl;
+    }catch(err){
+      showToast('El producto se guardó, pero no pude procesar la foto.');
+    }
+  }
+
   document.getElementById('overlayNuevo').classList.remove('show');
   renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
   showToast('Producto agregado ✓');
@@ -2050,9 +2079,48 @@ function renderStats(items){
   });
   const debtorKeys = Object.keys(debtors);
   const montoTotal = debtorKeys.reduce((acc,k)=>acc+debtors[k], 0);
-  document.getElementById('statClientesDeben').textContent = debtorKeys.length;
   document.getElementById('statMontoDeben').textContent = fmt(montoTotal);
+  document.getElementById('statClientesDeben').textContent = debtorKeys.length + (debtorKeys.length===1 ? ' cliente' : ' clientes');
 }
+
+function compareVentas(a, b){
+  let va, vb;
+  switch(ventasSortField){
+    case 'producto': va = a.producto||''; vb = b.producto||''; break;
+    case 'cantidad': va = a.cantidad||0; vb = b.cantidad||0; break;
+    case 'precio': va = a.precioUnitario||0; vb = b.precioUnitario||0; break;
+    case 'subtotal': va = (a.cantidad||0)*(a.precioUnitario||0); vb = (b.cantidad||0)*(b.precioUnitario||0); break;
+    case 'medio': va = a.medioPago||''; vb = b.medioPago||''; break;
+    case 'facturado': va = a.facturado?1:0; vb = b.facturado?1:0; break;
+    case 'cliente': va = a.cliente||''; vb = b.cliente||''; break;
+    default: va = a.fecha||''; vb = b.fecha||'';
+  }
+  if(typeof va === 'string'){ va = va.toLowerCase(); vb = String(vb).toLowerCase(); }
+  let cmp = va < vb ? -1 : va > vb ? 1 : (a.id||'').localeCompare(b.id||'');
+  return ventasSortDir === 'asc' ? cmp : -cmp;
+}
+
+function updateSortArrows(){
+  document.querySelectorAll('#ventasTheadRow th[data-sort]').forEach(th=>{
+    const arrow = th.querySelector('.sort-arrow');
+    const isActive = th.dataset.sort === ventasSortField;
+    th.classList.toggle('sort-active', isActive);
+    arrow.textContent = isActive ? (ventasSortDir === 'asc' ? '▲' : '▼') : '⇅';
+  });
+}
+
+document.getElementById('ventasTheadRow').addEventListener('click', (e)=>{
+  const th = e.target.closest('th[data-sort]');
+  if(!th) return;
+  const field = th.dataset.sort;
+  if(ventasSortField === field){
+    ventasSortDir = ventasSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    ventasSortField = field;
+    ventasSortDir = 'asc';
+  }
+  renderVentas();
+});
 
 function renderVentas(){
   const tbody = document.getElementById('ventasTbody');
@@ -2093,7 +2161,9 @@ function renderVentas(){
 
   items = aplicarFiltrosSecundarios(items);
 
-  items.sort((a,b)=> (a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : (b.id||'').localeCompare(a.id||'')));
+  items.sort(compareVentas);
+
+  updateSortArrows();
 
   const total = items.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
   document.getElementById('totalDia').textContent = fmt(total);
