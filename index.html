@@ -341,7 +341,7 @@
   .opt-btn-debe.selected{border-color:var(--red);background:linear-gradient(135deg,#D9635A,#B8392F);color:#fff;box-shadow:0 3px 10px rgba(184,57,47,.3);}
   .opt-btn-sm{padding:9px 8px;font-size:13px;border-radius:10px;}
   .ajuste-input-wrap{
-    display:flex;align-items:center;gap:6px;margin-top:8px;border:1.5px solid var(--border);
+    display:flex;align-items:center;gap:6px;border:1.5px solid var(--border);
     border-radius:12px;padding:0 12px;background:var(--card);
   }
   .ajuste-input-wrap .dollar{font-weight:800;color:var(--ink-soft);font-size:15px;}
@@ -612,21 +612,34 @@
   }
   .analisis-mes-check input{width:16px;height:16px;cursor:pointer;}
   .analisis-mes-check.checked{border-color:var(--gold);background:var(--gold-pale);color:var(--gold-deep);}
-  .analisis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;}
+  .analisis-top-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px;}
+  .analisis-mini-toggles{display:flex;gap:8px;flex-wrap:wrap;}
+  .analisis-mini-btn{
+    padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);background:#fff;
+    font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink-soft);white-space:nowrap;
+  }
+  .analisis-mini-btn.active{border-color:var(--gold);background:var(--gold-grad);color:#fff;}
+  .analisis-desplegable{margin-bottom:14px;max-width:520px;}
+  .analisis-grid{display:grid;grid-template-columns:1fr;gap:16px;}
   .analisis-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);}
   .analisis-card.wide{grid-column:1 / -1;}
   .analisis-card h3{font-family:'Playfair Display',serif;color:var(--gold-deep);font-size:17px;margin:0 0 14px;}
   .analisis-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .analisis-bar-label{flex:0 0 150px;font-size:13px;font-weight:700;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .analisis-bar-track{flex:1;height:16px;background:var(--border);border-radius:8px;overflow:hidden;min-width:60px;}
+  .analisis-bar-label{flex:0 0 320px;font-size:13px;font-weight:700;color:var(--ink-soft);white-space:normal;word-break:break-word;}
+  .analisis-bar-track{flex:0 1 140px;height:14px;background:var(--border);border-radius:8px;overflow:hidden;min-width:40px;}
   .analisis-bar-fill{height:100%;background:var(--gold-grad);border-radius:8px;}
-  .analisis-bar-val{flex:0 0 auto;font-weight:800;font-size:13px;color:var(--stat-gold);white-space:nowrap;}
+  .analisis-bar-val{flex:0 0 auto;font-weight:800;font-size:13px;color:var(--stat-gold);white-space:nowrap;margin-left:auto;}
 
   /* ---------- Administración: dashboard financiero ---------- */
   .fin-year-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
   .fin-year-btn{width:44px;height:44px;padding:0;font-size:20px;font-weight:800;text-align:center;flex:0 0 44px;}
   .fin-year-label{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:var(--gold-deep);min-width:70px;text-align:center;}
   .fin-months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:24px;}
+  .fin-stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .fin-stats-row .stat-compact{flex:1 1 280px;max-width:420px;}
+  .stat-compact.clickable{cursor:pointer;transition:transform .08s;}
+  .stat-compact.clickable:active{transform:scale(.98);}
+  #finPromedioRow .stat-compact{max-width:420px;}
   .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);}
   .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:15px;color:var(--gold-deep);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px;}
   .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-size:13px;color:var(--ink-soft);font-weight:700;}
@@ -635,7 +648,35 @@
   .fin-val.neg{color:var(--red);}
   .fin-row.fin-result{border-top:1.5px dashed var(--border);margin-top:6px;padding-top:8px;}
   .fin-row.fin-result .fin-val{font-size:18px;}
+  .fin-row.fin-promedio{padding-top:4px;}
+  .fin-row.fin-promedio .fin-val{font-size:13px;color:var(--gold-deep);}
+  .fin-month-card.acumulado{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
+  .fin-month-card.acumulado .fin-month-name{font-size:16px;}
   .fin-subtitle{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin:6px 0 14px;}
+
+  /* ---------- Calendario de vencimientos ---------- */
+  .venc-cal-nav{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:14px;}
+  .venc-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .venc-cal-dow{text-align:center;font-size:11px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;padding-bottom:4px;}
+  .venc-cal-day{
+    min-height:64px;border:1.5px solid var(--border);border-radius:9px;padding:5px;background:#fff;
+    cursor:pointer;display:flex;flex-direction:column;gap:2px;overflow:hidden;
+  }
+  .venc-cal-day:hover{border-color:var(--gold);}
+  .venc-cal-day.empty{visibility:hidden;border:none;}
+  .venc-cal-day.today{border-color:var(--gold);background:var(--gold-pale);border-width:2px;}
+  .venc-cal-day.has-venc{border-color:var(--red);}
+  .venc-cal-daynum{font-size:12px;font-weight:800;color:var(--ink-soft);}
+  .venc-cal-item{
+    background:var(--red-pale);color:var(--red);font-size:9.5px;font-weight:800;border-radius:5px;
+    padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .venc-cal-item.pagado{background:var(--green-pale);color:var(--green);text-decoration:line-through;}
+  .venc-cal-hint{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:14px;font-weight:600;}
+  @media(max-width:700px){
+    .venc-cal-day{min-height:48px;}
+    .venc-cal-item{font-size:8px;}
+  }
 
   /* ---------- Selección múltiple / acciones en grupo ---------- */
   .bulk-toolbar{
@@ -695,40 +736,50 @@
   .stat-compact-main{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 130%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
   .stat-compact-gold{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);}
   .stat-compact-red{background:linear-gradient(135deg,#fff 0%,var(--red-pale) 140%);border-color:#E9BBB4;}
-  .stat-compact-lbl{font-size:11.5px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px;position:relative;z-index:1;}
+  .stat-compact-lbl{font-size:10.5px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;position:relative;z-index:1;white-space:nowrap;}
   .stat-compact-val{
-    font-weight:800;font-size:32px;font-family:'Inter',sans-serif;position:relative;z-index:1;
-    display:block;margin-top:3px;color:var(--stat-gold);
+    font-weight:800;font-size:24px;font-family:'Inter',sans-serif;position:relative;z-index:1;
+    display:block;margin-top:2px;color:var(--stat-gold);
   }
   .stat-compact-val.red{color:var(--stat-red);}
-  .stat-compact-sub{font-size:12px;color:var(--ink-soft);font-weight:700;margin-top:3px;position:relative;z-index:1;}
-  #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;font-size:14px;}
+  .stat-compact-sub{font-size:11px;color:var(--ink-soft);font-weight:700;margin-top:2px;position:relative;z-index:1;}
+  #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;font-size:12px;}
 
   .ventas-stats-sticky{
-    display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;
+    display:flex;align-items:stretch;gap:10px;margin-bottom:14px;flex-wrap:wrap;
     position:sticky;top:70px;z-index:15;background:var(--cream);padding-top:2px;
   }
+  .ventas-stats-sticky .stat-compact{flex:1 1 160px;max-width:200px;padding:12px 14px;}
+  .vfs-filters{
+    flex:1 1 260px;max-width:320px;display:flex;flex-direction:column;gap:8px;
+    background:var(--card);border:2px solid var(--border);border-radius:15px;padding:10px 12px;
+  }
+  .vfs-filters .chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:0;}
+  .vfs-filters .chip-v{padding:8px 9px;font-size:11.5px;border-radius:9px;flex:1 1 auto;text-align:center;white-space:nowrap;}
+  .vfs-medio-select{font-size:13px;padding:9px 10px;}
+
+  .deben-hover-card{position:relative;overflow:visible !important;}
+  .deben-tooltip{
+    display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;min-width:220px;
+    background:#fff;border:2px solid var(--red);border-radius:12px;padding:10px 12px;
+    box-shadow:0 10px 28px rgba(0,0,0,.18);z-index:60;max-height:280px;overflow-y:auto;
+  }
+  .deben-hover-card:hover .deben-tooltip{display:block;}
+  .deben-tooltip-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12.5px;font-weight:700;border-bottom:1px dashed var(--border);}
+  .deben-tooltip-row:last-child{border-bottom:none;}
+  .deben-tooltip-empty{font-size:12px;color:var(--ink-faint);text-align:center;padding:6px;font-weight:600;}
 
   @media(max-width:880px){
-    .ventas-layout{flex-direction:column;}
-    .ventas-sidebar{position:static;width:100%;flex:1 1 auto;}
     .ventas-stats-sticky{
-      position:fixed;top:58px;left:0;right:0;z-index:30;background:var(--cream);
-      display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
-      margin:0;padding:8px 10px 8px;box-shadow:0 3px 10px rgba(150,110,30,.12);
-      border-bottom:1px solid var(--border);
+      flex-direction:column;
     }
-    .ventas-stats-sticky .stat-compact{padding:8px 7px 7px;border-radius:10px;margin-bottom:0;}
-    .ventas-stats-sticky .stat-compact::after{font-size:28px;right:-6px;top:-8px;}
-    .ventas-stats-sticky .stat-compact-lbl{font-size:8.5px;letter-spacing:.2px;}
-    .ventas-stats-sticky .stat-compact-val{font-size:18px;margin-top:2px;}
-    .ventas-stats-sticky .stat-compact-sub{font-size:9px;}
-    #statMontoDeben.stat-compact-sub{font-size:10px;}
-    #panel-ventas{padding-top:104px;}
+    .ventas-stats-sticky .stat-compact{max-width:none;}
+    .vfs-filters{max-width:none;}
   }
   .total-dia{background:var(--dark-surface);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .total-dia .lbl{font-size:12px;color:var(--gold-light);font-weight:700;letter-spacing:.4px;}
   .total-dia .val{font-family:'Inter',sans-serif;font-size:26px;font-weight:800;color:var(--gold-light);}
+  .ventas-main-full{width:100%;}
   .table-wrap{overflow-x:auto;border-radius:16px;border:1.5px solid var(--border);box-shadow:var(--shadow);background:var(--card);}
   table.ventas-table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px;}
   table.ventas-table thead th{
@@ -763,10 +814,12 @@
   .estado-pill.pago{background:var(--green-pale);color:var(--green);}
   .estado-pill.debe{background:var(--red-pale);color:var(--red);}
   .estado-pill.neutro{background:var(--border);color:var(--ink-faint);}
-  .pago-rapido{display:flex;gap:4px;margin-top:5px;}
+  .medio-cell{display:flex;align-items:center;gap:5px;}
+  .medio-cell input.cell-edit{flex:1 1 auto;min-width:70px;}
+  .pago-rapido{display:flex;gap:3px;flex:0 0 auto;}
   .pago-rapido button{
-    width:26px;height:26px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);
-    font-size:13px;cursor:pointer;padding:0;
+    width:24px;height:24px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);
+    font-size:12px;cursor:pointer;padding:0;flex:0 0 auto;
   }
   .pago-rapido button:hover{border-color:var(--gold);background:var(--gold-pale);}
 
@@ -777,6 +830,30 @@
 
   @media(max-width:420px){
     .costo-fields, .prov-fields{grid-template-columns:1fr 1fr;}
+  }  /* ---------- Catálogo para imprimir / exportar a PDF ---------- */
+  .print-only{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printCatalog, #printCatalog *{visibility:visible;}
+    #printCatalog{display:block !important;position:absolute;top:0;left:0;width:100%;padding:20px;}
+    .print-header{text-align:center;margin-bottom:24px;border-bottom:2px solid #B8862F;padding-bottom:14px;}
+    .print-header h1{font-family:'Playfair Display',serif;font-size:26px;color:#8A6323;margin:0 0 4px;}
+    .print-sub{font-size:12px;color:#666;}
+    .print-rubro{
+      font-family:'Playfair Display',serif;font-size:17px;color:#8A6323;margin:22px 0 10px;
+      border-bottom:1.5px solid #E9DCBC;padding-bottom:4px;page-break-after:avoid;
+    }
+    .print-grid{display:grid;grid-template-columns:1fr;gap:2px 0;}
+    .print-item{
+      display:flex;justify-content:space-between;gap:10px;padding:4px 0;
+      border-bottom:1px dotted #ccc;font-size:12.5px;page-break-inside:avoid;
+    }
+    .print-item-name{text-transform:uppercase;font-weight:600;}
+    .print-item-price{font-weight:800;color:#9C5209;white-space:nowrap;}
+    .print-footer{
+      margin-top:26px;padding-top:12px;border-top:1px solid #E9DCBC;text-align:center;
+      font-size:10.5px;color:#888;font-style:italic;
+    }
   }
 </style>
 </head>
@@ -845,6 +922,7 @@
       <button class="btn btn-outline btn-sm" id="btnImportarExcel">📤 Importar Excel</button>
       <input type="file" id="fileExcel" accept=".xlsx,.xls,.csv" style="display:none;">
       <input type="file" id="fotoFileInput" accept="image/*" style="display:none;">
+      <button class="btn btn-outline btn-sm" id="btnExportarCatalogoPDF">🖨️ Exportar catálogo (PDF)</button>
       <button class="btn btn-gold btn-sm" id="btnNuevoProducto">＋ Nuevo producto</button>
     </div>
     <div class="action-bar-inline" data-for="admin">
@@ -896,7 +974,7 @@
           <button class="opt-btn opt-btn-sm selected" data-ajuste-tipo="descuento">Descuento</button>
           <button class="opt-btn opt-btn-sm" data-ajuste-tipo="recargo">Recargo</button>
         </div>
-        <div class="ajuste-input-wrap">
+        <div class="ajuste-input-wrap" style="margin-top:8px;">
           <span class="dollar">$</span>
           <input type="number" class="field" id="ventaAjuste" placeholder="0" value="0">
         </div>
@@ -981,6 +1059,21 @@
   <!-- ===================== VENTAS (historial) ===================== -->
   <section class="panel" id="panel-ventas">
     <div class="ventas-stats-sticky" id="ventasStatsBlock">
+      <div class="vfs-filters">
+        <div class="chip-row">
+          <button class="chip-v active" data-f="hoy">☀️ Hoy</button>
+          <button class="chip-v" data-f="mes">📅 Este mes</button>
+          <button class="chip-v" data-f="dia">📆 Elegir día</button>
+          <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
+        </div>
+        <select class="field vfs-medio-select" id="filtroMedio">
+          <option value="">Medio de pago: Todos</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="QR">QR</option>
+          <option value="Tarjeta">Tarjeta</option>
+        </select>
+      </div>
       <div class="stat-compact stat-compact-main" data-icon="🧾">
         <span class="stat-compact-lbl">Total del período</span>
         <span class="stat-compact-val" id="totalDia">$ 0</span>
@@ -990,83 +1083,56 @@
         <span class="stat-compact-lbl">Facturado</span>
         <span class="stat-compact-val" id="statFacturadoMes">$ 0</span>
       </div>
-      <div class="stat-compact stat-compact-red" data-icon="⚠️">
+      <div class="stat-compact stat-compact-red deben-hover-card" data-icon="⚠️">
         <span class="stat-compact-lbl">Clientes que deben</span>
         <span class="stat-compact-val red" id="statMontoDeben">$ 0</span>
         <span class="stat-compact-sub" id="statClientesDeben">0 clientes</span>
+        <div class="deben-tooltip" id="debenTooltip"></div>
       </div>
     </div>
-    <div class="ventas-layout">
-      <aside class="ventas-sidebar">
-        <div class="field-label">Período</div>
-        <div class="filter-col">
-          <button class="chip-v active" data-f="hoy">☀️ Hoy</button>
-          <button class="chip-v" data-f="dia">📆 Elegir día</button>
-          <button class="chip-v" data-f="mes">📅 Este mes</button>
-          <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
-        </div>
-        <div class="mini-field" id="diaBox" style="display:none;">
-          <label>Desde</label>
-          <input type="date" class="field" id="diaSelect">
-          <label style="margin-top:8px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional, para un rango)</span></label>
-          <input type="date" class="field" id="diaSelectHasta">
-        </div>
-        <div class="mini-field" id="mesAnterioresBox" style="display:none;">
-          <label>Ver un mes puntual</label>
-          <select class="field" id="mesAnteriorSelect">
-            <option value="">Todos los meses</option>
-          </select>
-        </div>
-        <div class="field-label">Medio de pago</div>
-        <select class="field" id="filtroMedio">
-          <option value="">Todos</option>
-          <option value="Efectivo">Efectivo</option>
-          <option value="Transferencia">Transferencia</option>
-          <option value="QR">QR</option>
-          <option value="Tarjeta">Tarjeta</option>
-          <option value="Debe">Debe</option>
-        </select>
-        <div class="field-label">Facturado</div>
-        <select class="field" id="filtroFacturado">
-          <option value="">Todos</option>
-          <option value="si">Facturados</option>
-          <option value="no">No facturados</option>
-        </select>
-        <div class="field-label">Cliente</div>
-        <select class="field" id="filtroCliente">
-          <option value="">Todos</option>
-        </select>
 
-        <button class="btn btn-outline btn-block" id="btnQuitarFiltros" style="margin-top:14px;">✕ Quitar filtros</button>
-      </aside>
+    <div class="mini-field" id="diaBox" style="display:none;">
+      <label>Desde</label>
+      <input type="date" class="field" id="diaSelect">
+      <label style="margin-top:8px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional, para un rango)</span></label>
+      <input type="date" class="field" id="diaSelectHasta">
+    </div>
+    <div class="mini-field" id="mesAnterioresBox" style="display:none;">
+      <label>Ver un mes puntual</label>
+      <select class="field" id="mesAnteriorSelect">
+        <option value="">Todos los meses</option>
+      </select>
+    </div>
 
-      <div class="ventas-main">
+    <div class="ventas-main-full">
+      <div class="search-row">
         <div class="search-wrap">
           <input type="text" class="search" id="searchHistorial" placeholder="Buscar en producto, cliente o medio de pago...">
         </div>
-        <div class="bulk-toolbar" id="bulkToolbarVentas">
-          <span id="bulkCountVentas">0 seleccionadas</span>
-          <button class="btn btn-danger btn-sm" id="btnBulkDeleteVentas">🗑️ Eliminar seleccionadas</button>
-        </div>
-        <div class="table-wrap">
-          <table class="ventas-table">
-            <thead>
-              <tr id="ventasTheadRow">
-                <th><input type="checkbox" id="checkAllVentas"></th>
-                <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
-                <th data-sort="producto">Producto <span class="sort-arrow"></span></th>
-                <th data-sort="cantidad">Cant. <span class="sort-arrow"></span></th>
-                <th data-sort="precio">$ Precio <span class="sort-arrow"></span></th>
-                <th data-sort="subtotal">$ Subtotal <span class="sort-arrow"></span></th>
-                <th data-sort="medio">Medio de pago <span class="sort-arrow"></span></th>
-                <th data-sort="facturado">Facturado <span class="sort-arrow"></span></th>
-                <th data-sort="cliente">Cliente <span class="sort-arrow"></span></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="ventasTbody"></tbody>
-          </table>
-        </div>
+        <button class="btn btn-outline btn-sm" id="btnQuitarFiltros">✕ Quitar filtros</button>
+      </div>
+      <div class="bulk-toolbar" id="bulkToolbarVentas">
+        <span id="bulkCountVentas">0 seleccionadas</span>
+        <button class="btn btn-danger btn-sm" id="btnBulkDeleteVentas">🗑️ Eliminar seleccionadas</button>
+      </div>
+      <div class="table-wrap">
+        <table class="ventas-table">
+          <thead>
+            <tr id="ventasTheadRow">
+              <th><input type="checkbox" id="checkAllVentas"></th>
+              <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
+              <th data-sort="producto">Producto <span class="sort-arrow"></span></th>
+              <th data-sort="cantidad">Cant. <span class="sort-arrow"></span></th>
+              <th data-sort="precio">$ Precio <span class="sort-arrow"></span></th>
+              <th data-sort="subtotal">$ Subtotal <span class="sort-arrow"></span></th>
+              <th data-sort="medio">Medio de pago <span class="sort-arrow"></span></th>
+              <th data-sort="facturado">Facturado <span class="sort-arrow"></span></th>
+              <th data-sort="cliente">Cliente <span class="sort-arrow"></span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ventasTbody"></tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -1099,17 +1165,6 @@
       <div class="price-lookup-results" id="dondeComprarResults"></div>
       <button class="btn btn-outline btn-sm" id="btnAnotarPrecio" style="margin-top:12px;">💲 Anotar un precio de proveedor</button>
     </div>
-    <div class="search-row">
-      <div class="search-wrap">
-        <input type="text" class="search" id="searchProv" placeholder="Buscar proveedor...">
-      </div>
-      <select class="field" id="sortProv" style="max-width:220px;">
-        <option value="nombre-asc">Nombre (A-Z)</option>
-        <option value="nombre-desc">Nombre (Z-A)</option>
-        <option value="cantidad-desc">Cantidad de productos (mayor a menor)</option>
-        <option value="cantidad-asc">Cantidad de productos (menor a mayor)</option>
-      </select>
-    </div>
     <div id="listProv"></div>
   </section>
 
@@ -1134,20 +1189,35 @@
 
   <!-- ===================== ADMINISTRACIÓN (finanzas) ===================== -->
   <section class="panel" id="panel-admin">
-    <div class="venc-card">
-      <div class="venc-header">
-        <div class="price-lookup-title">📅 Próximos vencimientos</div>
-        <button class="btn btn-outline btn-sm" id="btnNuevoVencimiento">＋ Agregar vencimiento</button>
-      </div>
-      <div id="vencimientosList"></div>
-    </div>
-
     <div class="fin-year-row">
       <button class="chip-v fin-year-btn" id="btnFinYearPrev">‹</button>
       <div class="fin-year-label" id="finYearLabel">2026</div>
       <button class="chip-v fin-year-btn" id="btnFinYearNext">›</button>
     </div>
     <div class="fin-months-grid" id="finMonthsGrid"></div>
+
+    <h3 class="fin-subtitle">📅 Calendario de vencimientos</h3>
+    <div class="venc-card">
+      <div class="venc-cal-nav">
+        <button class="chip-v fin-year-btn" id="btnVencMonthPrev">‹</button>
+        <div class="fin-year-label" id="vencMonthLabel">Mes 2026</div>
+        <button class="chip-v fin-year-btn" id="btnVencMonthNext">›</button>
+      </div>
+      <div class="venc-cal-grid" id="vencCalendarGrid"></div>
+      <div class="venc-cal-hint">🔔 Esta alerta es solo dentro de la web: se muestra cuando entrás a la app. No manda avisos a WhatsApp ni al mail.</div>
+    </div>
+
+    <h3 class="fin-subtitle">💸 Gastos fijos <button class="btn btn-outline btn-sm" id="btnNuevoVencimiento" style="margin-left:10px;">＋ Agregar gasto fijo</button></h3>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <table class="ventas-table">
+        <thead>
+          <tr>
+            <th>Gasto</th><th>$ Monto</th><th>Próx. vencimiento</th><th>Medio de pago</th><th>Este mes</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="vencimientosTablaBody"></tbody>
+      </table>
+    </div>
 
     <h3 class="fin-subtitle">Detalle de lo pagado</h3>
     <div class="search-row">
@@ -1184,11 +1254,18 @@
 
   <!-- ===================== ANÁLISIS ===================== -->
   <section class="panel" id="panel-analisis">
-    <div class="chip-row">
-      <button class="chip-v active" data-af="mes">Este mes</button>
-      <button class="chip-v" data-af="meses">Meses</button>
-      <button class="chip-v" data-af="acumulado">Acumulado</button>
-      <button class="chip-v" data-af="rango">Desde / Hasta</button>
+    <div class="analisis-top-row">
+      <div class="chip-row">
+        <button class="chip-v active" data-af="mes">Este mes</button>
+        <button class="chip-v" data-af="meses">Meses</button>
+        <button class="chip-v" data-af="acumulado">Acumulado</button>
+        <button class="chip-v" data-af="rango">Desde / Hasta</button>
+      </div>
+      <div class="analisis-mini-toggles">
+        <button class="analisis-mini-btn" data-toggle="medios">💳 Medios de pago</button>
+        <button class="analisis-mini-btn" data-toggle="dias">📆 Día de semana</button>
+        <button class="analisis-mini-btn" data-toggle="momento">🗓️ Momento del mes</button>
+      </div>
     </div>
     <div class="venc-card" id="analisisMesesBox" style="display:none;padding:14px;">
       <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
@@ -1204,19 +1281,21 @@
         <input type="date" class="field" id="analisisHasta">
       </div>
     </div>
+
+    <div class="analisis-card analisis-desplegable" id="analisisMediosCard" style="display:none;">
+      <h3>💳 Medios de pago</h3>
+      <div id="analisisMedios"></div>
+    </div>
+    <div class="analisis-card analisis-desplegable" id="analisisDiasCard" style="display:none;">
+      <h3>📆 Día de la semana</h3>
+      <div id="analisisDias"></div>
+    </div>
+    <div class="analisis-card analisis-desplegable" id="analisisMomentoCard" style="display:none;">
+      <h3>🗓️ Momento del mes</h3>
+      <div id="analisisMomento"></div>
+    </div>
+
     <div class="analisis-grid">
-      <div class="analisis-card">
-        <h3>💳 Medios de pago</h3>
-        <div id="analisisMedios"></div>
-      </div>
-      <div class="analisis-card">
-        <h3>📆 Día de la semana</h3>
-        <div id="analisisDias"></div>
-      </div>
-      <div class="analisis-card">
-        <h3>🗓️ Momento del mes</h3>
-        <div id="analisisMomento"></div>
-      </div>
       <div class="analisis-card wide">
         <h3>🏆 Productos más vendidos</h3>
         <div id="analisisProductos"></div>
@@ -1229,15 +1308,18 @@
 <!-- ===================== MODAL: NUEVO VENCIMIENTO ===================== -->
 <div class="overlay" id="overlayVencimiento">
   <div class="modal">
-    <h3>Nuevo vencimiento</h3>
+    <h3 id="vencModalTitle">Nuevo vencimiento</h3>
     <div class="field-label">Detalle</div>
     <input type="text" class="field" id="vcDetalle" placeholder="Ej: Alquiler, EPE, Monotributo...">
     <div class="field-label">Día del mes en que vence</div>
     <input type="number" class="field" id="vcDia" min="1" max="31" value="10">
-    <div class="field-label">Notas (medio de pago habitual, opcional)</div>
+    <div class="field-label">Monto ($)</div>
+    <input type="number" class="field" id="vcMonto" value="0">
+    <div class="field-label">Medio de pago habitual (opcional)</div>
     <input type="text" class="field" id="vcNotas" placeholder="Ej: Débito automático, Efectivo...">
     <div class="modal-actions">
       <button class="btn btn-gold btn-lg btn-block" id="btnGuardarVencimiento">Guardar vencimiento</button>
+      <button class="btn btn-outline btn-block" id="btnEliminarVencimientoModal" style="display:none;color:var(--red);">🗑️ Eliminar este vencimiento</button>
       <button class="btn btn-outline btn-block" id="btnCancelarVencimiento">Cancelar</button>
     </div>
   </div>
@@ -1272,6 +1354,21 @@
 </div>
 
 <!-- ===================== MODAL: NUEVO PRODUCTO ===================== -->
+<!-- ===================== MODAL: EXPORTAR CATÁLOGO PDF ===================== -->
+<div class="overlay" id="overlayCatalogoPDF">
+  <div class="modal">
+    <h3>Exportar catálogo en PDF</h3>
+    <div class="field-label">¿Qué querés incluir?</div>
+    <select class="field" id="cpRubro">
+      <option value="Todos">Todos los rubros</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-gold btn-lg btn-block" id="btnGenerarCatalogoPDF">🖨️ Generar PDF</button>
+      <button class="btn btn-outline btn-block" id="btnCancelarCatalogoPDF">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlayNuevo">
   <div class="modal">
     <h3>Nuevo producto</h3>
@@ -1983,6 +2080,45 @@ function renderChipsCostos(){
   });
 }
 
+function buildPrintCatalog(){
+  let items = PRODUCTS.filter(p => p.activo !== false);
+  if(currentCategoryCostos && currentCategoryCostos !== 'Todos'){
+    items = items.filter(p => p.rubro === currentCategoryCostos);
+  }
+
+  const grupos = {};
+  items.forEach(p=>{
+    const key = titleCase(p.rubro || 'Sin categoría');
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(p);
+  });
+  Object.values(grupos).forEach(arr => arr.sort((a,b)=>a.nombre.localeCompare(b.nombre)));
+
+  const fecha = new Date().toLocaleDateString('es-AR');
+  const alcance = (currentCategoryCostos && currentCategoryCostos !== 'Todos') ? titleCase(currentCategoryCostos) : 'Catálogo completo';
+
+  let html = `
+    <div class="print-header">
+      <h1>Desde Casa — Catálogo de Precios</h1>
+      <div class="print-sub">Limpieza y Deco · ${escapeHtml(alcance)} · Generado el ${fecha}</div>
+    </div>`;
+
+  Object.keys(grupos).sort().forEach(rubro=>{
+    html += `<div class="print-rubro">${escapeHtml(rubro)}</div><div class="print-grid">`;
+    grupos[rubro].forEach(p=>{
+      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById('printCatalog').innerHTML = html;
+}
+
+document.getElementById('btnExportarCatalogoPDF').addEventListener('click', ()=>{
+  buildPrintCatalog();
+  setTimeout(()=>window.print(), 150);
+});
+
 function renderCostos(){
   const term = document.getElementById('searchCostos').value.trim().toLowerCase();
   const list = document.getElementById('listCostos');
@@ -2523,17 +2659,10 @@ document.getElementById('btnGuardarPrecio').addEventListener('click', async ()=>
 });
 
 function renderProveedores(){
-  const term = document.getElementById('searchProv').value.trim().toLowerCase();
   const list = document.getElementById('listProv');
   const map = getProveedores();
   let names = Object.keys(map).filter(n=>n!=='__SIN_PROVEEDOR__');
-  if(term) names = names.filter(n=>n.toLowerCase().includes(term));
-
-  const orden = document.getElementById('sortProv').value;
-  if(orden==='nombre-desc') names.sort((a,b)=>b.localeCompare(a));
-  else if(orden==='cantidad-desc') names.sort((a,b)=>map[b]-map[a]);
-  else if(orden==='cantidad-asc') names.sort((a,b)=>map[a]-map[b]);
-  else names.sort((a,b)=>a.localeCompare(b));
+  names.sort((a,b)=>a.localeCompare(b));
 
   let html = names.map(n=>{
     const info = PROV_INFO[n] || {};
@@ -2556,29 +2685,26 @@ function renderProveedores(){
     </div>`;
   }).join('');
 
-  if(!term){
-    const sinProv = PRODUCTS.filter(p=>!p.proveedor || !p.proveedor.trim());
-    if(sinProv.length){
-      html += `<div class="prov-card">
-        <button class="prov-line" data-toggle-prov="__SIN_PROVEEDOR__">
-          <span class="prov-name">Sin proveedor asignado</span>
-          <span class="prov-count">${sinProv.length} producto${sinProv.length===1?'':'s'}</span>
-          <span class="prov-caret">▾</span>
-        </button>
-        <div class="prov-body" id="prov-body-SIN">
-          <button class="prov-toggle" data-toggle="__SIN_PROVEEDOR__">Ver productos ▾</button>
-          <div class="prov-products" id="prov-prods-SIN">${sinProv.map(p=>`<div>• ${escapeHtml(p.nombre)}</div>`).join('')}</div>
-        </div>
-      </div>`;
-    }
+  const sinProv = PRODUCTS.filter(p=>!p.proveedor || !p.proveedor.trim());
+  if(sinProv.length){
+    html += `<div class="prov-card">
+      <button class="prov-line" data-toggle-prov="__SIN_PROVEEDOR__">
+        <span class="prov-name">Sin proveedor asignado</span>
+        <span class="prov-count">${sinProv.length} producto${sinProv.length===1?'':'s'}</span>
+        <span class="prov-caret">▾</span>
+      </button>
+      <div class="prov-body" id="prov-body-SIN">
+        <button class="prov-toggle" data-toggle="__SIN_PROVEEDOR__">Ver productos ▾</button>
+        <div class="prov-products" id="prov-prods-SIN">${sinProv.map(p=>`<div>• ${escapeHtml(p.nombre)}</div>`).join('')}</div>
+      </div>
+    </div>`;
   }
 
   if(!html){ list.innerHTML = '<div class="empty-state"><span class="big">🔍</span>No encontramos proveedores.</div>'; return; }
   list.innerHTML = html;
 }
 
-document.getElementById('searchProv').addEventListener('input', renderProveedores);
-document.getElementById('sortProv').addEventListener('change', renderProveedores);
+
 
 document.getElementById('listProv').addEventListener('click', (e)=>{
   const provLine = e.target.closest('.prov-line');
@@ -2633,9 +2759,9 @@ function populateMesAnteriorSelect(){
   if(meses.includes(prev)) sel.value = prev;
 }
 
-document.querySelectorAll('.filter-col .chip-v').forEach(chip=>{
+document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
   chip.addEventListener('click', ()=>{
-    document.querySelectorAll('.filter-col .chip-v').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     ventasFiltro = chip.dataset.f;
     const boxMes = document.getElementById('mesAnterioresBox');
@@ -2659,35 +2785,27 @@ document.getElementById('diaSelect').addEventListener('change', renderVentas);
 document.getElementById('diaSelectHasta').addEventListener('change', renderVentas);
 document.getElementById('mesAnteriorSelect').addEventListener('change', renderVentas);
 document.getElementById('filtroMedio').addEventListener('change', renderVentas);
-document.getElementById('filtroFacturado').addEventListener('change', renderVentas);
 
 document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
   ventasFiltro = 'acumulado';
-  document.querySelectorAll('.filter-col .chip-v').forEach(c=>c.classList.remove('active'));
-  document.querySelector('.filter-col .chip-v[data-f="acumulado"]').classList.add('active');
+  document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
+  document.querySelector('#panel-ventas .chip-row .chip-v[data-f="acumulado"]').classList.add('active');
   populateMesAnteriorSelect();
   document.getElementById('mesAnteriorSelect').value = '';
   document.getElementById('mesAnterioresBox').style.display = 'block';
   document.getElementById('diaBox').style.display = 'none';
   document.getElementById('diaSelectHasta').value = '';
   document.getElementById('filtroMedio').value = '';
-  document.getElementById('filtroFacturado').value = '';
+  document.getElementById('searchHistorial').value = '';
   renderVentas();
   showToast('Filtros limpiados ✓');
 });
 
 function aplicarFiltrosSecundarios(items){
   const medio = document.getElementById('filtroMedio').value;
-  const facturado = document.getElementById('filtroFacturado').value;
-  const cliente = document.getElementById('filtroCliente').value;
   const term = document.getElementById('searchHistorial').value.trim().toLowerCase();
   if(medio){
     items = items.filter(s => String(s.medioPago||'').trim().toLowerCase() === medio.toLowerCase());
-  }
-  if(facturado==='si') items = items.filter(s => s.facturado);
-  else if(facturado==='no') items = items.filter(s => !s.facturado);
-  if(cliente){
-    items = items.filter(s => String(s.cliente||'').trim() === cliente);
   }
   if(term){
     items = items.filter(s =>
@@ -2699,16 +2817,7 @@ function aplicarFiltrosSecundarios(items){
   return items;
 }
 
-function populateFiltroCliente(){
-  const sel = document.getElementById('filtroCliente');
-  const prev = sel.value;
-  const clientes = [...new Set(SALES.map(s=>(s.cliente||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  sel.innerHTML = '<option value="">Todos</option>' + clientes.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  if(clientes.includes(prev)) sel.value = prev;
-}
-
 document.getElementById('searchHistorial').addEventListener('input', renderVentas);
-document.getElementById('filtroCliente').addEventListener('change', renderVentas);
 
 function updateBulkToolbarVentas(){
   const bar = document.getElementById('bulkToolbarVentas');
@@ -2750,14 +2859,25 @@ function renderStats(items){
   const debtors = {};
   items.forEach(s=>{
     if(String(s.medioPago||'').trim().toLowerCase() === 'debe'){
-      const key = (s.cliente||'Consumidor final').trim().toLowerCase();
-      debtors[key] = (debtors[key]||0) + s.cantidad*s.precioUnitario;
+      const nombre = (s.cliente||'Consumidor final').trim() || 'Consumidor final';
+      const key = nombre.toLowerCase();
+      if(!debtors[key]) debtors[key] = { nombre, monto: 0 };
+      debtors[key].monto += s.cantidad*s.precioUnitario;
     }
   });
-  const debtorKeys = Object.keys(debtors);
-  const montoTotal = debtorKeys.reduce((acc,k)=>acc+debtors[k], 0);
+  const listaDeudores = Object.values(debtors).sort((a,b)=>b.monto-a.monto);
+  const montoTotal = listaDeudores.reduce((acc,d)=>acc+d.monto, 0);
   document.getElementById('statMontoDeben').textContent = fmt(montoTotal);
-  document.getElementById('statClientesDeben').textContent = debtorKeys.length + (debtorKeys.length===1 ? ' cliente' : ' clientes');
+  document.getElementById('statClientesDeben').textContent = listaDeudores.length + (listaDeudores.length===1 ? ' cliente' : ' clientes');
+
+  const tooltip = document.getElementById('debenTooltip');
+  if(listaDeudores.length === 0){
+    tooltip.innerHTML = '<div class="deben-tooltip-empty">Nadie debe en este período 🎉</div>';
+  } else {
+    tooltip.innerHTML = listaDeudores.map(d=>`
+      <div class="deben-tooltip-row"><span>${escapeHtml(titleCase(d.nombre))}</span><span>${fmt(d.monto)}</span></div>
+    `).join('');
+  }
 }
 
 function compareVentas(a, b){
@@ -2841,7 +2961,6 @@ function renderVentas(){
   items.sort(compareVentas);
 
   updateSortArrows();
-  populateFiltroCliente();
 
   const total = items.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
   document.getElementById('totalDia').textContent = fmt(total);
@@ -2864,13 +2983,15 @@ function renderVentas(){
       <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${s.id}" data-field="precio" value="${s.precioUnitario}"></div></td>
       <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${s.id}" data-field="subtotal" value="${subtotal}"></div></td>
       <td>
-        <input type="text" class="cell-edit cell-edit-text ${esDebe?'medio-debe':''}" data-id="${s.id}" data-field="medio" value="${escapeHtml(s.medioPago)}">
-        ${esDebe ? `<div class="pago-rapido">
-          <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Efectivo" title="Marcar pagado en Efectivo">💵</button>
-          <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Transferencia" title="Marcar pagado por Transferencia">🏦</button>
-          <button data-action="pagar-rapido" data-id="${s.id}" data-medio="QR" title="Marcar pagado por QR">📱</button>
-          <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Tarjeta" title="Marcar pagado con Tarjeta">💳</button>
-        </div>` : ''}
+        <div class="medio-cell">
+          <input type="text" class="cell-edit cell-edit-text ${esDebe?'medio-debe':''}" data-id="${s.id}" data-field="medio" value="${escapeHtml(s.medioPago)}">
+          ${esDebe ? `<div class="pago-rapido">
+            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Efectivo" title="Marcar pagado en Efectivo">💵</button>
+            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Transferencia" title="Marcar pagado por Transferencia">🏦</button>
+            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="QR" title="Marcar pagado por QR">📱</button>
+            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Tarjeta" title="Marcar pagado con Tarjeta">💳</button>
+          </div>` : ''}
+        </div>
       </td>
       <td><button class="estado-pill ${s.facturado?'pago':'neutro'}" data-id="${s.id}" data-action="toggle-facturado">${s.facturado?'Facturado':'—'}</button></td>
       <td><input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="cliente" value="${escapeHtml(s.cliente)}"></td>
@@ -2986,6 +3107,22 @@ function getMonthlyFinance(year){
   return rows;
 }
 
+function getPromedioDiarioMes(year, mes){
+  const prefix = `${year}-${String(mes).padStart(2,'0')}`;
+  const ventasDelMes = SALES.filter(s => s.fecha && s.fecha.slice(0,7) === prefix);
+  const totalIngresos = ventasDelMes.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
+
+  const hoy = new Date();
+  const esMesActual = hoy.getFullYear()===year && (hoy.getMonth()+1)===mes;
+  let diasDelPeriodo;
+  if(esMesActual){
+    diasDelPeriodo = hoy.getDate();
+  } else {
+    diasDelPeriodo = new Date(year, mes, 0).getDate();
+  }
+  return diasDelPeriodo > 0 ? totalIngresos / diasDelPeriodo : 0;
+}
+
 function renderAdminDashboard(){
   document.getElementById('finYearLabel').textContent = finYear;
   const rows = getMonthlyFinance(finYear).filter(r => r.ingresos !== 0 || r.gastos !== 0);
@@ -2994,15 +3131,36 @@ function renderAdminDashboard(){
     grid.innerHTML = '<div class="empty-state" style="padding:16px;"><span class="big">📊</span>No hay actividad registrada en '+finYear+'.</div>';
     return;
   }
-  grid.innerHTML = rows.map(r=>{
+  let html = rows.map(r=>{
     const resClass = r.resultado >= 0 ? 'pos' : 'neg';
+    const promedio = getPromedioDiarioMes(finYear, r.mes);
     return `<div class="fin-month-card">
       <div class="fin-month-name">${MESES_NOMBRES[r.mes-1]}</div>
       <div class="fin-row"><span>Ingresos</span><span class="fin-val pos">${fmt(r.ingresos)}</span></div>
       <div class="fin-row"><span>Gastos</span><span class="fin-val neg">${fmt(r.gastos)}</span></div>
       <div class="fin-row fin-result"><span>Resultado</span><span class="fin-val ${resClass}">${fmt(r.resultado)}</span></div>
+      <div class="fin-row fin-promedio"><span>Promedio diario</span><span class="fin-val">${fmt(promedio)}</span></div>
     </div>`;
   }).join('');
+
+  const totIngresos = rows.reduce((a,r)=>a+r.ingresos,0);
+  const totGastos = rows.reduce((a,r)=>a+r.gastos,0);
+  const totResultado = totIngresos - totGastos;
+  const totDias = rows.reduce((a,r)=>{
+    const hoy = new Date();
+    const esMesActual = hoy.getFullYear()===finYear && (hoy.getMonth()+1)===r.mes;
+    return a + (esMesActual ? hoy.getDate() : new Date(finYear, r.mes, 0).getDate());
+  }, 0);
+  const promedioAcum = totDias>0 ? totIngresos/totDias : 0;
+  html += `<div class="fin-month-card acumulado">
+    <div class="fin-month-name">📊 Acumulado ${finYear}</div>
+    <div class="fin-row"><span>Ingresos</span><span class="fin-val pos">${fmt(totIngresos)}</span></div>
+    <div class="fin-row"><span>Gastos</span><span class="fin-val neg">${fmt(totGastos)}</span></div>
+    <div class="fin-row fin-result"><span>Resultado</span><span class="fin-val ${totResultado>=0?'pos':'neg'}">${fmt(totResultado)}</span></div>
+    <div class="fin-row fin-promedio"><span>Promedio diario</span><span class="fin-val">${fmt(promedioAcum)}</span></div>
+  </div>`;
+
+  grid.innerHTML = html;
 }
 
 function populateFinMesFiltro(){
@@ -3121,7 +3279,8 @@ function renderAdmin(){
   renderAdminDashboard();
   populateFinMesFiltro();
   renderGastosTabla();
-  renderVencimientos();
+  renderVencimientosTabla();
+  renderVencCalendar();
   renderAnalisis();
 }
 
@@ -3404,31 +3563,109 @@ function proximaFechaVencimiento(diaDelMes){
 
 function getCicloActual(){ return todayISO().slice(0,7); }
 
-function renderVencimientos(){
-  const list = document.getElementById('vencimientosList');
+let vencCalMonth = new Date().getMonth();
+let vencCalYear = new Date().getFullYear();
+let vencEditandoId = null;
+
+function renderVencCalendar(){
+  document.getElementById('vencMonthLabel').textContent = `${MESES_NOMBRES[vencCalMonth]} ${vencCalYear}`;
+  const grid = document.getElementById('vencCalendarGrid');
+  const primerDia = new Date(vencCalYear, vencCalMonth, 1);
+  const diasEnMes = new Date(vencCalYear, vencCalMonth+1, 0).getDate();
+  let primerDiaSemana = primerDia.getDay();
+  primerDiaSemana = primerDiaSemana===0 ? 6 : primerDiaSemana-1;
+
+  const hoy = new Date();
+  const esMesActual = hoy.getFullYear()===vencCalYear && hoy.getMonth()===vencCalMonth;
+  const ciclo = `${vencCalYear}-${String(vencCalMonth+1).padStart(2,'0')}`;
+
+  let html = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`<div class="venc-cal-dow">${d}</div>`).join('');
+  for(let i=0;i<primerDiaSemana;i++){ html += '<div class="venc-cal-day empty"></div>'; }
+  for(let d=1; d<=diasEnMes; d++){
+    const vencimientosDelDia = VENCIMIENTOS.filter(v=>v.diaDelMes===d);
+    const esHoy = esMesActual && hoy.getDate()===d;
+    html += `<div class="venc-cal-day ${esHoy?'today':''} ${vencimientosDelDia.length?'has-venc':''}" data-dia="${d}">
+      <span class="venc-cal-daynum">${d}</span>
+      ${vencimientosDelDia.map(v=>{
+        const pagado = (v.pagadoMeses||[]).includes(ciclo);
+        return `<div class="venc-cal-item ${pagado?'pagado':''}" data-id="${v.id}" title="${escapeHtml(v.detalle)}${v.monto?' — '+fmt(v.monto):''}">${escapeHtml(v.detalle)}</div>`;
+      }).join('')}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+document.getElementById('btnVencMonthPrev').addEventListener('click', ()=>{
+  vencCalMonth--;
+  if(vencCalMonth<0){ vencCalMonth=11; vencCalYear--; }
+  renderVencCalendar();
+});
+document.getElementById('btnVencMonthNext').addEventListener('click', ()=>{
+  vencCalMonth++;
+  if(vencCalMonth>11){ vencCalMonth=0; vencCalYear++; }
+  renderVencCalendar();
+});
+
+document.getElementById('vencCalendarGrid').addEventListener('click', (e)=>{
+  const item = e.target.closest('.venc-cal-item');
+  if(item){
+    abrirModalVencimiento(item.dataset.id);
+    return;
+  }
+  const day = e.target.closest('.venc-cal-day:not(.empty)');
+  if(day){
+    abrirModalVencimiento(null, parseInt(day.dataset.dia,10));
+  }
+});
+
+function abrirModalVencimiento(id, diaPrefill){
+  vencEditandoId = id;
+  const delBtn = document.getElementById('btnEliminarVencimientoModal');
+  if(id){
+    const v = VENCIMIENTOS.find(x=>x.id===id);
+    if(!v) return;
+    document.getElementById('vencModalTitle').textContent = 'Editar vencimiento';
+    document.getElementById('vcDetalle').value = v.detalle;
+    document.getElementById('vcDia').value = v.diaDelMes;
+    document.getElementById('vcMonto').value = v.monto || 0;
+    document.getElementById('vcNotas').value = v.notas || '';
+    delBtn.style.display = 'block';
+  } else {
+    document.getElementById('vencModalTitle').textContent = 'Nuevo vencimiento';
+    document.getElementById('vcDetalle').value = '';
+    document.getElementById('vcDia').value = diaPrefill || 10;
+    document.getElementById('vcMonto').value = 0;
+    document.getElementById('vcNotas').value = '';
+    delBtn.style.display = 'none';
+  }
+  document.getElementById('overlayVencimiento').classList.add('show');
+}
+
+function renderVencimientosTabla(){
+  const tbody = document.getElementById('vencimientosTablaBody');
   const items = VENCIMIENTOS.slice().sort((a,b)=>a.diaDelMes-b.diaDelMes);
   const ciclo = getCicloActual();
+
   if(items.length===0){
-    list.innerHTML = '<div class="empty-state" style="padding:10px;"><span class="big">📅</span>No tenés vencimientos anotados todavía.</div>';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state" style="padding:14px;"><span class="big">💸</span>No tenés gastos fijos cargados. Agregá uno o tocá un día en el calendario.</div></td></tr>';
     document.getElementById('tabBadgeAdmin').style.display = 'none';
     return;
   }
+
   let urgentes = 0;
-  list.innerHTML = items.map(v=>{
+  tbody.innerHTML = items.map(v=>{
     const pagado = (v.pagadoMeses||[]).includes(ciclo);
     const urgencia = pagado ? 'pagado' : calcularUrgenciaVencimiento(v.diaDelMes);
     if(!pagado && urgencia==='urgente') urgentes++;
-    return `<div class="venc-row ${urgencia}">
-      <span class="venc-dot"></span>
-      <span class="venc-detalle">${escapeHtml(v.detalle)}</span>
-      ${v.notas ? `<span class="venc-notas">${escapeHtml(v.notas)}</span>` : ''}
-      <span class="venc-dia">Vence: ${proximaFechaVencimiento(v.diaDelMes)}</span>
-      <span class="venc-dia-fijo">(día ${v.diaDelMes} de cada mes)</span>
-      <button class="venc-pago-btn ${pagado?'pagado':''}" data-action="toggle-pago-vencimiento" data-id="${v.id}">
-        ${pagado ? '✓ Pagado este mes' : 'Marcar pagado'}
-      </button>
-      <button class="venc-del" data-action="delete-vencimiento" data-id="${v.id}" title="Borrar">🗑️</button>
-    </div>`;
+    const colorFila = urgencia==='urgente' ? 'style="background:var(--red-pale);"' : urgencia==='pagado' ? 'style="background:var(--green-pale);"' : '';
+    return `<tr ${colorFila}>
+      <td class="prod-cell" style="cursor:pointer;" data-action="editar-venc" data-id="${v.id}">${escapeHtml(v.detalle)}</td>
+      <td class="num price-cell">${fmt(v.monto||0)}</td>
+      <td>${proximaFechaVencimiento(v.diaDelMes)} <span style="font-size:10px;color:var(--ink-faint);">(día ${v.diaDelMes})</span></td>
+      <td>${escapeHtml(v.notas||'—')}</td>
+      <td><button class="venc-pago-btn ${pagado?'pagado':''}" data-action="toggle-pago-vencimiento" data-id="${v.id}">${pagado ? '✓ Pagado' : 'Marcar pagado'}</button></td>
+      <td><button class="btn-del link-btn danger" data-action="delete-vencimiento" data-id="${v.id}">Eliminar</button></td>
+    </tr>`;
   }).join('');
 
   const badge = document.getElementById('tabBadgeAdmin');
@@ -3436,9 +3673,11 @@ function renderVencimientos(){
   else{ badge.style.display = 'none'; }
 }
 
-document.getElementById('vencimientosList').addEventListener('click', async (e)=>{
+document.getElementById('vencimientosTablaBody').addEventListener('click', async (e)=>{
+  const editBtn = e.target.closest('[data-action="editar-venc"]');
   const delBtn = e.target.closest('[data-action="delete-vencimiento"]');
   const pagoBtn = e.target.closest('[data-action="toggle-pago-vencimiento"]');
+  if(editBtn){ abrirModalVencimiento(editBtn.dataset.id); return; }
   if(pagoBtn){
     const v = VENCIMIENTOS.find(x=>x.id===pagoBtn.dataset.id);
     if(!v) return;
@@ -3450,39 +3689,56 @@ document.getElementById('vencimientosList').addEventListener('click', async (e)=
       v.pagadoMeses.push(ciclo);
     }
     await saveVencimientos();
-    renderVencimientos();
+    renderVencimientosTabla();
+    renderVencCalendar();
     showToast(v.pagadoMeses.includes(ciclo) ? 'Marcado como pagado ✓' : 'Desmarcado');
     return;
   }
-  if(!delBtn) return;
-  if(!confirm('¿Borrar este vencimiento?')) return;
-  VENCIMIENTOS = VENCIMIENTOS.filter(v=>v.id!==delBtn.dataset.id);
-  await saveVencimientos();
-  renderVencimientos();
-  showToast('Vencimiento borrado');
+  if(delBtn){
+    if(!confirm('¿Borrar este vencimiento?')) return;
+    VENCIMIENTOS = VENCIMIENTOS.filter(v=>v.id!==delBtn.dataset.id);
+    await saveVencimientos();
+    renderVencimientosTabla();
+    renderVencCalendar();
+    showToast('Vencimiento borrado');
+  }
 });
 
 document.getElementById('btnNuevoVencimiento').addEventListener('click', ()=>{
-  document.getElementById('vcDetalle').value = '';
-  document.getElementById('vcDia').value = 10;
-  document.getElementById('vcNotas').value = '';
-  document.getElementById('overlayVencimiento').classList.add('show');
+  abrirModalVencimiento(null);
 });
 document.getElementById('btnCancelarVencimiento').addEventListener('click', ()=>{
   document.getElementById('overlayVencimiento').classList.remove('show');
+});
+document.getElementById('btnEliminarVencimientoModal').addEventListener('click', async ()=>{
+  if(!vencEditandoId) return;
+  if(!confirm('¿Borrar este vencimiento?')) return;
+  VENCIMIENTOS = VENCIMIENTOS.filter(v=>v.id!==vencEditandoId);
+  await saveVencimientos();
+  document.getElementById('overlayVencimiento').classList.remove('show');
+  renderVencimientosTabla();
+  renderVencCalendar();
+  showToast('Vencimiento borrado');
 });
 document.getElementById('btnGuardarVencimiento').addEventListener('click', async ()=>{
   const detalle = document.getElementById('vcDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al vencimiento'); return; }
   let dia = parseInt(document.getElementById('vcDia').value, 10) || 1;
   dia = Math.min(31, Math.max(1, dia));
+  const monto = parseFloat(document.getElementById('vcMonto').value) || 0;
   const notas = document.getElementById('vcNotas').value.trim();
 
-  VENCIMIENTOS.push({ id: uid(), detalle, diaDelMes: dia, notas });
+  if(vencEditandoId){
+    const v = VENCIMIENTOS.find(x=>x.id===vencEditandoId);
+    if(v){ v.detalle = detalle; v.diaDelMes = dia; v.monto = monto; v.notas = notas; }
+  } else {
+    VENCIMIENTOS.push({ id: uid(), detalle, diaDelMes: dia, monto, notas, pagadoMeses: [] });
+  }
   await saveVencimientos();
   document.getElementById('overlayVencimiento').classList.remove('show');
-  renderVencimientos();
-  showToast('Vencimiento agregado ✓');
+  renderVencimientosTabla();
+  renderVencCalendar();
+  showToast(vencEditandoId ? 'Vencimiento actualizado ✓' : 'Vencimiento agregado ✓');
 });
 
 /* ============================================================
@@ -3608,9 +3864,9 @@ function renderAnalisis(){
     : '<div class="empty-state" style="padding:10px;">Sin datos en este período.</div>';
 }
 
-document.querySelectorAll('.chip-row .chip-v').forEach(chip=>{
+document.querySelectorAll('#panel-analisis .chip-row .chip-v').forEach(chip=>{
   chip.addEventListener('click', ()=>{
-    document.querySelectorAll('.chip-row .chip-v').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('#panel-analisis .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     analisisFiltro = chip.dataset.af;
     document.getElementById('analisisMesesBox').style.display = analisisFiltro==='meses' ? 'block' : 'none';
@@ -3621,6 +3877,78 @@ document.querySelectorAll('.chip-row .chip-v').forEach(chip=>{
 });
 document.getElementById('analisisDesde').addEventListener('change', renderAnalisis);
 document.getElementById('analisisHasta').addEventListener('change', renderAnalisis);
+
+const ANALISIS_TOGGLE_MAP = { medios: 'analisisMediosCard', dias: 'analisisDiasCard', momento: 'analisisMomentoCard' };
+document.querySelectorAll('.analisis-mini-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const key = btn.dataset.toggle;
+    const card = document.getElementById(ANALISIS_TOGGLE_MAP[key]);
+    const abierta = card.style.display !== 'none';
+    card.style.display = abierta ? 'none' : 'block';
+    btn.classList.toggle('active', !abierta);
+  });
+});
+
+/* ============================================================
+   EXPORTAR CATÁLOGO EN PDF (por rubro o completo)
+   ============================================================ */
+function generarContenidoCatalogo(rubroFiltro){
+  let productos = PRODUCTS.filter(p => p.activo !== false);
+  const esTodos = !rubroFiltro || rubroFiltro === 'Todos';
+
+  let html = '';
+
+  if(esTodos){
+    productos.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+    html += '<div class="print-grid">';
+    productos.forEach(p=>{
+      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
+    });
+    html += '</div>';
+  } else {
+    productos = productos.filter(p => p.rubro === rubroFiltro);
+    productos.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+    html += `<div class="print-rubro">${escapeHtml(titleCase(rubroFiltro))}</div>`;
+    html += '<div class="print-grid">';
+    productos.forEach(p=>{
+      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  if(productos.length===0){
+    return '<p style="text-align:center;color:#999;">No hay productos para mostrar.</p>';
+  }
+
+  html += '<div class="print-footer">Precios sujetos a modificaciones sin previo aviso. Consulte al realizar su pedido.</div>';
+  return html;
+}
+
+document.getElementById('btnExportarCatalogoPDF').addEventListener('click', ()=>{
+  const sel = document.getElementById('cpRubro');
+  sel.innerHTML = '<option value="Todos">Todos los rubros</option>' +
+    getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(r)}">${escapeHtml(titleCase(r))}</option>`).join('');
+  document.getElementById('overlayCatalogoPDF').classList.add('show');
+});
+document.getElementById('btnCancelarCatalogoPDF').addEventListener('click', ()=>{
+  document.getElementById('overlayCatalogoPDF').classList.remove('show');
+});
+document.getElementById('btnGenerarCatalogoPDF').addEventListener('click', ()=>{
+  const rubroFiltro = document.getElementById('cpRubro').value;
+  const subtitulo = rubroFiltro==='Todos' ? 'Catálogo completo' : titleCase(rubroFiltro);
+  const fechaTexto = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+  document.getElementById('printCatalog').innerHTML = `
+    <div class="print-header">
+      <h1>Desde Casa — Catálogo de Precios</h1>
+      <div class="print-sub">${escapeHtml(subtitulo)} · ${fechaTexto}</div>
+    </div>
+    ${generarContenidoCatalogo(rubroFiltro)}
+  `;
+
+  document.getElementById('overlayCatalogoPDF').classList.remove('show');
+  setTimeout(()=>{ window.print(); }, 150);
+});
 
 async function boot(){
   const list = document.getElementById('listCatalogo');
@@ -3673,5 +4001,7 @@ document.getElementById('btnTheme').addEventListener('click', ()=>{
 if(window.storage){ initGate(); }
 else{ window.addEventListener('storage-ready', initGate, {once:true}); }
 </script>
+<div id="printCatalog" class="print-only"></div>
+
 </body>
 </html>
