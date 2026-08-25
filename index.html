@@ -612,14 +612,11 @@
   }
   .analisis-mes-check input{width:16px;height:16px;cursor:pointer;}
   .analisis-mes-check.checked{border-color:var(--gold);background:var(--gold-pale);color:var(--gold-deep);}
-  .analisis-top-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px;}
-  .analisis-mini-toggles{display:flex;gap:8px;flex-wrap:wrap;}
-  .analisis-mini-btn{
-    padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);background:#fff;
-    font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink-soft);white-space:nowrap;
-  }
-  .analisis-mini-btn.active{border-color:var(--gold);background:var(--gold-grad);color:#fff;}
-  .analisis-desplegable{margin-bottom:14px;max-width:520px;}
+  .analisis-grid-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:18px;}
+  .analisis-grid-top .analisis-card{padding:14px 16px;}
+  .analisis-grid-top .analisis-card h3{font-size:14.5px;margin-bottom:10px;}
+  .analisis-grid-top .analisis-bar-label{flex:0 0 auto;max-width:60%;font-size:11.5px;}
+  .analisis-grid-top .analisis-bar-val{font-size:11.5px;}
   .analisis-grid{display:grid;grid-template-columns:1fr;gap:16px;}
   .analisis-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);}
   .analisis-card.wide{grid-column:1 / -1;}
@@ -676,6 +673,39 @@
   @media(max-width:700px){
     .venc-cal-day{min-height:48px;}
     .venc-cal-item{font-size:8px;}
+  }
+
+  /* ---------- Calendario + Gastos fijos, lado a lado ---------- */
+  .cal-gastos-layout{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px;}
+  .cal-side{flex:0 0 380px;max-width:380px;}
+  .cal-side .venc-cal-grid{gap:3px;}
+  .cal-side .venc-cal-day{min-height:44px;padding:3px;}
+  .cal-side .venc-cal-item{font-size:8px;}
+  .gastos-fijos-side{flex:1 1 480px;min-width:0;}
+  .gastos-fijos-table-wrap{max-height:520px;overflow-y:auto;}
+  table.gastos-fijos-table{font-size:12px;min-width:900px;}
+  table.gastos-fijos-table th, table.gastos-fijos-table td{padding:7px 6px;white-space:nowrap;}
+  table.gastos-fijos-table .gf-detalle-cell{cursor:pointer;font-weight:800;min-width:110px;}
+  table.gastos-fijos-table .gf-cat-badge{
+    display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:999px;
+    background:var(--gold-pale);color:var(--gold-deep);margin-top:2px;
+  }
+  .gf-cell{display:flex;align-items:center;gap:3px;}
+  .gf-cell input{width:64px;border:1.5px solid transparent;border-radius:6px;padding:4px 5px;font-size:11.5px;font-weight:700;text-align:right;background:transparent;}
+  .gf-cell input:hover{border-color:var(--border);}
+  .gf-cell input:focus{border-color:var(--gold);background:#fff;outline:none;}
+  .gf-cell.pagado{background:var(--green-pale);}
+  .gf-cell.pagado input{color:var(--green);}
+  .gf-pago-toggle{
+    width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);background:#fff;
+    cursor:pointer;flex:0 0 auto;font-size:9px;line-height:1;padding:0;color:transparent;
+  }
+  .gf-cell.pagado .gf-pago-toggle{background:var(--green);border-color:var(--green);color:#fff;}
+  #gastosFijosTotalRow{font-weight:800;background:var(--dark-surface);color:#fff;}
+  #gastosFijosTotalRow td{padding:8px 6px;}
+  @media(max-width:1000px){
+    .cal-gastos-layout{flex-direction:column;}
+    .cal-side{max-width:none;width:100%;}
   }
 
   /* ---------- Selección múltiple / acciones en grupo ---------- */
@@ -746,17 +776,17 @@
   #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;font-size:12px;}
 
   .ventas-stats-sticky{
-    display:flex;align-items:stretch;gap:10px;margin-bottom:14px;flex-wrap:wrap;
+    display:flex;align-items:stretch;gap:12px;margin-bottom:14px;flex-wrap:wrap;
     position:sticky;top:70px;z-index:15;background:var(--cream);padding-top:2px;
   }
-  .ventas-stats-sticky .stat-compact{flex:1 1 160px;max-width:200px;padding:12px 14px;}
+  .ventas-stats-sticky .stat-compact{flex:2.2 1 220px;padding:14px 16px;}
   .vfs-filters{
-    flex:1 1 260px;max-width:320px;display:flex;flex-direction:column;gap:8px;
-    background:var(--card);border:2px solid var(--border);border-radius:15px;padding:10px 12px;
+    flex:1.4 1 220px;display:flex;flex-direction:column;gap:8px;
+    background:var(--card);border:2px solid var(--border);border-radius:15px;padding:12px;
   }
-  .vfs-filters .chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:0;}
-  .vfs-filters .chip-v{padding:8px 9px;font-size:11.5px;border-radius:9px;flex:1 1 auto;text-align:center;white-space:nowrap;}
-  .vfs-medio-select{font-size:13px;padding:9px 10px;}
+  .vfs-filters .chip-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:0;}
+  .vfs-filters .chip-v{padding:13px 9px;font-size:12.5px;border-radius:10px;text-align:center;white-space:nowrap;}
+  .vfs-medio-select{font-size:13px;padding:10px 10px;}
 
   .deben-hover-card{position:relative;overflow:visible !important;}
   .deben-tooltip{
@@ -833,9 +863,8 @@
   }  /* ---------- Catálogo para imprimir / exportar a PDF ---------- */
   .print-only{display:none;}
   @media print{
-    body *{visibility:hidden;}
-    #printCatalog, #printCatalog *{visibility:visible;}
-    #printCatalog{display:block !important;position:absolute;top:0;left:0;width:100%;padding:20px;}
+    body > *:not(#printCatalog){display:none !important;}
+    #printCatalog{display:block !important;padding:20px;}
     .print-header{text-align:center;margin-bottom:24px;border-bottom:2px solid #B8862F;padding-bottom:14px;}
     .print-header h1{font-family:'Playfair Display',serif;font-size:26px;color:#8A6323;margin:0 0 4px;}
     .print-sub{font-size:12px;color:#666;}
@@ -1196,27 +1225,31 @@
     </div>
     <div class="fin-months-grid" id="finMonthsGrid"></div>
 
-    <h3 class="fin-subtitle">📅 Calendario de vencimientos</h3>
-    <div class="venc-card">
-      <div class="venc-cal-nav">
-        <button class="chip-v fin-year-btn" id="btnVencMonthPrev">‹</button>
-        <div class="fin-year-label" id="vencMonthLabel">Mes 2026</div>
-        <button class="chip-v fin-year-btn" id="btnVencMonthNext">›</button>
+    <h3 class="fin-subtitle">📅 Vencimientos y gastos fijos</h3>
+    <div class="cal-gastos-layout">
+      <div class="venc-card cal-side">
+        <div class="venc-cal-nav">
+          <button class="chip-v fin-year-btn" id="btnVencMonthPrev">‹</button>
+          <div class="fin-year-label" id="vencMonthLabel">Mes 2026</div>
+          <button class="chip-v fin-year-btn" id="btnVencMonthNext">›</button>
+        </div>
+        <div class="venc-cal-grid" id="vencCalendarGrid"></div>
+        <div class="venc-cal-hint">🔔 Esta alerta es solo dentro de la web: se muestra cuando entrás a la app. No manda avisos a WhatsApp ni al mail.</div>
       </div>
-      <div class="venc-cal-grid" id="vencCalendarGrid"></div>
-      <div class="venc-cal-hint">🔔 Esta alerta es solo dentro de la web: se muestra cuando entrás a la app. No manda avisos a WhatsApp ni al mail.</div>
-    </div>
 
-    <h3 class="fin-subtitle">💸 Gastos fijos <button class="btn btn-outline btn-sm" id="btnNuevoVencimiento" style="margin-left:10px;">＋ Agregar gasto fijo</button></h3>
-    <div class="table-wrap" style="margin-bottom:24px;">
-      <table class="ventas-table">
-        <thead>
-          <tr>
-            <th>Gasto</th><th>$ Monto</th><th>Próx. vencimiento</th><th>Medio de pago</th><th>Este mes</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="vencimientosTablaBody"></tbody>
-      </table>
+      <div class="venc-card gastos-fijos-side">
+        <div class="venc-header">
+          <div class="price-lookup-title" style="font-size:15px;">💸 Gastos fijos <span id="gastosFijosYearLabel">2026</span></div>
+          <button class="btn btn-outline btn-sm" id="btnNuevoVencimiento">＋ Agregar gasto fijo</button>
+        </div>
+        <div class="table-wrap gastos-fijos-table-wrap">
+          <table class="ventas-table gastos-fijos-table" id="gastosFijosTable">
+            <thead><tr id="gastosFijosThead"></tr></thead>
+            <tbody id="gastosFijosTbody"></tbody>
+            <tfoot><tr id="gastosFijosTotalRow"></tr></tfoot>
+          </table>
+        </div>
+      </div>
     </div>
 
     <h3 class="fin-subtitle">Detalle de lo pagado</h3>
@@ -1224,7 +1257,13 @@
       <div class="search-wrap">
         <input type="text" class="search" id="searchGastos" placeholder="Buscar en detalle o medio de pago...">
       </div>
-      <div class="mini-field" style="max-width:220px;">
+      <div class="mini-field" style="max-width:200px;">
+        <label>Categoría</label>
+        <select class="field" id="finCategoriaFiltro">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="mini-field" style="max-width:200px;">
         <label>Filtrar por mes</label>
         <select class="field" id="finMesFiltro">
           <option value="">Todos los meses</option>
@@ -1242,6 +1281,7 @@
             <th><input type="checkbox" id="checkAllGastos"></th>
             <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
             <th data-sort="detalle">Detalle <span class="sort-arrow"></span></th>
+            <th data-sort="categoria">Categoría <span class="sort-arrow"></span></th>
             <th data-sort="monto">$ Monto <span class="sort-arrow"></span></th>
             <th data-sort="medioPago">Medio de pago <span class="sort-arrow"></span></th>
             <th></th>
@@ -1254,18 +1294,11 @@
 
   <!-- ===================== ANÁLISIS ===================== -->
   <section class="panel" id="panel-analisis">
-    <div class="analisis-top-row">
-      <div class="chip-row">
-        <button class="chip-v active" data-af="mes">Este mes</button>
-        <button class="chip-v" data-af="meses">Meses</button>
-        <button class="chip-v" data-af="acumulado">Acumulado</button>
-        <button class="chip-v" data-af="rango">Desde / Hasta</button>
-      </div>
-      <div class="analisis-mini-toggles">
-        <button class="analisis-mini-btn" data-toggle="medios">💳 Medios de pago</button>
-        <button class="analisis-mini-btn" data-toggle="dias">📆 Día de semana</button>
-        <button class="analisis-mini-btn" data-toggle="momento">🗓️ Momento del mes</button>
-      </div>
+    <div class="chip-row">
+      <button class="chip-v active" data-af="mes">Este mes</button>
+      <button class="chip-v" data-af="meses">Meses</button>
+      <button class="chip-v" data-af="acumulado">Acumulado</button>
+      <button class="chip-v" data-af="rango">Desde / Hasta</button>
     </div>
     <div class="venc-card" id="analisisMesesBox" style="display:none;padding:14px;">
       <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
@@ -1282,17 +1315,23 @@
       </div>
     </div>
 
-    <div class="analisis-card analisis-desplegable" id="analisisMediosCard" style="display:none;">
-      <h3>💳 Medios de pago</h3>
-      <div id="analisisMedios"></div>
-    </div>
-    <div class="analisis-card analisis-desplegable" id="analisisDiasCard" style="display:none;">
-      <h3>📆 Día de la semana</h3>
-      <div id="analisisDias"></div>
-    </div>
-    <div class="analisis-card analisis-desplegable" id="analisisMomentoCard" style="display:none;">
-      <h3>🗓️ Momento del mes</h3>
-      <div id="analisisMomento"></div>
+    <div class="analisis-grid-top">
+      <div class="analisis-card">
+        <h3>💳 Medios de pago</h3>
+        <div id="analisisMedios"></div>
+      </div>
+      <div class="analisis-card">
+        <h3>📆 Día de la semana</h3>
+        <div id="analisisDias"></div>
+      </div>
+      <div class="analisis-card">
+        <h3>🗓️ Momento del mes</h3>
+        <div id="analisisMomento"></div>
+      </div>
+      <div class="analisis-card">
+        <h3>💸 Gastos por categoría</h3>
+        <div id="analisisGastos"></div>
+      </div>
     </div>
 
     <div class="analisis-grid">
@@ -1311,9 +1350,12 @@
     <h3 id="vencModalTitle">Nuevo vencimiento</h3>
     <div class="field-label">Detalle</div>
     <input type="text" class="field" id="vcDetalle" placeholder="Ej: Alquiler, EPE, Monotributo...">
+    <div class="field-label">Categoría</div>
+    <input type="text" class="field" id="vcCategoria" list="categoriasList" placeholder="Ej: Impuestos">
+    <datalist id="categoriasList"></datalist>
     <div class="field-label">Día del mes en que vence</div>
     <input type="number" class="field" id="vcDia" min="1" max="31" value="10">
-    <div class="field-label">Monto ($)</div>
+    <div class="field-label">Monto de este mes ($, opcional)</div>
     <input type="number" class="field" id="vcMonto" value="0">
     <div class="field-label">Medio de pago habitual (opcional)</div>
     <input type="text" class="field" id="vcNotas" placeholder="Ej: Débito automático, Efectivo...">
@@ -1333,6 +1375,8 @@
     <input type="date" class="field" id="ngFecha">
     <div class="field-label">Detalle (impuesto / proveedor)</div>
     <input type="text" class="field" id="ngDetalle" placeholder="Ej: Alquiler, EPE, Proveedor X...">
+    <div class="field-label">Categoría</div>
+    <input type="text" class="field" id="ngCategoria" list="categoriasList" placeholder="Ej: Proveedor">
     <div class="field-label">Monto ($)</div>
     <input type="number" class="field" id="ngMonto" value="0">
     <div class="field-label">Medio de pago</div>
@@ -3179,6 +3223,7 @@ function compareGastos(a, b){
   let va, vb;
   switch(gastosSortField){
     case 'detalle': va = (a.detalle||'').toLowerCase(); vb = (b.detalle||'').toLowerCase(); break;
+    case 'categoria': va = (a.categoria||'').toLowerCase(); vb = (b.categoria||'').toLowerCase(); break;
     case 'monto': va = a.monto||0; vb = b.monto||0; break;
     case 'medioPago': va = (a.medioPago||'').toLowerCase(); vb = (b.medioPago||'').toLowerCase(); break;
     default: va = a.fecha||''; vb = b.fecha||'';
@@ -3237,37 +3282,45 @@ document.getElementById('btnBulkDeleteGastos').addEventListener('click', async (
 });
 
 document.getElementById('searchGastos').addEventListener('input', renderGastosTabla);
+document.getElementById('finCategoriaFiltro').addEventListener('change', renderGastosTabla);
 
 function renderGastosTabla(){
   const tbody = document.getElementById('gastosTbody');
   const mesFiltro = document.getElementById('finMesFiltro').value;
+  const catFiltro = document.getElementById('finCategoriaFiltro').value;
   const term = document.getElementById('searchGastos').value.trim().toLowerCase();
   let items = GASTOS.filter(g => g.fecha && g.fecha.slice(0,4) == finYear);
   if(mesFiltro){
     const mm = String(mesFiltro).padStart(2,'0');
     items = items.filter(g => g.fecha.slice(5,7) === mm);
   }
+  if(catFiltro){
+    items = items.filter(g => (g.categoria||'') === catFiltro);
+  }
   if(term){
     items = items.filter(g =>
       (g.detalle||'').toLowerCase().includes(term) ||
-      (g.medioPago||'').toLowerCase().includes(term)
+      (g.medioPago||'').toLowerCase().includes(term) ||
+      (g.categoria||'').toLowerCase().includes(term)
     );
   }
   items.sort(compareGastos);
   updateGastosSortArrows();
 
   if(items.length===0){
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><span class="big">🧾</span>No hay gastos que coincidan con estos filtros.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span class="big">🧾</span>No hay gastos que coincidan con estos filtros.</div></td></tr>`;
     updateBulkToolbarGastos();
     return;
   }
 
   tbody.innerHTML = items.map(g=>{
+    const ligado = !!g.origenVencimientoId;
     return `<tr data-id="${g.id}">
       <td><input type="checkbox" class="row-check" data-id="${g.id}" ${selectedGastoIds.has(g.id)?'checked':''}></td>
-      <td><input type="date" class="cell-edit" data-id="${g.id}" data-field="fecha" value="${g.fecha}"></td>
+      <td><input type="date" class="cell-edit" data-id="${g.id}" data-field="fecha" value="${g.fecha}" ${ligado?'disabled title="Viene de un gasto fijo marcado como pagado"':''}></td>
       <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="detalle" value="${escapeHtml(g.detalle||'')}"></td>
-      <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}"></div></td>
+      <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="categoria" value="${escapeHtml(g.categoria||'')}" list="categoriasList"></td>
+      <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
       <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="medioPago" value="${escapeHtml(g.medioPago||'')}"></td>
       <td><button class="btn-del link-btn danger" data-id="${g.id}" data-action="delete-gasto">Eliminar</button></td>
     </tr>`;
@@ -3278,8 +3331,9 @@ function renderGastosTabla(){
 function renderAdmin(){
   renderAdminDashboard();
   populateFinMesFiltro();
+  populateCategoriaFiltro();
   renderGastosTabla();
-  renderVencimientosTabla();
+  renderGastosFijosTable();
   renderVencCalendar();
   renderAnalisis();
 }
@@ -3332,8 +3386,10 @@ document.getElementById('gastosTbody').addEventListener('change', async (e)=>{
 
 /* ---- Nuevo gasto (manual) ---- */
 document.getElementById('btnNuevoGasto').addEventListener('click', ()=>{
+  populateCategoriasList();
   document.getElementById('ngFecha').value = todayISO();
   document.getElementById('ngDetalle').value = '';
+  document.getElementById('ngCategoria').value = '';
   document.getElementById('ngMonto').value = 0;
   document.getElementById('ngMedio').value = '';
   document.getElementById('overlayNuevoGasto').classList.add('show');
@@ -3345,10 +3401,11 @@ document.getElementById('btnGuardarGasto').addEventListener('click', async ()=>{
   const detalle = document.getElementById('ngDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al gasto'); return; }
   const fecha = document.getElementById('ngFecha').value || todayISO();
+  const categoria = document.getElementById('ngCategoria').value.trim();
   const monto = parseFloat(document.getElementById('ngMonto').value) || 0;
   const medioPago = document.getElementById('ngMedio').value.trim();
 
-  GASTOS.push({ id: uid(), fecha, detalle, monto, medioPago });
+  GASTOS.push({ id: uid(), fecha, detalle, categoria, monto, medioPago });
   await saveGastos();
   document.getElementById('overlayNuevoGasto').classList.remove('show');
   finYear = parseInt(fecha.slice(0,4), 10);
@@ -3563,6 +3620,25 @@ function proximaFechaVencimiento(diaDelMes){
 
 function getCicloActual(){ return todayISO().slice(0,7); }
 
+function getCategoriasConocidas(){
+  const usadas = new Set(['Impuestos','Proveedor','Extraordinario']);
+  VENCIMIENTOS.forEach(v=>{ if(v.categoria) usadas.add(v.categoria); });
+  GASTOS.forEach(g=>{ if(g.categoria) usadas.add(g.categoria); });
+  return Array.from(usadas);
+}
+
+function populateCategoriasList(){
+  document.getElementById('categoriasList').innerHTML = getCategoriasConocidas().map(c=>`<option value="${escapeHtml(c)}">`).join('');
+}
+
+function populateCategoriaFiltro(){
+  const sel = document.getElementById('finCategoriaFiltro');
+  const prev = sel.value;
+  const cats = getCategoriasConocidas();
+  sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  if(cats.includes(prev)) sel.value = prev;
+}
+
 let vencCalMonth = new Date().getMonth();
 let vencCalYear = new Date().getFullYear();
 let vencEditandoId = null;
@@ -3588,7 +3664,8 @@ function renderVencCalendar(){
       <span class="venc-cal-daynum">${d}</span>
       ${vencimientosDelDia.map(v=>{
         const pagado = (v.pagadoMeses||[]).includes(ciclo);
-        return `<div class="venc-cal-item ${pagado?'pagado':''}" data-id="${v.id}" title="${escapeHtml(v.detalle)}${v.monto?' — '+fmt(v.monto):''}">${escapeHtml(v.detalle)}</div>`;
+        const monto = (v.montosPorMes && v.montosPorMes[ciclo]) || 0;
+        return `<div class="venc-cal-item ${pagado?'pagado':''}" data-id="${v.id}" title="${escapeHtml(v.detalle)}${monto?' — '+fmt(monto):''}">${escapeHtml(v.detalle)}</div>`;
       }).join('')}
     </div>`;
   }
@@ -3620,19 +3697,23 @@ document.getElementById('vencCalendarGrid').addEventListener('click', (e)=>{
 
 function abrirModalVencimiento(id, diaPrefill){
   vencEditandoId = id;
+  populateCategoriasList();
   const delBtn = document.getElementById('btnEliminarVencimientoModal');
+  const cicloActual = getCicloActual();
   if(id){
     const v = VENCIMIENTOS.find(x=>x.id===id);
     if(!v) return;
     document.getElementById('vencModalTitle').textContent = 'Editar vencimiento';
     document.getElementById('vcDetalle').value = v.detalle;
+    document.getElementById('vcCategoria').value = v.categoria || '';
     document.getElementById('vcDia').value = v.diaDelMes;
-    document.getElementById('vcMonto').value = v.monto || 0;
+    document.getElementById('vcMonto').value = (v.montosPorMes && v.montosPorMes[cicloActual]) || 0;
     document.getElementById('vcNotas').value = v.notas || '';
     delBtn.style.display = 'block';
   } else {
     document.getElementById('vencModalTitle').textContent = 'Nuevo vencimiento';
     document.getElementById('vcDetalle').value = '';
+    document.getElementById('vcCategoria').value = '';
     document.getElementById('vcDia').value = diaPrefill || 10;
     document.getElementById('vcMonto').value = 0;
     document.getElementById('vcNotas').value = '';
@@ -3641,67 +3722,122 @@ function abrirModalVencimiento(id, diaPrefill){
   document.getElementById('overlayVencimiento').classList.add('show');
 }
 
-function renderVencimientosTabla(){
-  const tbody = document.getElementById('vencimientosTablaBody');
-  const items = VENCIMIENTOS.slice().sort((a,b)=>a.diaDelMes-b.diaDelMes);
+function actualizarBadgeVencimientos(){
   const ciclo = getCicloActual();
-
-  if(items.length===0){
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state" style="padding:14px;"><span class="big">💸</span>No tenés gastos fijos cargados. Agregá uno o tocá un día en el calendario.</div></td></tr>';
-    document.getElementById('tabBadgeAdmin').style.display = 'none';
-    return;
-  }
-
   let urgentes = 0;
-  tbody.innerHTML = items.map(v=>{
+  VENCIMIENTOS.forEach(v=>{
     const pagado = (v.pagadoMeses||[]).includes(ciclo);
-    const urgencia = pagado ? 'pagado' : calcularUrgenciaVencimiento(v.diaDelMes);
-    if(!pagado && urgencia==='urgente') urgentes++;
-    const colorFila = urgencia==='urgente' ? 'style="background:var(--red-pale);"' : urgencia==='pagado' ? 'style="background:var(--green-pale);"' : '';
-    return `<tr ${colorFila}>
-      <td class="prod-cell" style="cursor:pointer;" data-action="editar-venc" data-id="${v.id}">${escapeHtml(v.detalle)}</td>
-      <td class="num price-cell">${fmt(v.monto||0)}</td>
-      <td>${proximaFechaVencimiento(v.diaDelMes)} <span style="font-size:10px;color:var(--ink-faint);">(día ${v.diaDelMes})</span></td>
-      <td>${escapeHtml(v.notas||'—')}</td>
-      <td><button class="venc-pago-btn ${pagado?'pagado':''}" data-action="toggle-pago-vencimiento" data-id="${v.id}">${pagado ? '✓ Pagado' : 'Marcar pagado'}</button></td>
-      <td><button class="btn-del link-btn danger" data-action="delete-vencimiento" data-id="${v.id}">Eliminar</button></td>
-    </tr>`;
-  }).join('');
-
+    if(!pagado && calcularUrgenciaVencimiento(v.diaDelMes)==='urgente') urgentes++;
+  });
   const badge = document.getElementById('tabBadgeAdmin');
   if(urgentes>0){ badge.textContent = urgentes; badge.style.display = 'inline-block'; }
   else{ badge.style.display = 'none'; }
 }
 
-document.getElementById('vencimientosTablaBody').addEventListener('click', async (e)=>{
+function renderGastosFijosTable(){
+  document.getElementById('gastosFijosYearLabel').textContent = finYear;
+  const thead = document.getElementById('gastosFijosThead');
+  thead.innerHTML = '<th>Gasto</th>' + MESES_NOMBRES.map(m=>`<th>${m.slice(0,3).toUpperCase()}</th>`).join('') + '<th></th>';
+
+  const tbody = document.getElementById('gastosFijosTbody');
+  const items = VENCIMIENTOS.slice().sort((a,b)=>a.detalle.localeCompare(b.detalle));
+
+  if(items.length===0){
+    tbody.innerHTML = `<tr><td colspan="14"><div class="empty-state" style="padding:14px;"><span class="big">💸</span>No tenés gastos fijos cargados. Agregá uno o tocá un día en el calendario.</div></td></tr>`;
+  } else {
+    tbody.innerHTML = items.map(v=>{
+      const celdas = MESES_NOMBRES.map((_, i)=>{
+        const mm = String(i+1).padStart(2,'0');
+        const ym = `${finYear}-${mm}`;
+        const monto = (v.montosPorMes && v.montosPorMes[ym]) || '';
+        const pagado = (v.pagadoMeses||[]).includes(ym);
+        return `<td>
+          <div class="gf-cell ${pagado?'pagado':''}">
+            <button class="gf-pago-toggle" data-action="toggle-pago-gf" data-id="${v.id}" data-ym="${ym}" title="Marcar pagado">✓</button>
+            <input type="number" data-action="monto-gf" data-id="${v.id}" data-ym="${ym}" value="${monto}" placeholder="—">
+          </div>
+        </td>`;
+      }).join('');
+      return `<tr>
+        <td class="gf-detalle-cell" data-action="editar-venc" data-id="${v.id}">${escapeHtml(v.detalle)}<br><span class="gf-cat-badge">${escapeHtml(v.categoria||'Sin categoría')}</span></td>
+        ${celdas}
+        <td><button class="btn-del link-btn danger" data-action="delete-vencimiento" data-id="${v.id}" title="Eliminar">🗑️</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const totalRow = document.getElementById('gastosFijosTotalRow');
+  const totalCeldas = MESES_NOMBRES.map((_, i)=>{
+    const mm = String(i+1).padStart(2,'0');
+    const ym = `${finYear}-${mm}`;
+    const total = items.reduce((acc,v)=> acc + ((v.montosPorMes && v.montosPorMes[ym]) || 0), 0);
+    return `<td>${total ? fmt(total) : '—'}</td>`;
+  }).join('');
+  totalRow.innerHTML = `<td>TOTAL</td>${totalCeldas}<td></td>`;
+
+  actualizarBadgeVencimientos();
+}
+
+document.getElementById('gastosFijosTbody').addEventListener('click', async (e)=>{
+  const pagoBtn = e.target.closest('[data-action="toggle-pago-gf"]');
   const editBtn = e.target.closest('[data-action="editar-venc"]');
   const delBtn = e.target.closest('[data-action="delete-vencimiento"]');
-  const pagoBtn = e.target.closest('[data-action="toggle-pago-vencimiento"]');
-  if(editBtn){ abrirModalVencimiento(editBtn.dataset.id); return; }
+
   if(pagoBtn){
     const v = VENCIMIENTOS.find(x=>x.id===pagoBtn.dataset.id);
     if(!v) return;
+    const ym = pagoBtn.dataset.ym;
     if(!v.pagadoMeses) v.pagadoMeses = [];
-    const ciclo = getCicloActual();
-    if(v.pagadoMeses.includes(ciclo)){
-      v.pagadoMeses = v.pagadoMeses.filter(m=>m!==ciclo);
+    const yaPagado = v.pagadoMeses.includes(ym);
+    if(yaPagado){
+      v.pagadoMeses = v.pagadoMeses.filter(m=>m!==ym);
+      GASTOS = GASTOS.filter(g => !(g.origenVencimientoId===v.id && g.origenMes===ym));
     } else {
-      v.pagadoMeses.push(ciclo);
+      v.pagadoMeses.push(ym);
+      const monto = (v.montosPorMes && v.montosPorMes[ym]) || 0;
+      GASTOS.push({
+        id: uid(), fecha: `${ym}-01`, detalle: v.detalle, categoria: v.categoria || '',
+        monto, medioPago: v.notas || '', origenVencimientoId: v.id, origenMes: ym
+      });
     }
     await saveVencimientos();
-    renderVencimientosTabla();
+    await saveGastos();
+    renderGastosFijosTable();
     renderVencCalendar();
-    showToast(v.pagadoMeses.includes(ciclo) ? 'Marcado como pagado ✓' : 'Desmarcado');
+    renderGastosTabla();
+    renderAnalisis();
+    showToast(yaPagado ? 'Desmarcado' : 'Marcado como pagado ✓ (se sumó a Detalle de lo pagado)');
     return;
   }
+  if(editBtn){ abrirModalVencimiento(editBtn.dataset.id); return; }
   if(delBtn){
-    if(!confirm('¿Borrar este vencimiento?')) return;
+    if(!confirm('¿Borrar este gasto fijo? También se van a borrar los pagos ya registrados en Detalle de lo pagado.')) return;
+    GASTOS = GASTOS.filter(g => g.origenVencimientoId !== delBtn.dataset.id);
     VENCIMIENTOS = VENCIMIENTOS.filter(v=>v.id!==delBtn.dataset.id);
     await saveVencimientos();
-    renderVencimientosTabla();
+    await saveGastos();
+    renderGastosFijosTable();
     renderVencCalendar();
-    showToast('Vencimiento borrado');
+    renderGastosTabla();
+    renderAnalisis();
+    showToast('Gasto fijo borrado');
   }
+});
+
+document.getElementById('gastosFijosTbody').addEventListener('change', async (e)=>{
+  const inp = e.target.closest('[data-action="monto-gf"]');
+  if(!inp) return;
+  const v = VENCIMIENTOS.find(x=>x.id===inp.dataset.id);
+  if(!v) return;
+  if(!v.montosPorMes) v.montosPorMes = {};
+  const val = parseFloat(inp.value) || 0;
+  const ym = inp.dataset.ym;
+  v.montosPorMes[ym] = val;
+  const gLigado = GASTOS.find(g => g.origenVencimientoId===v.id && g.origenMes===ym);
+  if(gLigado){ gLigado.monto = val; await saveGastos(); renderGastosTabla(); renderAnalisis(); }
+  await saveVencimientos();
+  renderGastosFijosTable();
+  renderVencCalendar();
 });
 
 document.getElementById('btnNuevoVencimiento').addEventListener('click', ()=>{
@@ -3712,31 +3848,41 @@ document.getElementById('btnCancelarVencimiento').addEventListener('click', ()=>
 });
 document.getElementById('btnEliminarVencimientoModal').addEventListener('click', async ()=>{
   if(!vencEditandoId) return;
-  if(!confirm('¿Borrar este vencimiento?')) return;
+  if(!confirm('¿Borrar este gasto fijo? También se van a borrar los pagos ya registrados en Detalle de lo pagado.')) return;
+  GASTOS = GASTOS.filter(g => g.origenVencimientoId !== vencEditandoId);
   VENCIMIENTOS = VENCIMIENTOS.filter(v=>v.id!==vencEditandoId);
   await saveVencimientos();
+  await saveGastos();
   document.getElementById('overlayVencimiento').classList.remove('show');
-  renderVencimientosTabla();
+  renderGastosFijosTable();
   renderVencCalendar();
-  showToast('Vencimiento borrado');
+  renderGastosTabla();
+  renderAnalisis();
+  showToast('Gasto fijo borrado');
 });
 document.getElementById('btnGuardarVencimiento').addEventListener('click', async ()=>{
   const detalle = document.getElementById('vcDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al vencimiento'); return; }
+  const categoria = document.getElementById('vcCategoria').value.trim();
   let dia = parseInt(document.getElementById('vcDia').value, 10) || 1;
   dia = Math.min(31, Math.max(1, dia));
   const monto = parseFloat(document.getElementById('vcMonto').value) || 0;
   const notas = document.getElementById('vcNotas').value.trim();
+  const cicloActual = getCicloActual();
 
   if(vencEditandoId){
     const v = VENCIMIENTOS.find(x=>x.id===vencEditandoId);
-    if(v){ v.detalle = detalle; v.diaDelMes = dia; v.monto = monto; v.notas = notas; }
+    if(v){
+      v.detalle = detalle; v.categoria = categoria; v.diaDelMes = dia; v.notas = notas;
+      if(!v.montosPorMes) v.montosPorMes = {};
+      v.montosPorMes[cicloActual] = monto;
+    }
   } else {
-    VENCIMIENTOS.push({ id: uid(), detalle, diaDelMes: dia, monto, notas, pagadoMeses: [] });
+    VENCIMIENTOS.push({ id: uid(), detalle, categoria, diaDelMes: dia, notas, montosPorMes: { [cicloActual]: monto }, pagadoMeses: [] });
   }
   await saveVencimientos();
   document.getElementById('overlayVencimiento').classList.remove('show');
-  renderVencimientosTabla();
+  renderGastosFijosTable();
   renderVencCalendar();
   showToast(vencEditandoId ? 'Vencimiento actualizado ✓' : 'Vencimiento agregado ✓');
 });
@@ -3798,6 +3944,24 @@ function getAnalisisSales(){
   return items;
 }
 
+function getAnalisisGastos(){
+  let items = GASTOS.slice();
+  const todayStr = todayISO();
+
+  if(analisisFiltro==='mes'){
+    const curMonth = todayStr.slice(0,7);
+    items = items.filter(g=>g.fecha && g.fecha.slice(0,7)===curMonth);
+  } else if(analisisFiltro==='meses'){
+    items = items.filter(g=>g.fecha && analisisMesesElegidos.has(g.fecha.slice(0,7)));
+  } else if(analisisFiltro==='rango'){
+    const desde = document.getElementById('analisisDesde').value;
+    const hasta = document.getElementById('analisisHasta').value;
+    if(desde) items = items.filter(g=>g.fecha && g.fecha>=desde);
+    if(hasta) items = items.filter(g=>g.fecha && g.fecha<=hasta);
+  }
+  return items;
+}
+
 function barraHtml(label, val, max, extra){
   const barPct = max>0 ? Math.max(2, (val/max*100)) : 0;
   return `<div class="analisis-bar-row">
@@ -3849,6 +4013,19 @@ function renderAnalisis(){
   document.getElementById('analisisMomento').innerHTML = Object.keys(buckets)
     .map(k=>barraHtml(labelsMomento[k], buckets[k], maxMomento)).join('');
 
+  // Gastos por categoría (mismo período aplicado a Gastos)
+  const gastosItems = getAnalisisGastos();
+  const gCat = {};
+  gastosItems.forEach(g=>{
+    const key = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+    gCat[key] = (gCat[key]||0) + (g.monto||0);
+  });
+  const sortedCat = Object.entries(gCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat = sortedCat.length ? Math.max(...sortedCat.map(x=>x[1])) : 1;
+  document.getElementById('analisisGastos').innerHTML = sortedCat.length
+    ? sortedCat.map(([k,v])=>barraHtml(k, v, maxCat)).join('')
+    : '<div class="empty-state" style="padding:10px;">Sin gastos en este período.</div>';
+
   // Productos más vendidos
   const gProd = {};
   items.forEach(s=>{
@@ -3877,17 +4054,6 @@ document.querySelectorAll('#panel-analisis .chip-row .chip-v').forEach(chip=>{
 });
 document.getElementById('analisisDesde').addEventListener('change', renderAnalisis);
 document.getElementById('analisisHasta').addEventListener('change', renderAnalisis);
-
-const ANALISIS_TOGGLE_MAP = { medios: 'analisisMediosCard', dias: 'analisisDiasCard', momento: 'analisisMomentoCard' };
-document.querySelectorAll('.analisis-mini-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const key = btn.dataset.toggle;
-    const card = document.getElementById(ANALISIS_TOGGLE_MAP[key]);
-    const abierta = card.style.display !== 'none';
-    card.style.display = abierta ? 'none' : 'block';
-    btn.classList.toggle('active', !abierta);
-  });
-});
 
 /* ============================================================
    EXPORTAR CATÁLOGO EN PDF (por rubro o completo)
