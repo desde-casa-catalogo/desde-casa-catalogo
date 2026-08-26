@@ -832,29 +832,39 @@
   #statMontoDeben.stat-compact-sub{color:var(--red);font-weight:800;font-size:12px;}
 
   .ventas-stats-sticky{
-    display:flex;align-items:stretch;gap:12px;margin-bottom:14px;flex-wrap:wrap;
+    display:flex;align-items:stretch;gap:12px;margin-bottom:10px;flex-wrap:wrap;
     position:sticky;top:70px;z-index:15;background:var(--cream);padding-top:2px;
   }
   .ventas-stats-sticky .stat-compact{flex:2.2 1 180px;padding:12px 14px;}
   .vfs-filters{
-    flex:1.4 1 220px;display:flex;flex-direction:column;gap:8px;
-    background:var(--card);border:2px solid var(--border);border-radius:15px;padding:12px;
+    flex:1.4 1 220px;display:flex;flex-direction:column;gap:6px;position:relative;
+    background:var(--card);border:2px solid var(--border);border-radius:15px;padding:10px;
   }
-  .vfs-filters .chip-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:0;}
-  .vfs-filters .chip-v{padding:13px 9px;font-size:12.5px;border-radius:10px;text-align:center;white-space:nowrap;}
-  .vfs-medio-select{font-size:13px;padding:10px 10px;}
-  .vfs-inline-box{background:var(--gold-pale);border:1.5px solid var(--gold-light);border-radius:10px;padding:8px 10px;}
+  .vfs-filters .chip-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0;}
+  .vfs-filters .chip-v{padding:9px 8px;font-size:12px;border-radius:9px;text-align:center;white-space:nowrap;}
+  .vfs-medio-select{font-size:12.5px;padding:7px 8px;}
+
+  /* Estos dos se despliegan flotando por arriba, sin empujar nada hacia abajo */
+  .vfs-float{
+    position:absolute;top:calc(100% + 6px);left:0;right:-380px;z-index:40;
+    box-shadow:0 10px 28px rgba(0,0,0,.18);
+  }
+  @media(max-width:1100px){ .vfs-float{right:0;} }
+  .vfs-inline-box{background:#fff;border:1.5px solid var(--gold-light);border-radius:10px;padding:10px 12px;}
   .vfs-inline-box label{font-size:10px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;display:block;margin-bottom:3px;}
   .vfs-inline-box input, .vfs-inline-box select{font-size:13px;padding:8px 9px;}
 
-  .dias-sueltos-box{background:var(--card);border:2px solid var(--border);border-radius:15px;padding:14px 16px;margin-bottom:14px;}
-  .dias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:7px;}
+  .dias-sueltos-box{background:var(--card);border:2px solid var(--border);border-radius:15px;padding:9px 12px;margin-bottom:10px;}
+  .dias-sueltos-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .dias-sueltos-head label{font-size:11px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;}
+  .dias-sueltos-head select{font-size:13px;padding:6px 8px;max-width:180px;}
+  .dias-grid{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;}
   .dia-suelto-btn{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
-    background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 4px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;flex:0 0 auto;
+    background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:4px 3px;cursor:pointer;min-width:34px;
   }
-  .dia-suelto-btn .dsb-num{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--ink);}
-  .dia-suelto-btn .dsb-dow{font-size:9px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.2px;}
+  .dia-suelto-btn .dsb-num{font-family:'Playfair Display',serif;font-weight:800;font-size:19px;color:var(--ink);line-height:1;}
+  .dia-suelto-btn .dsb-dow{font-size:7px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1px;}
   .dia-suelto-btn:hover{border-color:var(--gold);}
   .dia-suelto-btn.selected{background:var(--gold-grad);border-color:var(--gold);}
   .dia-suelto-btn.selected .dsb-num, .dia-suelto-btn.selected .dsb-dow{color:#fff;}
@@ -876,6 +886,7 @@
     }
     .ventas-stats-sticky .stat-compact{max-width:none;}
     .vfs-filters{max-width:none;}
+    .vfs-float{position:static;box-shadow:none;margin-top:6px;}
   }
   .total-dia{background:var(--dark-surface);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .total-dia .lbl{font-size:12px;color:var(--gold-light);font-weight:700;letter-spacing:.4px;}
@@ -950,10 +961,10 @@
     }
     .print-item-name{text-transform:uppercase;font-weight:600;}
     .print-item-price{font-weight:800;color:#9C5209;white-space:nowrap;}
-    .print-grid{padding-bottom:34px;}
-    .print-footer{
-      position:fixed;bottom:0;left:0;right:0;padding:8px 20px;text-align:center;
-      font-size:9.5px;color:#888;font-style:italic;background:#fff;border-top:1px solid #E9DCBC;
+    .print-footer-inline{
+      text-align:center;font-size:10px;color:#888;font-style:italic;
+      padding:10px 0;margin:6px 0;border-top:1px dashed #E9DCBC;border-bottom:1px dashed #E9DCBC;
+      page-break-inside:avoid;
     }
   }
 </style>
@@ -1107,18 +1118,6 @@
           <button class="chip-v" data-f="dia">📆 Elegir día</button>
           <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
         </div>
-        <div class="vfs-inline-box" id="diaBox" style="display:none;">
-          <label>Desde</label>
-          <input type="date" class="field" id="diaSelect">
-          <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
-          <input type="date" class="field" id="diaSelectHasta">
-        </div>
-        <div class="vfs-inline-box" id="mesAnterioresBox" style="display:none;">
-          <label>Ver un mes puntual</label>
-          <select class="field" id="mesAnteriorSelect">
-            <option value="">Todos los meses</option>
-          </select>
-        </div>
         <select class="field vfs-medio-select" id="filtroMedio">
           <option value="">Medio de pago: Todos</option>
           <option value="Efectivo">Efectivo</option>
@@ -1127,6 +1126,18 @@
           <option value="Débito">Débito</option>
           <option value="Crédito">Crédito</option>
         </select>
+        <div class="vfs-inline-box vfs-float" id="diaBox" style="display:none;">
+          <label>Desde</label>
+          <input type="date" class="field" id="diaSelect">
+          <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
+          <input type="date" class="field" id="diaSelectHasta">
+        </div>
+        <div class="vfs-inline-box vfs-float" id="mesAnterioresBox" style="display:none;">
+          <label>Ver un mes puntual</label>
+          <select class="field" id="mesAnteriorSelect">
+            <option value="">Todos los meses</option>
+          </select>
+        </div>
       </div>
       <div class="stat-compact stat-compact-main" data-icon="🧾">
         <span class="stat-compact-lbl">Total del período</span>
@@ -1146,8 +1157,8 @@
     </div>
 
     <div class="dias-sueltos-box">
-      <div class="mini-field" style="max-width:240px;margin-bottom:10px;">
-        <label>📆 Elegir días sueltos de...</label>
+      <div class="dias-sueltos-head">
+        <label>📆 Días sueltos de</label>
         <select class="field" id="mesDiasSueltos">
           <option value="">Elegí un mes...</option>
         </select>
@@ -4124,35 +4135,37 @@ document.getElementById('analisisHasta').addEventListener('change', renderAnalis
 /* ============================================================
    EXPORTAR CATÁLOGO EN PDF (por rubro o completo)
    ============================================================ */
+const FRASE_LEGAL_CATALOGO = 'Precios sujetos a modificaciones sin previo aviso. Consulte al realizar su pedido.';
+
 function generarContenidoCatalogo(rubroFiltro){
   let productos = PRODUCTS.filter(p => p.activo !== false);
   const esTodos = !rubroFiltro || rubroFiltro === 'Todos';
 
-  let html = '';
-
-  if(esTodos){
-    productos.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    html += '<div class="print-grid">';
-    productos.forEach(p=>{
-      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
-    });
-    html += '</div>';
-  } else {
+  if(!esTodos){
     productos = productos.filter(p => p.rubro === rubroFiltro);
-    productos.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    html += `<div class="print-rubro">${escapeHtml(titleCase(rubroFiltro))}</div>`;
-    html += '<div class="print-grid">';
-    productos.forEach(p=>{
-      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
-    });
-    html += '</div>';
   }
+  productos.sort((a,b)=>a.nombre.localeCompare(b.nombre));
 
   if(productos.length===0){
     return '<p style="text-align:center;color:#999;">No hay productos para mostrar.</p>';
   }
 
-  html += '<div class="print-footer">Precios sujetos a modificaciones sin previo aviso. Consulte al realizar su pedido.</div>';
+  const CADA_CUANTOS = 22; // aprox. una hoja impresa, para que la frase quede en cada tramo
+  const fraseHtml = `<div class="print-footer-inline">${FRASE_LEGAL_CATALOGO}</div>`;
+
+  let html = '';
+  if(!esTodos){
+    html += `<div class="print-rubro">${escapeHtml(titleCase(rubroFiltro))}</div>`;
+  }
+  html += '<div class="print-grid">';
+  productos.forEach((p, i)=>{
+    html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
+    if((i+1) % CADA_CUANTOS === 0){
+      html += `</div>${fraseHtml}<div class="print-grid">`;
+    }
+  });
+  html += '</div>';
+  html += fraseHtml;
   return html;
 }
 
