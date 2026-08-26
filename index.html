@@ -270,22 +270,18 @@
     color:#fff;background:var(--gold-grad);border-color:var(--gold);
     box-shadow:0 3px 10px rgba(150,110,30,.3);
   }
+  main{max-width:none;width:100%;margin:0;padding:14px 28px 0;}
   @media(max-width:760px){
     nav.tabs{flex-direction:column;align-items:stretch;}
+    .tabs-scroll{width:100%;flex:1 1 100%;}
+    .tabs-actions{width:100%;flex:1 1 100%;}
     .action-bar-inline.show{justify-content:flex-start;}
-    .tab-btn[data-tab="anotar"],
-    .tab-btn[data-tab="ventas"],
-    .tab-btn[data-tab="proveedores"],
-    .tab-btn[data-tab="admin"],
-    .tab-btn[data-tab="analisis"]{
-      display:none;
-    }
     .search-row{flex-wrap:wrap;}
     .search-row .search-wrap{flex:1 1 100%;}
     .search-row select.field{flex:1 1 100%;max-width:none;}
+    main{padding:14px 12px 0;}
   }
 
-  main{max-width:none;width:100%;margin:0;padding:14px 28px 0;}
   .panel{display:none;}
   .panel.active{display:block;animation:fadeIn .18s ease;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
@@ -331,6 +327,9 @@
   .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
   .btn-grid-5{grid-template-columns:1fr 1fr;}
   .btn-grid-5 .opt-btn-debe{grid-column:1 / -1;}
+  .btn-grid-7{grid-template-columns:1fr 1fr;gap:8px;}
+  .btn-grid-7 .opt-btn{padding:12px 8px;font-size:13px;}
+  .btn-grid-7 .opt-btn-debe{grid-column:1 / -1;}
   .opt-btn{
     padding:15px 10px;border-radius:12px;border:2px solid var(--border);background:var(--card);
     font-weight:800;font-size:14.5px;color:var(--ink-soft);cursor:pointer;transition:transform .08s;
@@ -338,6 +337,8 @@
   .opt-btn:active{transform:scale(.97);}
   .opt-btn.selected{border-color:var(--gold);background:var(--gold-grad);color:#fff;box-shadow:0 3px 10px rgba(150,110,30,.28);}
   .opt-btn-debe{color:var(--red);border-color:var(--red);background:var(--red-pale);}
+  .opt-btn-autoconsumo{color:var(--ink-soft);border-color:var(--border);background:#fff;font-size:13px;padding:11px;}
+  .opt-btn-autoconsumo.selected{color:#fff;background:var(--ink);border-color:var(--ink);}
   .opt-btn-debe.selected{border-color:var(--red);background:linear-gradient(135deg,#D9635A,#B8392F);color:#fff;box-shadow:0 3px 10px rgba(184,57,47,.3);}
   .opt-btn-sm{padding:9px 8px;font-size:13px;border-radius:10px;}
   .ajuste-input-wrap{
@@ -345,7 +346,7 @@
     border-radius:12px;padding:0 12px;background:var(--card);
   }
   .ajuste-input-wrap .dollar{font-weight:800;color:var(--ink-soft);font-size:15px;}
-  .ajuste-input-wrap input{border:none;padding:12px 0;font-size:16px;text-align:right;flex:1;background:transparent;}
+  .ajuste-input-wrap input{border:none;padding:12px 0;font-size:16px;text-align:right;flex:1;min-width:0;background:transparent;}
   .ajuste-input-wrap input:focus{outline:none;}
   .ajuste-input-wrap:focus-within{border-color:var(--gold);}
 
@@ -442,9 +443,9 @@
   .cart-info .tot{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--gold-light);}
 
   @media(max-width:880px){
-    .vender-layout{flex-direction:column;}
+    .vender-layout{flex-direction:column;align-items:stretch;}
     .vender-summary{position:static;width:100%;max-height:none;order:2;flex:1 1 auto;}
-    .vender-catalog{order:1;}
+    .vender-catalog{order:1;width:100%;}
   }
 
   /* ---------- Modal general (add product, pin change) ---------- */
@@ -612,17 +613,31 @@
   }
   .analisis-mes-check input{width:16px;height:16px;cursor:pointer;}
   .analisis-mes-check.checked{border-color:var(--gold);background:var(--gold-pale);color:var(--gold-deep);}
-  .analisis-grid-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:18px;}
+  .analisis-top-layout{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;}
+  .analisis-filtros-col{flex:0 0 200px;width:200px;display:flex;flex-direction:column;gap:10px;}
+  .chip-row-compact{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:0;}
+  .chip-row-compact .chip-v{padding:10px 8px;font-size:12px;text-align:center;}
+  .analisis-filtros-col .mini-field label{font-size:11px;}
+  .analisis-grid-top{flex:1 1 500px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
   .analisis-grid-top .analisis-card{padding:14px 16px;}
   .analisis-grid-top .analisis-card h3{font-size:14.5px;margin-bottom:10px;}
   .analisis-grid-top .analisis-bar-label{flex:0 0 auto;max-width:60%;font-size:11.5px;}
   .analisis-grid-top .analisis-bar-val{font-size:11.5px;}
+  @media(max-width:900px){
+    .analisis-filtros-col{flex:1 1 100%;width:100%;}
+    .chip-row-compact{grid-template-columns:1fr 1fr;}
+    .analisis-grid-top{flex:1 1 100%;}
+  }
   .analisis-grid{display:grid;grid-template-columns:1fr;gap:16px;}
   .analisis-card{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);}
   .analisis-card.wide{grid-column:1 / -1;}
   .analisis-card h3{font-family:'Playfair Display',serif;color:var(--gold-deep);font-size:17px;margin:0 0 14px;}
   .analisis-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .analisis-bar-label{flex:0 0 320px;font-size:13px;font-weight:700;color:var(--ink-soft);white-space:normal;word-break:break-word;}
+  @media(max-width:600px){
+    .analisis-bar-label{flex:0 0 42%;font-size:11.5px;}
+    .analisis-bar-track{flex:1 1 auto;}
+  }
   .analisis-bar-track{flex:0 1 140px;height:14px;background:var(--border);border-radius:8px;overflow:hidden;min-width:40px;}
   .analisis-bar-fill{height:100%;background:var(--gold-grad);border-radius:8px;}
   .analisis-bar-val{flex:0 0 auto;font-weight:800;font-size:13px;color:var(--stat-gold);white-space:nowrap;margin-left:auto;}
@@ -631,24 +646,24 @@
   .fin-year-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
   .fin-year-btn{width:44px;height:44px;padding:0;font-size:20px;font-weight:800;text-align:center;flex:0 0 44px;}
   .fin-year-label{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:var(--gold-deep);min-width:70px;text-align:center;}
-  .fin-months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:24px;}
+  .fin-months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-bottom:24px;}
   .fin-stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
   .fin-stats-row .stat-compact{flex:1 1 280px;max-width:420px;}
   .stat-compact.clickable{cursor:pointer;transition:transform .08s;}
   .stat-compact.clickable:active{transform:scale(.98);}
   #finPromedioRow .stat-compact{max-width:420px;}
-  .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);}
-  .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:15px;color:var(--gold-deep);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px;}
-  .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-size:13px;color:var(--ink-soft);font-weight:700;}
-  .fin-val{font-weight:800;font-size:14.5px;}
+  .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
+  .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--gold-deep);margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px;}
+  .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:15px;color:var(--ink-soft);font-weight:700;}
+  .fin-val{font-weight:800;font-size:17px;}
   .fin-val.pos{color:var(--green);}
   .fin-val.neg{color:var(--red);}
-  .fin-row.fin-result{border-top:1.5px dashed var(--border);margin-top:6px;padding-top:8px;}
-  .fin-row.fin-result .fin-val{font-size:18px;}
+  .fin-row.fin-result{border-top:1.5px dashed var(--border);margin-top:6px;padding-top:9px;}
+  .fin-row.fin-result .fin-val{font-size:22px;}
   .fin-row.fin-promedio{padding-top:4px;}
-  .fin-row.fin-promedio .fin-val{font-size:13px;color:var(--gold-deep);}
+  .fin-row.fin-promedio .fin-val{font-size:16px;color:var(--gold-deep);}
   .fin-month-card.acumulado{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
-  .fin-month-card.acumulado .fin-month-name{font-size:16px;}
+  .fin-month-card.acumulado .fin-month-name{font-size:19px;}
   .fin-subtitle{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin:6px 0 14px;}
 
   /* ---------- Calendario de vencimientos ---------- */
@@ -682,6 +697,16 @@
   .cal-side .venc-cal-day{min-height:44px;padding:3px;}
   .cal-side .venc-cal-item{font-size:8px;}
   .gastos-fijos-side{flex:1 1 480px;min-width:0;}
+  .mp-calc-card{margin-bottom:24px;}
+  .mp-calc-tabla{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+  .mp-calc-tabla-head, .mp-calc-tabla-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:8px 12px;font-size:12.5px;}
+  .mp-calc-tabla-head{background:var(--dark-surface);color:#fff;font-weight:800;}
+  .mp-calc-tabla-row{border-top:1px solid var(--border);font-weight:700;}
+  .mp-calc-tabla-row span:not(:first-child){text-align:center;color:var(--gold-deep);}
+  .mp-calc-note{font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px;}
+  .mp-calc-inputs{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+  .mp-calc-inputs .mini-field{flex:1 1 200px;}
+  .mp-calc-resultado{background:var(--gold-pale);border-radius:12px;padding:12px 16px;font-size:13.5px;font-weight:700;color:var(--gold-deep);line-height:1.7;}
   .gastos-fijos-table-wrap{max-height:520px;overflow-y:auto;}
   table.gastos-fijos-table{font-size:12px;min-width:900px;}
   table.gastos-fijos-table th, table.gastos-fijos-table td{padding:7px 6px;white-space:nowrap;}
@@ -706,6 +731,7 @@
   @media(max-width:1000px){
     .cal-gastos-layout{flex-direction:column;}
     .cal-side{max-width:none;width:100%;}
+    .gastos-fijos-side{flex:1 1 100%;width:100%;max-width:calc(100vw - 56px);}
   }
 
   /* ---------- Selección múltiple / acciones en grupo ---------- */
@@ -844,12 +870,12 @@
   .estado-pill.pago{background:var(--green-pale);color:var(--green);}
   .estado-pill.debe{background:var(--red-pale);color:var(--red);}
   .estado-pill.neutro{background:var(--border);color:var(--ink-faint);}
-  .medio-cell{display:flex;align-items:center;gap:5px;}
-  .medio-cell input.cell-edit{flex:1 1 auto;min-width:70px;}
-  .pago-rapido{display:flex;gap:3px;flex:0 0 auto;}
+  .medio-cell{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+  .medio-cell input.cell-edit{flex:1 1 90px;min-width:90px;}
+  .pago-rapido{display:flex;gap:2px;flex:0 0 auto;flex-wrap:wrap;}
   .pago-rapido button{
-    width:24px;height:24px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);
-    font-size:12px;cursor:pointer;padding:0;flex:0 0 auto;
+    min-width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);
+    font-size:10.5px;cursor:pointer;padding:0 2px;flex:0 0 auto;font-weight:700;
   }
   .pago-rapido button:hover{border-color:var(--gold);background:var(--gold-pale);}
 
@@ -944,18 +970,18 @@
   <div class="tabs-actions">
     <div class="action-bar-inline" data-for="ventas">
       <button class="btn btn-gold btn-sm" id="btnExportarTodo">💾 Exportar todo (Excel)</button>
-      <button class="btn btn-outline btn-sm" id="btnImportarVentas">📤 Importar historial (Excel)</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarVentas" title="Siempre agrega filas nuevas, nunca actualiza ni reemplaza lo que ya tenés cargado. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importar historial (Excel)</button>
       <input type="file" id="fileExcelVentas" accept=".xlsx,.xls,.csv" style="display:none;">
     </div>
     <div class="action-bar-inline" data-for="productos">
-      <button class="btn btn-outline btn-sm" id="btnImportarExcel">📤 Importar Excel</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarExcel" title="Busca el producto por nombre exacto. Si ya existe, lo actualiza. Si no existe, lo agrega nuevo">📤 Importar Excel</button>
       <input type="file" id="fileExcel" accept=".xlsx,.xls,.csv" style="display:none;">
       <input type="file" id="fotoFileInput" accept="image/*" style="display:none;">
       <button class="btn btn-outline btn-sm" id="btnExportarCatalogoPDF">🖨️ Exportar catálogo (PDF)</button>
       <button class="btn btn-gold btn-sm" id="btnNuevoProducto">＋ Nuevo producto</button>
     </div>
     <div class="action-bar-inline" data-for="admin">
-      <button class="btn btn-outline btn-sm" id="btnImportarGastos">📤 Importar gastos (Excel)</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarGastos" title="Siempre agrega, no actualiza. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importar gastos (Excel)</button>
       <input type="file" id="fileExcelGastos" accept=".xlsx,.xls,.csv" style="display:none;">
       <button class="btn btn-gold btn-sm" id="btnNuevoGasto">＋ Nuevo gasto</button>
     </div>
@@ -989,13 +1015,15 @@
           <div class="venta-empty">Todavía no elegiste productos</div>
         </div>
         <div class="field-label">Medio de pago</div>
-        <div class="btn-grid btn-grid-5" id="ventaMedioGrid">
+        <div class="btn-grid btn-grid-7" id="ventaMedioGrid">
           <button class="opt-btn" data-medio="Efectivo">Efectivo</button>
           <button class="opt-btn" data-medio="Transferencia">Transferencia</button>
           <button class="opt-btn" data-medio="QR">QR</button>
-          <button class="opt-btn" data-medio="Tarjeta">Tarjeta</button>
+          <button class="opt-btn" data-medio="Débito">Débito</button>
+          <button class="opt-btn" data-medio="Crédito">Crédito</button>
           <button class="opt-btn opt-btn-debe" data-medio="Debe">Debe</button>
         </div>
+        <button class="opt-btn opt-btn-autoconsumo" id="btnAutoconsumo" style="width:100%;margin-top:8px;">🏠 Es autoconsumo (uso propio, no cobra nada)</button>
         <div class="field-label">Cliente</div>
         <input type="text" class="field" id="ventaCliente" placeholder="Consumidor final">
         <div class="field-label">Ajuste de precio</div>
@@ -1051,7 +1079,8 @@
             <option value="Efectivo">Efectivo</option>
             <option value="Transferencia">Transferencia</option>
             <option value="QR">QR</option>
-            <option value="Tarjeta">Tarjeta</option>
+            <option value="Débito">Débito</option>
+            <option value="Crédito">Crédito</option>
             <option value="Debe">Debe</option>
           </select>
         </div>
@@ -1100,7 +1129,8 @@
           <option value="Efectivo">Efectivo</option>
           <option value="Transferencia">Transferencia</option>
           <option value="QR">QR</option>
-          <option value="Tarjeta">Tarjeta</option>
+          <option value="Débito">Débito</option>
+          <option value="Crédito">Crédito</option>
         </select>
       </div>
       <div class="stat-compact stat-compact-main" data-icon="🧾">
@@ -1252,6 +1282,29 @@
       </div>
     </div>
 
+    <h3 class="fin-subtitle">💳 Calculadora de comisión Mercado Pago</h3>
+    <div class="venc-card mp-calc-card">
+      <div class="mini-field" style="max-width:260px;margin-bottom:14px;">
+        <label>Mes a calcular</label>
+        <select class="field" id="mpMesSelect"></select>
+      </div>
+      <div class="mp-calc-tabla">
+        <div class="mp-calc-tabla-head"><span></span><span>QR</span><span>Tarjeta física</span></div>
+        <div class="mp-calc-tabla-row"><span>Débito</span><span>1,66%</span><span>4,01%</span></div>
+        <div class="mp-calc-tabla-row"><span>Crédito</span><span>7,77%</span><span>7,77%</span></div>
+        <div class="mp-calc-tabla-row"><span>Dinero en cuenta</span><span>1,00%</span><span>—</span></div>
+      </div>
+      <div class="mp-calc-note">Débito y Crédito ya son medios de pago propios en tu registro, así que su comisión se calcula exacta. Este % es solo para QR, que va todo junto.</div>
+      <div class="mp-calc-inputs">
+        <div class="mini-field">
+          <label>De tu QR del mes, ¿qué % fue con débito? (el resto se toma como crédito)</label>
+          <input type="number" class="field" id="mpPctQrDebito" value="100" min="0" max="100">
+        </div>
+      </div>
+      <div id="mpCalcResultado" class="mp-calc-resultado"></div>
+      <button class="btn btn-gold btn-lg btn-block" id="btnGenerarComisionMP" style="margin-top:12px;">＋ Cargar esta comisión como gasto</button>
+    </div>
+
     <h3 class="fin-subtitle">Detalle de lo pagado</h3>
     <div class="search-row">
       <div class="search-wrap">
@@ -1294,43 +1347,43 @@
 
   <!-- ===================== ANÁLISIS ===================== -->
   <section class="panel" id="panel-analisis">
-    <div class="chip-row">
-      <button class="chip-v active" data-af="mes">Este mes</button>
-      <button class="chip-v" data-af="meses">Meses</button>
-      <button class="chip-v" data-af="acumulado">Acumulado</button>
-      <button class="chip-v" data-af="rango">Desde / Hasta</button>
-    </div>
-    <div class="venc-card" id="analisisMesesBox" style="display:none;padding:14px;">
-      <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
-      <div id="analisisMesesChecklist" class="analisis-meses-checklist"></div>
-    </div>
-    <div class="anotar-form-grid" id="analisisRangoBox" style="display:none;margin-bottom:20px;">
-      <div class="mini-field anotar-field-fecha">
-        <label>Desde</label>
-        <input type="date" class="field" id="analisisDesde">
+    <div class="analisis-top-layout">
+      <div class="analisis-filtros-col">
+        <div class="chip-row chip-row-compact">
+          <button class="chip-v active" data-af="mes">Este mes</button>
+          <button class="chip-v" data-af="meses">Meses</button>
+          <button class="chip-v" data-af="acumulado">Acumulado</button>
+          <button class="chip-v" data-af="rango">Desde / Hasta</button>
+        </div>
+        <div class="venc-card" id="analisisMesesBox" style="display:none;padding:12px;">
+          <div class="price-lookup-title" style="font-size:12.5px;margin-bottom:8px;">Tildá los meses</div>
+          <div id="analisisMesesChecklist" class="analisis-meses-checklist"></div>
+        </div>
+        <div class="mini-field" id="analisisRangoBox" style="display:none;">
+          <label>Desde</label>
+          <input type="date" class="field" id="analisisDesde">
+          <label style="margin-top:6px;">Hasta</label>
+          <input type="date" class="field" id="analisisHasta">
+        </div>
       </div>
-      <div class="mini-field anotar-field-fecha">
-        <label>Hasta</label>
-        <input type="date" class="field" id="analisisHasta">
-      </div>
-    </div>
 
-    <div class="analisis-grid-top">
-      <div class="analisis-card">
-        <h3>💳 Medios de pago</h3>
-        <div id="analisisMedios"></div>
-      </div>
-      <div class="analisis-card">
-        <h3>📆 Día de la semana</h3>
-        <div id="analisisDias"></div>
-      </div>
-      <div class="analisis-card">
-        <h3>🗓️ Momento del mes</h3>
-        <div id="analisisMomento"></div>
-      </div>
-      <div class="analisis-card">
-        <h3>💸 Gastos por categoría</h3>
-        <div id="analisisGastos"></div>
+      <div class="analisis-grid-top">
+        <div class="analisis-card">
+          <h3>💳 Medios de pago</h3>
+          <div id="analisisMedios"></div>
+        </div>
+        <div class="analisis-card">
+          <h3>📆 Día de la semana</h3>
+          <div id="analisisDias"></div>
+        </div>
+        <div class="analisis-card">
+          <h3>🗓️ Momento del mes</h3>
+          <div id="analisisMomento"></div>
+        </div>
+        <div class="analisis-card">
+          <h3>💸 Gastos por categoría</h3>
+          <div id="analisisGastos"></div>
+        </div>
       </div>
     </div>
 
@@ -1486,6 +1539,7 @@ let ventasSortField = 'fecha';
 let ventasSortDir = 'desc';
 let selectedVentaIds = new Set();
 let ventaMedio = null;
+let ventaEsAutoconsumo = false;
 let ventaAjusteTipo = 'descuento';
 let pinBuffer = '';
 
@@ -1839,21 +1893,6 @@ function updateTabsActions(tab){
   });
 }
 
-const TABS_OCULTAS_MOBILE = ['anotar','ventas','proveedores','admin','analisis'];
-
-function checkModoMobileSimple(){
-  const esMobile = window.innerWidth <= 760;
-  const activo = document.querySelector('.tab-btn.active');
-  if(esMobile && activo && TABS_OCULTAS_MOBILE.includes(activo.dataset.tab)){
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    document.querySelector('.tab-btn[data-tab="vender"]').classList.add('active');
-    document.getElementById('panel-vender').classList.add('active');
-    updateTabsActions('vender');
-  }
-}
-window.addEventListener('resize', checkModoMobileSimple);
-
 document.getElementById('tabsNav').addEventListener('click', (e)=>{
   const btn = e.target.closest('.tab-btn');
   if(!btn) return;
@@ -2065,8 +2104,17 @@ document.getElementById('btnScrollSummary').addEventListener('click', ()=>{
 document.getElementById('ventaMedioGrid').addEventListener('click', (e)=>{
   const b = e.target.closest('.opt-btn'); if(!b) return;
   ventaMedio = b.dataset.medio;
+  ventaEsAutoconsumo = false;
+  document.getElementById('btnAutoconsumo').classList.remove('selected');
   document.querySelectorAll('#ventaMedioGrid .opt-btn').forEach(x=>x.classList.remove('selected'));
   b.classList.add('selected');
+});
+
+document.getElementById('btnAutoconsumo').addEventListener('click', ()=>{
+  ventaEsAutoconsumo = !ventaEsAutoconsumo;
+  ventaMedio = ventaEsAutoconsumo ? 'Autoconsumo' : null;
+  document.getElementById('btnAutoconsumo').classList.toggle('selected', ventaEsAutoconsumo);
+  document.querySelectorAll('#ventaMedioGrid .opt-btn').forEach(x=>x.classList.remove('selected'));
 });
 
 document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>{
@@ -2078,8 +2126,8 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
   const {total: rawTotal} = cartCountAndTotal();
   const ajusteVal = parseFloat(document.getElementById('ventaAjuste').value) || 0;
   const signo = ventaAjusteTipo === 'recargo' ? 1 : -1;
-  const totalFinal = rawTotal + (signo * ajusteVal);
-  const ratio = rawTotal > 0 ? (totalFinal / rawTotal) : 1;
+  const totalFinal = ventaEsAutoconsumo ? 0 : rawTotal + (signo * ajusteVal);
+  const ratio = ventaEsAutoconsumo ? 0 : (rawTotal > 0 ? (totalFinal / rawTotal) : 1);
 
   for(const id in CART){
     const p = PRODUCTS.find(x=>x.id===id);
@@ -2094,9 +2142,11 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
 
   CART = {};
   ventaMedio = null;
+  ventaEsAutoconsumo = false;
   ventaAjusteTipo = 'descuento';
   document.getElementById('ventaCliente').value = '';
   document.getElementById('ventaAjuste').value = 0;
+  document.getElementById('btnAutoconsumo').classList.remove('selected');
   document.querySelectorAll('#ventaMedioGrid .opt-btn').forEach(x=>x.classList.remove('selected'));
   document.querySelectorAll('[data-ajuste-tipo]').forEach(b=>b.classList.remove('selected'));
   document.querySelector('[data-ajuste-tipo="descuento"]').classList.add('selected');
@@ -2106,7 +2156,7 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
   renderVentaSummary();
   renderCostos();
   renderVentas();
-  showToast('Venta registrada ✓');
+  showToast(ventaEsAutoconsumo ? 'Uso propio registrado ✓ (stock descontado, sin cobrar)' : 'Venta registrada ✓');
 });
 
 /* ============================================================
@@ -2212,6 +2262,10 @@ function renderCostos(){
         <span class="prov-caret costo-caret">▾</span>
       </button>
       <div class="costo-body" id="costo-body-${p.id}">
+        <div class="mini-field" style="margin-bottom:12px;">
+          <label>Nombre del producto</label>
+          <input type="text" class="field costo-input costo-input-nombre" data-id="${p.id}" data-field="nombre" value="${escapeHtml(p.nombre)}">
+        </div>
         <div class="costo-inline-fields">
           <div class="mini-field-sm"><label>Stock</label><input type="number" class="costo-input ${p.stock<0?'neg':''}" data-id="${p.id}" data-field="stock" value="${p.stock}"></div>
           <div class="mini-field-sm"><label>Costo</label><input type="number" class="costo-input" data-id="${p.id}" data-field="costo" value="${p.costo}"></div>
@@ -2248,7 +2302,12 @@ document.getElementById('listCostos').addEventListener('change', async (e)=>{
   const field = inp.dataset.field;
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
-  if(field==='stock'){
+  if(field==='nombre'){
+    const val = inp.value.trim();
+    if(!val){ showToast('El nombre no puede quedar vacío'); inp.value = p.nombre; return; }
+    p.nombre = val.toUpperCase();
+    showToast('Nombre corregido ✓');
+  } else if(field==='stock'){
     const val = parseInt(inp.value, 10);
     p.stock = isNaN(val) ? 0 : val;
   } else {
@@ -2392,7 +2451,7 @@ document.getElementById('fileExcel').addEventListener('change', (e)=>{
           PRODUCTS.push({
             id: 'p_'+Date.now()+'_'+Math.floor(Math.random()*10000),
             nombre: nombre.toUpperCase(), proveedor, costo, precio, rubro,
-            stock: (stock!==null && !isNaN(stock)) ? stock : 1, foto
+            stock: (stock!==null && !isNaN(stock)) ? stock : 100, foto
           });
           nuevos++;
         }
@@ -3033,7 +3092,8 @@ function renderVentas(){
             <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Efectivo" title="Marcar pagado en Efectivo">💵</button>
             <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Transferencia" title="Marcar pagado por Transferencia">🏦</button>
             <button data-action="pagar-rapido" data-id="${s.id}" data-medio="QR" title="Marcar pagado por QR">📱</button>
-            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Tarjeta" title="Marcar pagado con Tarjeta">💳</button>
+            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Débito" title="Marcar pagado con Débito">💳d</button>
+            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Crédito" title="Marcar pagado con Crédito">💳c</button>
           </div>` : ''}
         </div>
       </td>
@@ -3335,6 +3395,8 @@ function renderAdmin(){
   renderGastosTabla();
   renderGastosFijosTable();
   renderVencCalendar();
+  populateMpMesSelect();
+  calcularComisionMP();
   renderAnalisis();
 }
 
@@ -3401,7 +3463,7 @@ document.getElementById('btnGuardarGasto').addEventListener('click', async ()=>{
   const detalle = document.getElementById('ngDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al gasto'); return; }
   const fecha = document.getElementById('ngFecha').value || todayISO();
-  const categoria = document.getElementById('ngCategoria').value.trim();
+  const categoria = document.getElementById('ngCategoria').value.trim() || sugerirCategoria(detalle);
   const monto = parseFloat(document.getElementById('ngMonto').value) || 0;
   const medioPago = document.getElementById('ngMedio').value.trim();
 
@@ -3439,8 +3501,10 @@ document.getElementById('fileExcelGastos').addEventListener('change', (e)=>{
         const fecha = parseFechaCell(getField(norm, ['FECHA','DATE']));
         const monto = parseFloat(getField(norm, ['MONTO','IMPORTE','TOTAL'])) || 0;
         const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO']));
+        const categoriaExcel = String(getField(norm, ['CATEGORIA','CATEGORÍA']) || '').trim();
+        const categoria = categoriaExcel || sugerirCategoria(detalle);
 
-        GASTOS.push({ id: uid(), fecha, detalle, monto, medioPago });
+        GASTOS.push({ id: uid(), fecha, detalle, categoria, monto, medioPago });
         cargados++;
       });
 
@@ -3620,8 +3684,20 @@ function proximaFechaVencimiento(diaDelMes){
 
 function getCicloActual(){ return todayISO().slice(0,7); }
 
+function sugerirCategoria(detalle){
+  const d = normalizeAccents(String(detalle||'')).toLowerCase();
+  const IMPUESTOS = ['tgi','agua','epe','internet'];
+  const ARCA = ['monotribut','iibb','drei'];
+  if(IMPUESTOS.some(k=>d.includes(k))) return 'Impuestos';
+  if(ARCA.some(k=>d.includes(k))) return 'Arca';
+  if(d.includes('alquiler')) return 'Alquiler';
+  const nombresProveedores = Object.keys(getProveedores()).map(n=>normalizeAccents(n).toLowerCase());
+  if(nombresProveedores.some(n=>n && d.includes(n))) return 'Proveedor';
+  return '';
+}
+
 function getCategoriasConocidas(){
-  const usadas = new Set(['Impuestos','Proveedor','Extraordinario']);
+  const usadas = new Set(['Impuestos','Arca','Alquiler','Proveedor','Extraordinario']);
   VENCIMIENTOS.forEach(v=>{ if(v.categoria) usadas.add(v.categoria); });
   GASTOS.forEach(g=>{ if(g.categoria) usadas.add(g.categoria); });
   return Array.from(usadas);
@@ -3733,6 +3809,70 @@ function actualizarBadgeVencimientos(){
   if(urgentes>0){ badge.textContent = urgentes; badge.style.display = 'inline-block'; }
   else{ badge.style.display = 'none'; }
 }
+
+/* ============================================================
+   CALCULADORA DE COMISIÓN MERCADO PAGO
+   ============================================================ */
+const MP_TASAS = {
+  qrDebito: 0.0166, qrCredito: 0.0777, qrCuenta: 0.0100,
+  tarjDebito: 0.0401, tarjCredito: 0.0777
+};
+
+function populateMpMesSelect(){
+  const sel = document.getElementById('mpMesSelect');
+  const meses = getMesesConActividad();
+  const prev = sel.value;
+  sel.innerHTML = meses.map(m=>`<option value="${m}">${formatMes(m)}</option>`).join('');
+  if(meses.includes(prev)) sel.value = prev;
+}
+
+function calcularComisionMP(){
+  const ym = document.getElementById('mpMesSelect').value;
+  if(!ym){ document.getElementById('mpCalcResultado').innerHTML = 'No hay ventas registradas todavía.'; return null; }
+
+  const ventasDelMes = SALES.filter(s => s.fecha && s.fecha.slice(0,7)===ym);
+  const sumaPorMedio = (medio) => ventasDelMes
+    .filter(s=>String(s.medioPago||'').trim().toLowerCase()===medio.toLowerCase())
+    .reduce((a,s)=>a+s.cantidad*s.precioUnitario,0);
+
+  // Débito y Crédito son medios de pago propios → comisión exacta
+  const totalDebito = sumaPorMedio('Débito');
+  const totalCredito = sumaPorMedio('Crédito');
+  const comisionTarj = totalDebito*MP_TASAS.tarjDebito + totalCredito*MP_TASAS.tarjCredito;
+
+  // QR es un solo medio de pago (no distingue débito/crédito) → se estima con el % que elijas
+  const totalQR = sumaPorMedio('QR');
+  const pctQrDebito = Math.min(100, Math.max(0, parseFloat(document.getElementById('mpPctQrDebito').value) || 0)) / 100;
+  const comisionQR = totalQR*pctQrDebito*MP_TASAS.qrDebito + totalQR*(1-pctQrDebito)*MP_TASAS.qrCredito;
+
+  const comisionTotal = comisionQR + comisionTarj;
+
+  document.getElementById('mpCalcResultado').innerHTML = `
+    QR del mes: ${fmt(totalQR)} (estimado según el % que elegiste) → comisión: ${fmt(comisionQR)}<br>
+    Débito del mes: ${fmt(totalDebito)} (exacto) → comisión: ${fmt(totalDebito*MP_TASAS.tarjDebito)}<br>
+    Crédito del mes: ${fmt(totalCredito)} (exacto) → comisión: ${fmt(totalCredito*MP_TASAS.tarjCredito)}<br>
+    <span style="font-size:16px;">Comisión total: ${fmt(comisionTotal)}</span>
+  `;
+  return { ym, comisionTotal };
+}
+
+['mpMesSelect','mpPctQrDebito'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcularComisionMP);
+  document.getElementById(id).addEventListener('change', calcularComisionMP);
+});
+
+document.getElementById('btnGenerarComisionMP').addEventListener('click', async ()=>{
+  const resultado = calcularComisionMP();
+  if(!resultado || resultado.comisionTotal<=0){ showToast('No hay nada que cargar para ese mes'); return; }
+  GASTOS.push({
+    id: uid(), fecha: `${resultado.ym}-28`, detalle: 'Comisión Mercado Pago',
+    categoria: 'Comisiones', monto: Math.round(resultado.comisionTotal), medioPago: 'Descuento automático'
+  });
+  await saveGastos();
+  renderGastosTabla();
+  renderAnalisis();
+  showToast('Comisión cargada como gasto ✓');
+});
 
 function renderGastosFijosTable(){
   document.getElementById('gastosFijosYearLabel').textContent = finYear;
@@ -3863,7 +4003,7 @@ document.getElementById('btnEliminarVencimientoModal').addEventListener('click',
 document.getElementById('btnGuardarVencimiento').addEventListener('click', async ()=>{
   const detalle = document.getElementById('vcDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al vencimiento'); return; }
-  const categoria = document.getElementById('vcCategoria').value.trim();
+  const categoria = document.getElementById('vcCategoria').value.trim() || sugerirCategoria(detalle);
   let dia = parseInt(document.getElementById('vcDia').value, 10) || 1;
   dia = Math.min(31, Math.max(1, dia));
   const monto = parseFloat(document.getElementById('vcMonto').value) || 0;
@@ -3974,18 +4114,22 @@ function barraHtml(label, val, max, extra){
 function renderAnalisis(){
   const items = getAnalisisSales();
 
-  // Medios de pago — solo los 4 que realmente usamos, "Debe" no cuenta acá (no es un pago concretado)
-  const MEDIOS_CANONICOS = ['Efectivo','Transferencia','QR','Tarjeta'];
+  // Medios de pago — "Debe" no cuenta acá (no es un pago concretado). Lo vacío/sin reconocer va a "Otros"
+  const MEDIOS_CANONICOS = ['Efectivo','Transferencia','QR','Débito','Crédito'];
+  const ALIAS_MEDIOS = { 'tarjeta debito':'Débito', 'tarjeta débito':'Débito', 'tarjeta credito':'Crédito', 'tarjeta crédito':'Crédito', 'qr debito':'QR', 'qr débito':'QR', 'qr credito':'QR', 'qr crédito':'QR', 'tarjeta':'Débito' };
   const gMedios = {};
-  MEDIOS_CANONICOS.forEach(m=>gMedios[m]=0);
   items.forEach(s=>{
-    const raw = String(s.medioPago||'').trim().toLowerCase();
-    const match = MEDIOS_CANONICOS.find(m=>m.toLowerCase()===raw);
-    if(match) gMedios[match] += s.cantidad*s.precioUnitario;
+    const raw = String(s.medioPago||'').trim();
+    if(raw.toLowerCase()==='debe') return;
+    const match = MEDIOS_CANONICOS.find(m=>m.toLowerCase()===raw.toLowerCase()) || ALIAS_MEDIOS[normalizeAccents(raw).toLowerCase()];
+    const key = match || (raw ? 'Otros' : 'Otros (sin especificar)');
+    gMedios[key] = (gMedios[key]||0) + s.cantidad*s.precioUnitario;
   });
   const sortedMedios = Object.entries(gMedios).sort((a,b)=>b[1]-a[1]);
-  const maxMedios = Math.max(1, ...sortedMedios.map(x=>x[1]));
-  document.getElementById('analisisMedios').innerHTML = sortedMedios.map(([k,v])=>barraHtml(k, v, maxMedios)).join('');
+  const maxMedios = sortedMedios.length ? Math.max(...sortedMedios.map(x=>x[1])) : 1;
+  document.getElementById('analisisMedios').innerHTML = sortedMedios.length
+    ? sortedMedios.map(([k,v])=>barraHtml(k, v, maxMedios)).join('')
+    : '<div class="empty-state" style="padding:10px;">Sin datos en este período.</div>';
 
   // Día de la semana
   const gDias = {};
@@ -4139,7 +4283,6 @@ async function boot(){
   renderAdmin();
   populateAnDatalist();
   renderAnotarHoy();
-  checkModoMobileSimple();
 
   loadPhotosInBackground();
 }
