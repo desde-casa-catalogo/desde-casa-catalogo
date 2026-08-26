@@ -365,9 +365,16 @@
   .vender-layout{display:flex;gap:18px;align-items:flex-start;}
   .vender-catalog{flex:1 1 auto;min-width:0;}
   .vender-summary{
-    flex:0 0 500px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;
+    flex:0 0 580px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;
     padding:24px;box-shadow:var(--shadow);position:sticky;top:70px;max-height:calc(100vh - 90px);overflow-y:auto;
   }
+  .vender-summary-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .vender-summary-head h3{margin:0;}
+  .btn-vaciar-carrito{
+    background:var(--red-pale);color:var(--red);border:1.5px solid #E9BBB4;border-radius:9px;
+    padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;
+  }
+  .btn-vaciar-carrito:hover{background:var(--red);color:#fff;}
   .vender-summary h3{font-family:'Playfair Display',serif;font-size:19px;margin:0 0 4px;color:var(--ink);}
   .vender-summary .sub{font-size:12px;color:var(--ink-faint);margin-bottom:10px;}
   .venta-items{display:flex;flex-direction:column;gap:8px;margin:6px 0;}
@@ -384,7 +391,7 @@
   .venta-total-row .lbl{font-size:13px;color:var(--ink-soft);font-weight:700;}
   .venta-total-row .val{font-family:'Inter',sans-serif;font-size:26px;font-weight:800;color:var(--price-color);}
 
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
   .prod-list-view{display:flex;flex-direction:column;gap:8px;}
   .prod-row-item{
     display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--border);
@@ -828,7 +835,7 @@
     display:flex;align-items:stretch;gap:12px;margin-bottom:14px;flex-wrap:wrap;
     position:sticky;top:70px;z-index:15;background:var(--cream);padding-top:2px;
   }
-  .ventas-stats-sticky .stat-compact{flex:2.2 1 220px;padding:14px 16px;}
+  .ventas-stats-sticky .stat-compact{flex:2.2 1 180px;padding:12px 14px;}
   .vfs-filters{
     flex:1.4 1 220px;display:flex;flex-direction:column;gap:8px;
     background:var(--card);border:2px solid var(--border);border-radius:15px;padding:12px;
@@ -839,6 +846,18 @@
   .vfs-inline-box{background:var(--gold-pale);border:1.5px solid var(--gold-light);border-radius:10px;padding:8px 10px;}
   .vfs-inline-box label{font-size:10px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;display:block;margin-bottom:3px;}
   .vfs-inline-box input, .vfs-inline-box select{font-size:13px;padding:8px 9px;}
+
+  .dias-sueltos-box{background:var(--card);border:2px solid var(--border);border-radius:15px;padding:14px 16px;margin-bottom:14px;}
+  .dias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:7px;}
+  .dia-suelto-btn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 4px;cursor:pointer;
+  }
+  .dia-suelto-btn .dsb-num{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--ink);}
+  .dia-suelto-btn .dsb-dow{font-size:9px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.2px;}
+  .dia-suelto-btn:hover{border-color:var(--gold);}
+  .dia-suelto-btn.selected{background:var(--gold-grad);border-color:var(--gold);}
+  .dia-suelto-btn.selected .dsb-num, .dia-suelto-btn.selected .dsb-dow{color:#fff;}
 
   .deben-hover-card{position:relative;overflow:visible !important;}
   .deben-tooltip{
@@ -987,7 +1006,6 @@
 <nav class="tabs" id="tabsNav">
   <div class="tabs-scroll">
     <button class="tab-btn active" data-tab="vender"><span class="ico">🛒</span>Ventas POS</button>
-    <button class="tab-btn" data-tab="anotar"><span class="ico">📝</span>Ventas</button>
     <button class="tab-btn" data-tab="ventas"><span class="ico">🧾</span>Historial</button>
     <button class="tab-btn" data-tab="productos"><span class="ico">💰</span>Productos</button>
     <button class="tab-btn" data-tab="proveedores"><span class="ico">🏷️</span>Proveedores</button>
@@ -1035,7 +1053,10 @@
         <div class="card-grid" id="listCatalogo"></div>
       </div>
       <aside class="vender-summary" id="ventaSummary">
-        <h3>Resumen de la Venta</h3>
+        <div class="vender-summary-head">
+          <h3>Resumen de la Venta</h3>
+          <button class="btn-vaciar-carrito" id="btnVaciarCarrito" title="Vaciar todo el carrito">🗑️ Vaciar</button>
+        </div>
         <div class="field-label">Fecha</div>
         <input type="date" class="field" id="ventaFecha">
         <div class="field-label">Productos</div>
@@ -1073,72 +1094,6 @@
         </div>
         <button class="btn btn-gold btn-lg btn-block" id="btnVenderConfirm">Vender</button>
       </aside>
-    </div>
-  </section>
-
-  <!-- ===================== ANOTAR VENTA (modo simple, tipo Excel) ===================== -->
-  <section class="panel" id="panel-anotar">
-    <div class="anotar-intro">📝 Anotá cada venta como si fuera una fila de Excel: Fecha, Producto, Cantidad, Precio, Medio de pago y Cliente.</div>
-    <div class="anotar-card">
-      <div class="anotar-form-grid">
-        <div class="mini-field anotar-field-fecha">
-          <label>Fecha</label>
-          <input type="date" class="field" id="anFecha">
-        </div>
-        <div class="mini-field anotar-field-producto">
-          <label>Producto</label>
-          <input type="text" class="field" id="anProducto" list="anProductosList" placeholder="Escribí el producto...">
-          <datalist id="anProductosList"></datalist>
-        </div>
-        <div class="mini-field anotar-field-chico">
-          <label>Cantidad</label>
-          <input type="number" class="field" id="anCantidad" value="1" min="1">
-        </div>
-        <div class="mini-field anotar-field-chico">
-          <label>Precio</label>
-          <div class="ajuste-input-wrap">
-            <span class="dollar">$</span>
-            <input type="number" id="anPrecio" value="0">
-          </div>
-        </div>
-        <div class="mini-field anotar-field-medio">
-          <label>Medio de pago</label>
-          <select class="field" id="anMedio">
-            <option value="Efectivo">Efectivo</option>
-            <option value="Transferencia">Transferencia</option>
-            <option value="QR">QR</option>
-            <option value="Débito">Débito</option>
-            <option value="Crédito">Crédito</option>
-            <option value="Debe">Debe</option>
-          </select>
-        </div>
-        <div class="mini-field anotar-field-cliente">
-          <label>Cliente</label>
-          <input type="text" class="field" id="anCliente" placeholder="Consumidor final">
-        </div>
-      </div>
-      <button class="btn btn-gold btn-lg btn-block" id="btnAgregarAnotacion" style="margin-top:16px;">＋ Agregar venta</button>
-    </div>
-
-    <h3 class="fin-subtitle">Ventas de hoy</h3>
-    <div class="search-wrap">
-      <input type="text" class="search" id="searchAnotar" placeholder="Buscar en producto o cliente...">
-    </div>
-    <div class="table-wrap">
-      <table class="ventas-table">
-        <thead>
-          <tr id="anotarTheadRow">
-            <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
-            <th data-sort="producto">Producto <span class="sort-arrow"></span></th>
-            <th data-sort="cantidad">Cant. <span class="sort-arrow"></span></th>
-            <th data-sort="precio">$ Precio <span class="sort-arrow"></span></th>
-            <th data-sort="medio">Medio de pago <span class="sort-arrow"></span></th>
-            <th data-sort="cliente">Cliente <span class="sort-arrow"></span></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="anotarTbody"></tbody>
-      </table>
     </div>
   </section>
 
@@ -1188,6 +1143,16 @@
         <span class="stat-compact-sub" id="statClientesDeben">0 clientes</span>
         <div class="deben-tooltip" id="debenTooltip"></div>
       </div>
+    </div>
+
+    <div class="dias-sueltos-box">
+      <div class="mini-field" style="max-width:240px;margin-bottom:10px;">
+        <label>📆 Elegir días sueltos de...</label>
+        <select class="field" id="mesDiasSueltos">
+          <option value="">Elegí un mes...</option>
+        </select>
+      </div>
+      <div class="dias-grid" id="diasGridSueltos"></div>
     </div>
 
     <div class="ventas-main-full">
@@ -1262,7 +1227,8 @@
     <div class="modal">
       <h3>Anotar precio de proveedor</h3>
       <div class="field-label">Producto</div>
-      <input type="text" class="field" id="pcProducto" list="anProductosList" placeholder="Escribí el producto...">
+      <input type="text" class="field" id="pcProducto" list="pcProductosList" placeholder="Escribí el producto...">
+      <datalist id="pcProductosList"></datalist>
       <div class="field-label">Proveedor</div>
       <input type="text" class="field" id="pcProveedor" list="provsList" placeholder="Nombre del proveedor">
       <div class="field-label">Costo</div>
@@ -1562,6 +1528,7 @@ let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
 let ventasFiltro = 'hoy';
+let selectedDiasSueltos = new Set();
 let ventasSortField = 'fecha';
 let ventasSortDir = 'desc';
 let selectedVentaIds = new Set();
@@ -2058,6 +2025,15 @@ function cartCountAndTotal(){
   return {count, total};
 }
 
+document.getElementById('btnVaciarCarrito').addEventListener('click', ()=>{
+  if(Object.keys(CART).length===0) return;
+  if(!confirm('¿Vaciar todo el carrito? Se van a sacar todos los productos que elegiste.')) return;
+  CART = {};
+  renderCatalogo();
+  renderVentaSummary();
+  showToast('Carrito vaciado');
+});
+
 function renderVentaSummary(){
   const {count, total} = cartCountAndTotal();
   const itemsWrap = document.getElementById('ventaItems');
@@ -2387,7 +2363,7 @@ document.getElementById('listCostos').addEventListener('click', async (e)=>{
     if(!confirm('¿Eliminar "'+p.nombre+'" del catálogo? Esto no borra ventas ya registradas.')) return;
     PRODUCTS = PRODUCTS.filter(x=>x.id!==id);
     await saveProducts();
-    renderCostos(); renderCatalogo(); renderProveedores(); populateAnDatalist();
+    renderCostos(); renderCatalogo(); renderProveedores();
     showToast('Producto eliminado');
   }
 });
@@ -2435,7 +2411,7 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
   }
 
   document.getElementById('overlayNuevo').classList.remove('show');
-  renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores(); populateAnDatalist();
+  renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
   showToast('Producto agregado ✓');
 });
 
@@ -2489,7 +2465,7 @@ document.getElementById('fileExcel').addEventListener('change', (e)=>{
       });
 
       await saveProducts();
-      renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores(); populateAnDatalist();
+      renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
       showToast(`Importado ✓ ${nuevos} nuevos, ${actualizados} actualizados`);
     }catch(err){
       showToast('No pude leer el archivo. Revisá el formato.');
@@ -2772,6 +2748,7 @@ function populateProvsList(){
 
 document.getElementById('btnAnotarPrecio').addEventListener('click', ()=>{
   populateProvsList();
+  document.getElementById('pcProductosList').innerHTML = PRODUCTS.map(p=>`<option value="${escapeHtml(p.nombre)}">`).join('');
   document.getElementById('pcProducto').value = document.getElementById('searchDondeComprar').value.trim();
   document.getElementById('pcProveedor').value = '';
   document.getElementById('pcCosto').value = 0;
@@ -2898,11 +2875,59 @@ function populateMesAnteriorSelect(){
   if(meses.includes(prev)) sel.value = prev;
 }
 
+function populateMesDiasSueltos(){
+  const sel = document.getElementById('mesDiasSueltos');
+  const meses = getMesesConActividad();
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Elegí un mes...</option>' + meses.map(m => `<option value="${m}">${formatMes(m)}</option>`).join('');
+  if(meses.includes(prev)) sel.value = prev;
+}
+
+const DIAS_SEMANA_CORTO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+function renderDiasGridSueltos(){
+  const ym = document.getElementById('mesDiasSueltos').value;
+  const grid = document.getElementById('diasGridSueltos');
+  if(!ym){ grid.innerHTML = ''; return; }
+  const [y, m] = ym.split('-').map(Number);
+  const diasEnMes = new Date(y, m, 0).getDate();
+  let html = '';
+  for(let d=1; d<=diasEnMes; d++){
+    const fecha = `${ym}-${String(d).padStart(2,'0')}`;
+    const dow = DIAS_SEMANA_CORTO[new Date(y, m-1, d).getDay()];
+    const activo = selectedDiasSueltos.has(fecha);
+    html += `<button class="dia-suelto-btn ${activo?'selected':''}" data-fecha="${fecha}">
+      <span class="dsb-num">${d}</span>
+      <span class="dsb-dow">${dow}</span>
+    </button>`;
+  }
+  grid.innerHTML = html;
+}
+
+document.getElementById('mesDiasSueltos').addEventListener('change', ()=>{
+  selectedDiasSueltos.clear();
+  renderDiasGridSueltos();
+  renderVentas();
+});
+
+document.getElementById('diasGridSueltos').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.dia-suelto-btn');
+  if(!btn) return;
+  const fecha = btn.dataset.fecha;
+  if(selectedDiasSueltos.has(fecha)) selectedDiasSueltos.delete(fecha);
+  else selectedDiasSueltos.add(fecha);
+  btn.classList.toggle('selected');
+  renderVentas();
+});
+
 document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
   chip.addEventListener('click', ()=>{
     document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     ventasFiltro = chip.dataset.f;
+    selectedDiasSueltos.clear();
+    document.getElementById('mesDiasSueltos').value = '';
+    renderDiasGridSueltos();
     const boxMes = document.getElementById('mesAnterioresBox');
     const boxDia = document.getElementById('diaBox');
     boxMes.style.display = 'none';
@@ -2936,6 +2961,9 @@ document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
   document.getElementById('diaSelectHasta').value = '';
   document.getElementById('filtroMedio').value = '';
   document.getElementById('searchHistorial').value = '';
+  selectedDiasSueltos.clear();
+  document.getElementById('mesDiasSueltos').value = '';
+  renderDiasGridSueltos();
   renderVentas();
   showToast('Filtros limpiados ✓');
 });
@@ -3066,7 +3094,12 @@ function renderVentas(){
 
   const labels = {hoy:'TOTAL DE HOY', mes:'TOTAL DE ESTE MES'};
 
-  if(ventasFiltro==='hoy') items = items.filter(s=>s.fecha===todayStr);
+  if(selectedDiasSueltos.size > 0){
+    items = items.filter(s=>s.fecha && selectedDiasSueltos.has(s.fecha));
+    const n = selectedDiasSueltos.size;
+    document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${n} DÍA${n===1?'':'S'} ELEGIDO${n===1?'':'S'}`;
+  }
+  else if(ventasFiltro==='hoy') items = items.filter(s=>s.fecha===todayStr);
   else if(ventasFiltro==='dia'){
     const desde = document.getElementById('diaSelect').value || todayStr;
     const hasta = document.getElementById('diaSelectHasta').value;
@@ -3091,7 +3124,7 @@ function renderVentas(){
     }
   }
 
-  if(ventasFiltro==='hoy' || ventasFiltro==='mes'){
+  if(selectedDiasSueltos.size===0 && (ventasFiltro==='hoy' || ventasFiltro==='mes')){
     document.getElementById('ventasFiltroLabel').textContent = labels[ventasFiltro] || 'TOTAL';
   }
 
@@ -3557,140 +3590,6 @@ document.getElementById('fileExcelGastos').addEventListener('change', (e)=>{
     e.target.value = '';
   };
   reader.readAsArrayBuffer(file);
-});
-
-/* ============================================================
-   ANOTAR VENTA (modo simple, tipo planilla, para principiantes)
-   ============================================================ */
-let anMatchedProductId = null;
-
-function populateAnDatalist(){
-  const dl = document.getElementById('anProductosList');
-  dl.innerHTML = PRODUCTS.map(p=>`<option value="${escapeHtml(p.nombre)}">`).join('');
-}
-
-function anCheckProductMatch(){
-  const val = document.getElementById('anProducto').value.trim().toLowerCase();
-  const match = PRODUCTS.find(p => p.nombre.toLowerCase() === val);
-  if(match){
-    if(match.id !== anMatchedProductId){
-      anMatchedProductId = match.id;
-      document.getElementById('anPrecio').value = match.precio;
-    }
-  } else {
-    anMatchedProductId = null;
-  }
-}
-document.getElementById('anProducto').addEventListener('input', anCheckProductMatch);
-
-let anotarSortField = 'fecha';
-let anotarSortDir = 'desc';
-
-function compareAnotar(a, b){
-  let va, vb;
-  switch(anotarSortField){
-    case 'producto': va=(a.producto||'').toLowerCase(); vb=(b.producto||'').toLowerCase(); break;
-    case 'cantidad': va=a.cantidad||0; vb=b.cantidad||0; break;
-    case 'precio': va=a.precioUnitario||0; vb=b.precioUnitario||0; break;
-    case 'medio': va=(a.medioPago||'').toLowerCase(); vb=(b.medioPago||'').toLowerCase(); break;
-    case 'cliente': va=(a.cliente||'').toLowerCase(); vb=(b.cliente||'').toLowerCase(); break;
-    default: va=a.fecha||''; vb=b.fecha||'';
-  }
-  let cmp = va < vb ? -1 : va > vb ? 1 : (a.id||'').localeCompare(b.id||'');
-  return anotarSortDir === 'asc' ? cmp : -cmp;
-}
-
-function updateAnotarSortArrows(){
-  document.querySelectorAll('#anotarTheadRow th[data-sort]').forEach(th=>{
-    const arrow = th.querySelector('.sort-arrow');
-    const isActive = th.dataset.sort === anotarSortField;
-    th.classList.toggle('sort-active', isActive);
-    arrow.textContent = isActive ? (anotarSortDir === 'asc' ? '▲' : '▼') : '⇅';
-  });
-}
-
-document.getElementById('anotarTheadRow').addEventListener('click', (e)=>{
-  const th = e.target.closest('th[data-sort]');
-  if(!th) return;
-  const field = th.dataset.sort;
-  if(anotarSortField === field){ anotarSortDir = anotarSortDir === 'asc' ? 'desc' : 'asc'; }
-  else { anotarSortField = field; anotarSortDir = 'asc'; }
-  renderAnotarHoy();
-});
-
-document.getElementById('searchAnotar').addEventListener('input', renderAnotarHoy);
-
-function renderAnotarHoy(){
-  const tbody = document.getElementById('anotarTbody');
-  const hoy = todayISO();
-  const term = document.getElementById('searchAnotar').value.trim().toLowerCase();
-  let items = SALES.filter(s=>s.fecha===hoy);
-  if(term){
-    items = items.filter(s =>
-      (s.producto||'').toLowerCase().includes(term) ||
-      (s.cliente||'').toLowerCase().includes(term)
-    );
-  }
-  items.sort(compareAnotar);
-  updateAnotarSortArrows();
-  if(items.length===0){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span class="big">📝</span>Todavía no anotaste ninguna venta hoy.</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = items.map(s=>{
-    return `<tr data-id="${s.id}">
-      <td>${s.fecha}</td>
-      <td class="prod-cell">${escapeHtml(s.producto)}</td>
-      <td class="num">${s.cantidad}</td>
-      <td class="num price-cell">${fmt(s.precioUnitario)}</td>
-      <td>${escapeHtml(s.medioPago)}</td>
-      <td>${escapeHtml(s.cliente)}</td>
-      <td><button class="btn-del link-btn danger" data-id="${s.id}" data-action="delete-anotacion">Eliminar</button></td>
-    </tr>`;
-  }).join('');
-}
-
-document.getElementById('anotarTbody').addEventListener('click', async (e)=>{
-  const delBtn = e.target.closest('[data-action="delete-anotacion"]');
-  if(!delBtn) return;
-  if(!confirm('¿Eliminar esta venta? Esto no repone el stock automáticamente.')) return;
-  SALES = SALES.filter(x=>x.id!==delBtn.dataset.id);
-  await saveSales();
-  renderAnotarHoy();
-  renderVentas();
-  showToast('Venta eliminada');
-});
-
-document.getElementById('btnAgregarAnotacion').addEventListener('click', async ()=>{
-  const producto = document.getElementById('anProducto').value.trim();
-  if(!producto){ showToast('Escribí el nombre del producto'); return; }
-  const fecha = document.getElementById('anFecha').value || todayISO();
-  const cantidad = parseInt(document.getElementById('anCantidad').value, 10) || 1;
-  const precioUnitario = parseFloat(document.getElementById('anPrecio').value) || 0;
-  const medioPago = document.getElementById('anMedio').value;
-  const cliente = document.getElementById('anCliente').value.trim() || 'Consumidor final';
-
-  SALES.push({ id: uid(), fecha, producto: producto.toUpperCase(), cantidad, precioUnitario, medioPago, cliente, facturado:false, origen: 'manual' });
-  await saveSales();
-
-  if(anMatchedProductId){
-    const p = PRODUCTS.find(x=>x.id===anMatchedProductId);
-    if(p){ p.stock = (p.stock||0) - cantidad; await saveProducts(); }
-  }
-
-  document.getElementById('anProducto').value = '';
-  document.getElementById('anCantidad').value = 1;
-  document.getElementById('anPrecio').value = 0;
-  document.getElementById('anCliente').value = '';
-  document.getElementById('anFecha').value = todayISO();
-  anMatchedProductId = null;
-
-  renderAnotarHoy();
-  renderCatalogo();
-  renderCostos();
-  renderVentas();
-  renderAdmin();
-  showToast('Venta anotada ✓');
 });
 
 /* ============================================================
@@ -4345,7 +4244,6 @@ async function boot(){
   await loadAll();
 
   document.getElementById('ventaFecha').value = todayISO();
-  document.getElementById('anFecha').value = todayISO();
 
   renderChipsCatalogo();
   renderCatalogo();
@@ -4353,10 +4251,9 @@ async function boot(){
   renderChipsCostos();
   renderCostos();
   renderProveedores();
+  populateMesDiasSueltos();
   renderVentas();
   renderAdmin();
-  populateAnDatalist();
-  renderAnotarHoy();
 
   loadPhotosInBackground();
 }
