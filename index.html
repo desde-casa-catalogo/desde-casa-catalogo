@@ -298,7 +298,13 @@
   }
   .search-wrap::before{content:'🔍';position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:16px;opacity:0.55;}
   input:focus, select:focus, button:focus-visible, textarea:focus{outline:2.5px solid var(--gold);outline-offset:1px;}
-  .chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+  .prod-count-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .prod-count-row .chips{margin-bottom:0;flex:1 1 auto;}
+  .prod-count-badge{
+    flex:0 0 auto;background:var(--gold-pale);color:var(--gold-deep);font-weight:800;font-size:12.5px;
+    padding:8px 14px;border-radius:999px;white-space:nowrap;border:1.5px solid var(--gold-light);
+  }
   .chip{flex:0 0 auto;padding:9px 16px;border-radius:999px;border:1.5px solid var(--border);background:var(--card);color:var(--ink-soft);font-weight:600;font-size:14px;cursor:pointer;}
   .chip.active{background:var(--gold-grad);border-color:var(--gold);color:#fff;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);}
@@ -320,6 +326,12 @@
   .btn-block{width:100%;}
   .btn-lg{padding:16px 20px;font-size:16.5px;border-radius:14px;}
   .field-label{font-size:12.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.3px;margin:14px 0 6px;text-transform:uppercase;}
+  .vc-repetir-check{
+    display:flex;align-items:center;gap:9px;margin-top:16px;padding:11px 12px;background:var(--gold-pale);
+    border-radius:10px;font-size:13.5px;font-weight:700;color:var(--gold-deep);cursor:pointer;
+  }
+  .vc-repetir-check input{width:18px;height:18px;cursor:pointer;flex:0 0 auto;}
+  #vcRepetirMesesBox{margin-top:4px;}
   .field-label:first-child{margin-top:0;}
   input[type="text"].field, input[type="date"].field, input[type="number"].field, select.field{
     width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);font-size:16px;color:var(--ink);
@@ -329,7 +341,6 @@
   .btn-grid-5 .opt-btn-debe{grid-column:1 / -1;}
   .btn-grid-7{grid-template-columns:1fr 1fr;gap:8px;}
   .btn-grid-7 .opt-btn{padding:12px 8px;font-size:13px;}
-  .btn-grid-7 .opt-btn-debe{grid-column:1 / -1;}
   .opt-btn{
     padding:15px 10px;border-radius:12px;border:2px solid var(--border);background:var(--card);
     font-weight:800;font-size:14.5px;color:var(--ink-soft);cursor:pointer;transition:transform .08s;
@@ -646,15 +657,16 @@
   .fin-year-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
   .fin-year-btn{width:44px;height:44px;padding:0;font-size:20px;font-weight:800;text-align:center;flex:0 0 44px;}
   .fin-year-label{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:var(--gold-deep);min-width:70px;text-align:center;}
-  .fin-months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-bottom:24px;}
+  .fin-months-grid{display:grid;grid-template-columns:repeat(var(--fin-cols, 4), 1fr);gap:10px;margin-bottom:24px;width:100%;}
   .fin-stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
   .fin-stats-row .stat-compact{flex:1 1 280px;max-width:420px;}
   .stat-compact.clickable{cursor:pointer;transition:transform .08s;}
   .stat-compact.clickable:active{transform:scale(.98);}
   #finPromedioRow .stat-compact{max-width:420px;}
-  .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
-  .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--gold-deep);margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px;}
-  .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:15px;color:var(--ink-soft);font-weight:700;}
+  .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);min-width:0;overflow:hidden;}
+  .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--gold-deep);margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:15px;color:var(--ink-soft);font-weight:700;gap:6px;}
+  .fin-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .fin-val{font-weight:800;font-size:17px;}
   .fin-val.pos{color:var(--green);}
   .fin-val.neg{color:var(--red);}
@@ -664,6 +676,27 @@
   .fin-row.fin-promedio .fin-val{font-size:16px;color:var(--gold-deep);}
   .fin-month-card.acumulado{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
   .fin-month-card.acumulado .fin-month-name{font-size:19px;}
+
+  /* Tamaños de letra proporcionales según cuántos meses hay que mostrar */
+  .fin-months-grid.fin-tier-sm .fin-month-card{padding:12px 10px;}
+  .fin-months-grid.fin-tier-sm .fin-month-name{font-size:13px;margin-bottom:6px;}
+  .fin-months-grid.fin-tier-sm .fin-row{font-size:11.5px;padding:3px 0;}
+  .fin-months-grid.fin-tier-sm .fin-val{font-size:12px;}
+  .fin-months-grid.fin-tier-sm .fin-row.fin-result .fin-val{font-size:15px;}
+  .fin-months-grid.fin-tier-sm .fin-row.fin-promedio .fin-val{font-size:11px;}
+
+  .fin-months-grid.fin-tier-xs .fin-month-card{padding:10px 8px;}
+  .fin-months-grid.fin-tier-xs .fin-month-name{font-size:10.5px;margin-bottom:4px;}
+  .fin-months-grid.fin-tier-xs .fin-row{font-size:9.5px;padding:2px 0;}
+  .fin-months-grid.fin-tier-xs .fin-val{font-size:9.5px;}
+  .fin-months-grid.fin-tier-xs .fin-row.fin-result .fin-val{font-size:12px;}
+  .fin-months-grid.fin-tier-xs .fin-row.fin-promedio .fin-val{font-size:8.5px;}
+  .fin-months-grid.fin-tier-xs .fin-row.fin-promedio{display:none;}
+
+  @media(max-width:760px){
+    .fin-months-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr)) !important;}
+    .fin-months-grid.fin-tier-sm, .fin-months-grid.fin-tier-xs{grid-template-columns:repeat(auto-fit,minmax(120px,1fr)) !important;}
+  }
   .fin-subtitle{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin:6px 0 14px;}
 
   /* ---------- Calendario de vencimientos ---------- */
@@ -697,16 +730,6 @@
   .cal-side .venc-cal-day{min-height:44px;padding:3px;}
   .cal-side .venc-cal-item{font-size:8px;}
   .gastos-fijos-side{flex:1 1 480px;min-width:0;}
-  .mp-calc-card{margin-bottom:24px;}
-  .mp-calc-tabla{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
-  .mp-calc-tabla-head, .mp-calc-tabla-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:8px 12px;font-size:12.5px;}
-  .mp-calc-tabla-head{background:var(--dark-surface);color:#fff;font-weight:800;}
-  .mp-calc-tabla-row{border-top:1px solid var(--border);font-weight:700;}
-  .mp-calc-tabla-row span:not(:first-child){text-align:center;color:var(--gold-deep);}
-  .mp-calc-note{font-size:12px;color:var(--ink-faint);font-weight:600;margin-bottom:10px;}
-  .mp-calc-inputs{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
-  .mp-calc-inputs .mini-field{flex:1 1 200px;}
-  .mp-calc-resultado{background:var(--gold-pale);border-radius:12px;padding:12px 16px;font-size:13.5px;font-weight:700;color:var(--gold-deep);line-height:1.7;}
   .gastos-fijos-table-wrap{max-height:520px;overflow-y:auto;}
   table.gastos-fijos-table{font-size:12px;min-width:900px;}
   table.gastos-fijos-table th, table.gastos-fijos-table td{padding:7px 6px;white-space:nowrap;}
@@ -813,6 +836,9 @@
   .vfs-filters .chip-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:0;}
   .vfs-filters .chip-v{padding:13px 9px;font-size:12.5px;border-radius:10px;text-align:center;white-space:nowrap;}
   .vfs-medio-select{font-size:13px;padding:10px 10px;}
+  .vfs-inline-box{background:var(--gold-pale);border:1.5px solid var(--gold-light);border-radius:10px;padding:8px 10px;}
+  .vfs-inline-box label{font-size:10px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;display:block;margin-bottom:3px;}
+  .vfs-inline-box input, .vfs-inline-box select{font-size:13px;padding:8px 9px;}
 
   .deben-hover-card{position:relative;overflow:visible !important;}
   .deben-tooltip{
@@ -905,9 +931,10 @@
     }
     .print-item-name{text-transform:uppercase;font-weight:600;}
     .print-item-price{font-weight:800;color:#9C5209;white-space:nowrap;}
+    .print-grid{padding-bottom:34px;}
     .print-footer{
-      margin-top:26px;padding-top:12px;border-top:1px solid #E9DCBC;text-align:center;
-      font-size:10.5px;color:#888;font-style:italic;
+      position:fixed;bottom:0;left:0;right:0;padding:8px 20px;text-align:center;
+      font-size:9.5px;color:#888;font-style:italic;background:#fff;border-top:1px solid #E9DCBC;
     }
   }
 </style>
@@ -972,6 +999,7 @@
       <button class="btn btn-gold btn-sm" id="btnExportarTodo">💾 Exportar todo (Excel)</button>
       <button class="btn btn-outline btn-sm" id="btnImportarVentas" title="Siempre agrega filas nuevas, nunca actualiza ni reemplaza lo que ya tenés cargado. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importar historial (Excel)</button>
       <input type="file" id="fileExcelVentas" accept=".xlsx,.xls,.csv" style="display:none;">
+      <button class="btn btn-outline btn-sm" id="btnDeshacerImport" title="Ver y eliminar una importación completa, sin tocar lo cargado a mano">🗂️ Deshacer una importación</button>
     </div>
     <div class="action-bar-inline" data-for="productos">
       <button class="btn btn-outline btn-sm" id="btnImportarExcel" title="Busca el producto por nombre exacto. Si ya existe, lo actualiza. Si no existe, lo agrega nuevo">📤 Importar Excel</button>
@@ -1124,6 +1152,18 @@
           <button class="chip-v" data-f="dia">📆 Elegir día</button>
           <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
         </div>
+        <div class="vfs-inline-box" id="diaBox" style="display:none;">
+          <label>Desde</label>
+          <input type="date" class="field" id="diaSelect">
+          <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
+          <input type="date" class="field" id="diaSelectHasta">
+        </div>
+        <div class="vfs-inline-box" id="mesAnterioresBox" style="display:none;">
+          <label>Ver un mes puntual</label>
+          <select class="field" id="mesAnteriorSelect">
+            <option value="">Todos los meses</option>
+          </select>
+        </div>
         <select class="field vfs-medio-select" id="filtroMedio">
           <option value="">Medio de pago: Todos</option>
           <option value="Efectivo">Efectivo</option>
@@ -1148,19 +1188,6 @@
         <span class="stat-compact-sub" id="statClientesDeben">0 clientes</span>
         <div class="deben-tooltip" id="debenTooltip"></div>
       </div>
-    </div>
-
-    <div class="mini-field" id="diaBox" style="display:none;">
-      <label>Desde</label>
-      <input type="date" class="field" id="diaSelect">
-      <label style="margin-top:8px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional, para un rango)</span></label>
-      <input type="date" class="field" id="diaSelectHasta">
-    </div>
-    <div class="mini-field" id="mesAnterioresBox" style="display:none;">
-      <label>Ver un mes puntual</label>
-      <select class="field" id="mesAnteriorSelect">
-        <option value="">Todos los meses</option>
-      </select>
     </div>
 
     <div class="ventas-main-full">
@@ -1212,7 +1239,10 @@
         <option value="ganancia-desc">Ganancia % (mayor a menor)</option>
       </select>
     </div>
-    <div class="chips" id="chipsCostos"></div>
+    <div class="prod-count-row">
+      <div class="chips" id="chipsCostos"></div>
+      <div class="prod-count-badge" id="prodDisponiblesCount"></div>
+    </div>
     <div id="listCostos"></div>
   </section>
 
@@ -1269,7 +1299,7 @@
 
       <div class="venc-card gastos-fijos-side">
         <div class="venc-header">
-          <div class="price-lookup-title" style="font-size:15px;">💸 Gastos fijos <span id="gastosFijosYearLabel">2026</span></div>
+          <div class="price-lookup-title" style="font-size:19px;">💸 Gastos fijos <span id="gastosFijosYearLabel">2026</span></div>
           <button class="btn btn-outline btn-sm" id="btnNuevoVencimiento">＋ Agregar gasto fijo</button>
         </div>
         <div class="table-wrap gastos-fijos-table-wrap">
@@ -1280,29 +1310,6 @@
           </table>
         </div>
       </div>
-    </div>
-
-    <h3 class="fin-subtitle">💳 Calculadora de comisión Mercado Pago</h3>
-    <div class="venc-card mp-calc-card">
-      <div class="mini-field" style="max-width:260px;margin-bottom:14px;">
-        <label>Mes a calcular</label>
-        <select class="field" id="mpMesSelect"></select>
-      </div>
-      <div class="mp-calc-tabla">
-        <div class="mp-calc-tabla-head"><span></span><span>QR</span><span>Tarjeta física</span></div>
-        <div class="mp-calc-tabla-row"><span>Débito</span><span>1,66%</span><span>4,01%</span></div>
-        <div class="mp-calc-tabla-row"><span>Crédito</span><span>7,77%</span><span>7,77%</span></div>
-        <div class="mp-calc-tabla-row"><span>Dinero en cuenta</span><span>1,00%</span><span>—</span></div>
-      </div>
-      <div class="mp-calc-note">Débito y Crédito ya son medios de pago propios en tu registro, así que su comisión se calcula exacta. Este % es solo para QR, que va todo junto.</div>
-      <div class="mp-calc-inputs">
-        <div class="mini-field">
-          <label>De tu QR del mes, ¿qué % fue con débito? (el resto se toma como crédito)</label>
-          <input type="number" class="field" id="mpPctQrDebito" value="100" min="0" max="100">
-        </div>
-      </div>
-      <div id="mpCalcResultado" class="mp-calc-resultado"></div>
-      <button class="btn btn-gold btn-lg btn-block" id="btnGenerarComisionMP" style="margin-top:12px;">＋ Cargar esta comisión como gasto</button>
     </div>
 
     <h3 class="fin-subtitle">Detalle de lo pagado</h3>
@@ -1412,10 +1419,18 @@
     <input type="number" class="field" id="vcMonto" value="0">
     <div class="field-label">Medio de pago habitual (opcional)</div>
     <input type="text" class="field" id="vcNotas" placeholder="Ej: Débito automático, Efectivo...">
+    <label class="vc-repetir-check">
+      <input type="checkbox" id="vcRepetir">
+      Repetir este mismo monto en los próximos meses
+    </label>
+    <div id="vcRepetirMesesBox" style="display:none;">
+      <div class="field-label">¿Cuántos meses más (además de este)?</div>
+      <input type="number" class="field" id="vcRepetirCantidad" min="1" max="24" value="6">
+    </div>
     <div class="modal-actions">
-      <button class="btn btn-gold btn-lg btn-block" id="btnGuardarVencimiento">Guardar vencimiento</button>
+      <button class="btn btn-gold btn-lg btn-block" id="btnGuardarVencimiento">Guardar y agregar otro</button>
       <button class="btn btn-outline btn-block" id="btnEliminarVencimientoModal" style="display:none;color:var(--red);">🗑️ Eliminar este vencimiento</button>
-      <button class="btn btn-outline btn-block" id="btnCancelarVencimiento">Cancelar</button>
+      <button class="btn btn-outline btn-block" id="btnCancelarVencimiento">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1452,6 +1467,18 @@
 
 <!-- ===================== MODAL: NUEVO PRODUCTO ===================== -->
 <!-- ===================== MODAL: EXPORTAR CATÁLOGO PDF ===================== -->
+<!-- ===================== MODAL: DESHACER UNA IMPORTACIÓN ===================== -->
+<div class="overlay" id="overlayDeshacerImport">
+  <div class="modal">
+    <h3>Deshacer una importación</h3>
+    <p style="font-size:13px;color:var(--ink-faint);font-weight:600;margin:-8px 0 14px;">Acá aparecen los Excel que importaste desde que agregamos esta función. Borrar un lote elimina solo esas filas — nunca toca lo que cargaste a mano.</p>
+    <div id="loteImportList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-block" id="btnCerrarDeshacerImport">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlayCatalogoPDF">
   <div class="modal">
     <h3>Exportar catálogo en PDF</h3>
@@ -2134,7 +2161,7 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
     if(!p) continue;
     const cant = CART[id];
     const precioAjustado = Math.round(p.precio * ratio);
-    SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false });
+    SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual' });
     p.stock = (p.stock||0) - cant;
   }
   await saveSales();
@@ -2216,6 +2243,10 @@ document.getElementById('btnExportarCatalogoPDF').addEventListener('click', ()=>
 function renderCostos(){
   const term = document.getElementById('searchCostos').value.trim().toLowerCase();
   const list = document.getElementById('listCostos');
+
+  const totalDisponibles = PRODUCTS.filter(p=>p.activo !== false).length;
+  document.getElementById('prodDisponiblesCount').textContent = `✅ ${totalDisponibles} producto${totalDisponibles===1?'':'s'} disponible${totalDisponibles===1?'':'s'}`;
+
   let items = PRODUCTS.filter(p=>{
     const matchTerm = !term ||
       p.nombre.toLowerCase().includes(term) ||
@@ -2494,13 +2525,15 @@ function parseFechaCell(val){
 }
 
 function normMedioCell(val){
-  const s = String(val||'').trim().toLowerCase();
+  const s = normalizeAccents(String(val||'')).trim().toLowerCase();
   if(!s) return ''; // vacío se queda vacío, no se asume nada
+  if(s.includes('debit')) return 'Débito';
+  if(s.includes('credit')) return 'Crédito';
+  if(s.includes('compensad')) return 'Compensado';
   if(s.startsWith('deb')) return 'Debe';
   if(s.startsWith('efec')) return 'Efectivo';
   if(s.startsWith('transf') || s.startsWith('trasf') || s.startsWith('tranf')) return 'Transferencia';
   if(s.includes('qr')) return 'QR';
-  if(s.startsWith('tarj') || s.startsWith('debit')) return 'Tarjeta';
   return String(val).trim();
 }
 
@@ -2602,6 +2635,8 @@ document.getElementById('fileExcelVentas').addEventListener('change', (e)=>{
 
       let cargadas = 0;
       const noReconocidos = new Set();
+      const loteId = 'lote_' + Date.now();
+      const loteNombreArchivo = file.name;
       rows.forEach(row=>{
         const norm = {};
         Object.keys(row).forEach(k=> norm[k.trim().toUpperCase()] = row[k]);
@@ -2632,7 +2667,8 @@ document.getElementById('fileExcelVentas').addEventListener('change', (e)=>{
 
         SALES.push({
           id: uid(), fecha, producto: nombreFinal, cantidad,
-          precioUnitario, medioPago, cliente, facturado
+          precioUnitario, medioPago, cliente, facturado,
+          origen: 'excel', loteId, loteArchivo: loteNombreArchivo, loteFecha: todayISO()
         });
         cargadas++;
       });
@@ -3265,6 +3301,12 @@ function renderAdminDashboard(){
   </div>`;
 
   grid.innerHTML = html;
+
+  const totalCards = rows.length + 1; // + Acumulado
+  grid.style.setProperty('--fin-cols', totalCards);
+  grid.classList.remove('fin-tier-sm', 'fin-tier-xs');
+  if(totalCards > 9) grid.classList.add('fin-tier-xs');
+  else if(totalCards > 6) grid.classList.add('fin-tier-sm');
 }
 
 function populateFinMesFiltro(){
@@ -3395,8 +3437,6 @@ function renderAdmin(){
   renderGastosTabla();
   renderGastosFijosTable();
   renderVencCalendar();
-  populateMpMesSelect();
-  calcularComisionMP();
   renderAnalisis();
 }
 
@@ -3630,7 +3670,7 @@ document.getElementById('btnAgregarAnotacion').addEventListener('click', async (
   const medioPago = document.getElementById('anMedio').value;
   const cliente = document.getElementById('anCliente').value.trim() || 'Consumidor final';
 
-  SALES.push({ id: uid(), fecha, producto: producto.toUpperCase(), cantidad, precioUnitario, medioPago, cliente, facturado:false });
+  SALES.push({ id: uid(), fecha, producto: producto.toUpperCase(), cantidad, precioUnitario, medioPago, cliente, facturado:false, origen: 'manual' });
   await saveSales();
 
   if(anMatchedProductId){
@@ -3776,6 +3816,12 @@ function abrirModalVencimiento(id, diaPrefill){
   populateCategoriasList();
   const delBtn = document.getElementById('btnEliminarVencimientoModal');
   const cicloActual = getCicloActual();
+  const repetirCheck = document.getElementById('vcRepetir');
+  const repetirBox = document.getElementById('vcRepetirMesesBox');
+  const repetirWrap = repetirCheck.closest('.vc-repetir-check');
+  repetirCheck.checked = false;
+  repetirBox.style.display = 'none';
+  document.getElementById('vcRepetirCantidad').value = 6;
   if(id){
     const v = VENCIMIENTOS.find(x=>x.id===id);
     if(!v) return;
@@ -3786,6 +3832,8 @@ function abrirModalVencimiento(id, diaPrefill){
     document.getElementById('vcMonto').value = (v.montosPorMes && v.montosPorMes[cicloActual]) || 0;
     document.getElementById('vcNotas').value = v.notas || '';
     delBtn.style.display = 'block';
+    repetirWrap.style.display = 'none';
+    document.getElementById('btnGuardarVencimiento').textContent = 'Guardar cambios';
   } else {
     document.getElementById('vencModalTitle').textContent = 'Nuevo vencimiento';
     document.getElementById('vcDetalle').value = '';
@@ -3794,9 +3842,16 @@ function abrirModalVencimiento(id, diaPrefill){
     document.getElementById('vcMonto').value = 0;
     document.getElementById('vcNotas').value = '';
     delBtn.style.display = 'none';
+    repetirWrap.style.display = 'flex';
+    document.getElementById('btnGuardarVencimiento').textContent = 'Guardar y agregar otro';
   }
+  document.getElementById('vcDetalle').focus();
   document.getElementById('overlayVencimiento').classList.add('show');
 }
+
+document.getElementById('vcRepetir').addEventListener('change', (e)=>{
+  document.getElementById('vcRepetirMesesBox').style.display = e.target.checked ? 'block' : 'none';
+});
 
 function actualizarBadgeVencimientos(){
   const ciclo = getCicloActual();
@@ -3809,70 +3864,6 @@ function actualizarBadgeVencimientos(){
   if(urgentes>0){ badge.textContent = urgentes; badge.style.display = 'inline-block'; }
   else{ badge.style.display = 'none'; }
 }
-
-/* ============================================================
-   CALCULADORA DE COMISIÓN MERCADO PAGO
-   ============================================================ */
-const MP_TASAS = {
-  qrDebito: 0.0166, qrCredito: 0.0777, qrCuenta: 0.0100,
-  tarjDebito: 0.0401, tarjCredito: 0.0777
-};
-
-function populateMpMesSelect(){
-  const sel = document.getElementById('mpMesSelect');
-  const meses = getMesesConActividad();
-  const prev = sel.value;
-  sel.innerHTML = meses.map(m=>`<option value="${m}">${formatMes(m)}</option>`).join('');
-  if(meses.includes(prev)) sel.value = prev;
-}
-
-function calcularComisionMP(){
-  const ym = document.getElementById('mpMesSelect').value;
-  if(!ym){ document.getElementById('mpCalcResultado').innerHTML = 'No hay ventas registradas todavía.'; return null; }
-
-  const ventasDelMes = SALES.filter(s => s.fecha && s.fecha.slice(0,7)===ym);
-  const sumaPorMedio = (medio) => ventasDelMes
-    .filter(s=>String(s.medioPago||'').trim().toLowerCase()===medio.toLowerCase())
-    .reduce((a,s)=>a+s.cantidad*s.precioUnitario,0);
-
-  // Débito y Crédito son medios de pago propios → comisión exacta
-  const totalDebito = sumaPorMedio('Débito');
-  const totalCredito = sumaPorMedio('Crédito');
-  const comisionTarj = totalDebito*MP_TASAS.tarjDebito + totalCredito*MP_TASAS.tarjCredito;
-
-  // QR es un solo medio de pago (no distingue débito/crédito) → se estima con el % que elijas
-  const totalQR = sumaPorMedio('QR');
-  const pctQrDebito = Math.min(100, Math.max(0, parseFloat(document.getElementById('mpPctQrDebito').value) || 0)) / 100;
-  const comisionQR = totalQR*pctQrDebito*MP_TASAS.qrDebito + totalQR*(1-pctQrDebito)*MP_TASAS.qrCredito;
-
-  const comisionTotal = comisionQR + comisionTarj;
-
-  document.getElementById('mpCalcResultado').innerHTML = `
-    QR del mes: ${fmt(totalQR)} (estimado según el % que elegiste) → comisión: ${fmt(comisionQR)}<br>
-    Débito del mes: ${fmt(totalDebito)} (exacto) → comisión: ${fmt(totalDebito*MP_TASAS.tarjDebito)}<br>
-    Crédito del mes: ${fmt(totalCredito)} (exacto) → comisión: ${fmt(totalCredito*MP_TASAS.tarjCredito)}<br>
-    <span style="font-size:16px;">Comisión total: ${fmt(comisionTotal)}</span>
-  `;
-  return { ym, comisionTotal };
-}
-
-['mpMesSelect','mpPctQrDebito'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', calcularComisionMP);
-  document.getElementById(id).addEventListener('change', calcularComisionMP);
-});
-
-document.getElementById('btnGenerarComisionMP').addEventListener('click', async ()=>{
-  const resultado = calcularComisionMP();
-  if(!resultado || resultado.comisionTotal<=0){ showToast('No hay nada que cargar para ese mes'); return; }
-  GASTOS.push({
-    id: uid(), fecha: `${resultado.ym}-28`, detalle: 'Comisión Mercado Pago',
-    categoria: 'Comisiones', monto: Math.round(resultado.comisionTotal), medioPago: 'Descuento automático'
-  });
-  await saveGastos();
-  renderGastosTabla();
-  renderAnalisis();
-  showToast('Comisión cargada como gasto ✓');
-});
 
 function renderGastosFijosTable(){
   document.getElementById('gastosFijosYearLabel').textContent = finYear;
@@ -4000,6 +3991,14 @@ document.getElementById('btnEliminarVencimientoModal').addEventListener('click',
   renderAnalisis();
   showToast('Gasto fijo borrado');
 });
+function sumarMeses(yearMonth, n){
+  const [y, m] = yearMonth.split('-').map(Number);
+  const total = (y*12 + (m-1)) + n;
+  const nuevoY = Math.floor(total/12);
+  const nuevoM = (total%12) + 1;
+  return `${nuevoY}-${String(nuevoM).padStart(2,'0')}`;
+}
+
 document.getElementById('btnGuardarVencimiento').addEventListener('click', async ()=>{
   const detalle = document.getElementById('vcDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al vencimiento'); return; }
@@ -4017,14 +4016,38 @@ document.getElementById('btnGuardarVencimiento').addEventListener('click', async
       if(!v.montosPorMes) v.montosPorMes = {};
       v.montosPorMes[cicloActual] = monto;
     }
-  } else {
-    VENCIMIENTOS.push({ id: uid(), detalle, categoria, diaDelMes: dia, notas, montosPorMes: { [cicloActual]: monto }, pagadoMeses: [] });
+    await saveVencimientos();
+    document.getElementById('overlayVencimiento').classList.remove('show');
+    renderGastosFijosTable();
+    renderVencCalendar();
+    showToast('Vencimiento actualizado ✓');
+    return;
   }
+
+  const montosPorMes = { [cicloActual]: monto };
+  const repetir = document.getElementById('vcRepetir').checked;
+  if(repetir){
+    const cantidad = Math.min(24, Math.max(1, parseInt(document.getElementById('vcRepetirCantidad').value, 10) || 1));
+    for(let i=1; i<=cantidad; i++){
+      montosPorMes[sumarMeses(cicloActual, i)] = monto;
+    }
+  }
+
+  VENCIMIENTOS.push({ id: uid(), detalle, categoria, diaDelMes: dia, notas, montosPorMes, pagadoMeses: [] });
   await saveVencimientos();
-  document.getElementById('overlayVencimiento').classList.remove('show');
   renderGastosFijosTable();
   renderVencCalendar();
-  showToast(vencEditandoId ? 'Vencimiento actualizado ✓' : 'Vencimiento agregado ✓');
+  showToast(repetir ? `Vencimiento agregado ✓ (repetido en ${Object.keys(montosPorMes).length} meses)` : 'Vencimiento agregado ✓');
+
+  // Dejamos el modal abierto y listo para cargar el próximo, sin tener que reabrirlo
+  document.getElementById('vcDetalle').value = '';
+  document.getElementById('vcCategoria').value = '';
+  document.getElementById('vcMonto').value = 0;
+  document.getElementById('vcNotas').value = '';
+  document.getElementById('vcRepetir').checked = false;
+  document.getElementById('vcRepetirMesesBox').style.display = 'none';
+  populateCategoriasList();
+  document.getElementById('vcDetalle').focus();
 });
 
 /* ============================================================
@@ -4258,6 +4281,57 @@ document.getElementById('btnGenerarCatalogoPDF').addEventListener('click', ()=>{
 
   document.getElementById('overlayCatalogoPDF').classList.remove('show');
   setTimeout(()=>{ window.print(); }, 150);
+});
+
+/* ============================================================
+   DESHACER UNA IMPORTACIÓN (por lote, sin tocar lo cargado a mano)
+   ============================================================ */
+function getLotesImportacion(){
+  const lotes = {};
+  SALES.forEach(s=>{
+    if(s.origen==='excel' && s.loteId){
+      if(!lotes[s.loteId]) lotes[s.loteId] = { loteId: s.loteId, archivo: s.loteArchivo || 'Excel', fecha: s.loteFecha || '', count: 0, total: 0 };
+      lotes[s.loteId].count++;
+      lotes[s.loteId].total += s.cantidad * s.precioUnitario;
+    }
+  });
+  return Object.values(lotes).sort((a,b)=> (b.loteId||'').localeCompare(a.loteId||''));
+}
+
+function renderLotesImport(){
+  const lotes = getLotesImportacion();
+  const box = document.getElementById('loteImportList');
+  if(lotes.length===0){
+    box.innerHTML = '<div class="empty-state" style="padding:14px;"><span class="big">🗂️</span>No hay importaciones registradas con esta función todavía (las que ya hiciste antes de hoy no quedaron marcadas).</div>';
+    return;
+  }
+  box.innerHTML = lotes.map(l=>`
+    <div class="venc-row">
+      <span class="venc-detalle">${escapeHtml(l.archivo)}<br><span style="font-weight:600;color:var(--ink-faint);font-size:11px;">${l.fecha}</span></span>
+      <span class="venc-dia">${l.count} venta${l.count===1?'':'s'} · ${fmt(l.total)}</span>
+      <button class="venc-del" data-action="deshacer-lote" data-lote="${l.loteId}" title="Eliminar este lote completo">🗑️ Eliminar</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('btnDeshacerImport').addEventListener('click', ()=>{
+  renderLotesImport();
+  document.getElementById('overlayDeshacerImport').classList.add('show');
+});
+document.getElementById('btnCerrarDeshacerImport').addEventListener('click', ()=>{
+  document.getElementById('overlayDeshacerImport').classList.remove('show');
+});
+document.getElementById('loteImportList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('[data-action="deshacer-lote"]');
+  if(!btn) return;
+  const loteId = btn.dataset.lote;
+  const n = SALES.filter(s=>s.loteId===loteId).length;
+  if(!confirm(`¿Eliminar las ${n} ventas de esta importación? Esto NO afecta nada de lo que cargaste a mano.`)) return;
+  SALES = SALES.filter(s=>s.loteId!==loteId);
+  await saveSales();
+  renderVentas();
+  renderLotesImport();
+  showToast('Importación deshecha ✓');
 });
 
 async function boot(){
