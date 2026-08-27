@@ -902,6 +902,25 @@
   table.ventas-table thead th[data-sort]:hover{background:#3A3020;}
   .sort-arrow{display:inline-block;width:10px;font-size:10px;opacity:.45;}
   th[data-sort].sort-active .sort-arrow{opacity:1;color:var(--gold-light);}
+
+  .col-filter-icon{display:inline-block;font-size:9px;opacity:.6;cursor:pointer;padding:2px 3px;margin-left:2px;}
+  .col-filter-icon:hover{opacity:1;}
+  .col-filter-icon.activo{opacity:1;color:var(--gold-light);}
+  .col-filter-dropdown{
+    position:absolute;top:100%;left:0;z-index:70;background:#fff;color:var(--ink);
+    border:2px solid var(--gold);border-radius:10px;padding:10px;box-shadow:0 10px 28px rgba(0,0,0,.25);
+    min-width:200px;max-width:260px;text-transform:none;letter-spacing:normal;font-weight:600;cursor:default;
+  }
+  .col-filter-actions{display:flex;gap:6px;margin-bottom:8px;}
+  .col-filter-actions button{
+    flex:1;background:var(--gold-pale);border:1px solid var(--gold-light);border-radius:7px;
+    padding:5px 6px;font-size:10.5px;font-weight:700;color:var(--gold-deep);cursor:pointer;
+  }
+  .col-filter-list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+  .col-filter-item{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:4px 3px;border-radius:6px;cursor:pointer;}
+  .col-filter-item:hover{background:var(--gold-pale);}
+  .col-filter-item input{width:15px;height:15px;cursor:pointer;flex:0 0 auto;}
+
   table.ventas-table td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
   table.ventas-table tbody tr:nth-child(even){background:var(--cream-deep);}
@@ -1016,8 +1035,8 @@
 
 <nav class="tabs" id="tabsNav">
   <div class="tabs-scroll">
-    <button class="tab-btn active" data-tab="vender"><span class="ico">🛒</span>Ventas POS</button>
-    <button class="tab-btn" data-tab="ventas"><span class="ico">🧾</span>Historial</button>
+    <button class="tab-btn active" data-tab="vender"><span class="ico">🛒</span>Vender</button>
+    <button class="tab-btn" data-tab="ventas"><span class="ico">🧾</span>Ventas</button>
     <button class="tab-btn" data-tab="productos"><span class="ico">💰</span>Productos</button>
     <button class="tab-btn" data-tab="proveedores"><span class="ico">🏷️</span>Proveedores</button>
     <button class="tab-btn" data-tab="admin"><span class="ico">💼</span>Administración<span class="tab-badge" id="tabBadgeAdmin" style="display:none;"></span></button>
@@ -1025,22 +1044,25 @@
   </div>
   <div class="tabs-actions">
     <div class="action-bar-inline" data-for="ventas">
-      <button class="btn btn-gold btn-sm" id="btnExportarTodo">💾 Exportar todo (Excel)</button>
-      <button class="btn btn-outline btn-sm" id="btnImportarVentas" title="Siempre agrega filas nuevas, nunca actualiza ni reemplaza lo que ya tenés cargado. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importar historial (Excel)</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarVentas" title="Siempre agrega filas nuevas, nunca actualiza ni reemplaza lo que ya tenés cargado. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importación VENTAS</button>
       <input type="file" id="fileExcelVentas" accept=".xlsx,.xls,.csv" style="display:none;">
       <button class="btn btn-outline btn-sm" id="btnDeshacerImport" title="Ver y eliminar una importación completa, sin tocar lo cargado a mano">🗂️ Deshacer una importación</button>
     </div>
     <div class="action-bar-inline" data-for="productos">
-      <button class="btn btn-outline btn-sm" id="btnImportarExcel" title="Busca el producto por nombre exacto. Si ya existe, lo actualiza. Si no existe, lo agrega nuevo">📤 Importar Excel</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarExcel" title="Busca el producto por nombre exacto. Si ya existe, lo actualiza. Si no existe, lo agrega nuevo">📤 Importación PRODUCTOS</button>
       <input type="file" id="fileExcel" accept=".xlsx,.xls,.csv" style="display:none;">
       <input type="file" id="fotoFileInput" accept="image/*" style="display:none;">
       <button class="btn btn-outline btn-sm" id="btnExportarCatalogoPDF">🖨️ Exportar catálogo (PDF)</button>
       <button class="btn btn-gold btn-sm" id="btnNuevoProducto">＋ Nuevo producto</button>
+      <button class="btn btn-danger btn-sm" id="btnEliminarTodosProductos" title="Borra todos los productos de una sola vez, para volver a importar desde cero">🗑️ Eliminar todos</button>
     </div>
     <div class="action-bar-inline" data-for="admin">
-      <button class="btn btn-outline btn-sm" id="btnImportarGastos" title="Siempre agrega, no actualiza. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importar gastos (Excel)</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarGastos" title="Siempre agrega, no actualiza. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importación GASTOS</button>
       <input type="file" id="fileExcelGastos" accept=".xlsx,.xls,.csv" style="display:none;">
       <button class="btn btn-gold btn-sm" id="btnNuevoGasto">＋ Nuevo gasto</button>
+    </div>
+    <div class="action-bar-inline" data-for="analisis">
+      <button class="btn btn-gold btn-sm" id="btnExportarTodo">💾 Exportar todo (Excel)</button>
     </div>
   </div>
 </nav>
@@ -1113,30 +1135,10 @@
     <div class="ventas-stats-sticky" id="ventasStatsBlock">
       <div class="vfs-filters">
         <div class="chip-row">
-          <button class="chip-v active" data-f="hoy">☀️ Hoy</button>
-          <button class="chip-v" data-f="mes">📅 Este mes</button>
-          <button class="chip-v" data-f="dia">📆 Elegir día</button>
-          <button class="chip-v" data-f="acumulado">📊 Acumulado</button>
-        </div>
-        <select class="field vfs-medio-select" id="filtroMedio">
-          <option value="">Medio de pago: Todos</option>
-          <option value="Efectivo">Efectivo</option>
-          <option value="Transferencia">Transferencia</option>
-          <option value="QR">QR</option>
-          <option value="Débito">Débito</option>
-          <option value="Crédito">Crédito</option>
-        </select>
-        <div class="vfs-inline-box vfs-float" id="diaBox" style="display:none;">
-          <label>Desde</label>
-          <input type="date" class="field" id="diaSelect">
-          <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
-          <input type="date" class="field" id="diaSelectHasta">
-        </div>
-        <div class="vfs-inline-box vfs-float" id="mesAnterioresBox" style="display:none;">
-          <label>Ver un mes puntual</label>
-          <select class="field" id="mesAnteriorSelect">
-            <option value="">Todos los meses</option>
-          </select>
+          <button class="chip-v active" data-vf="hoy">☀️ Hoy</button>
+          <button class="chip-v" data-vf="meses">📅 Meses</button>
+          <button class="chip-v" data-vf="acumulado">📊 Acumulado</button>
+          <button class="chip-v" data-vf="rango">📆 Desde / Hasta</button>
         </div>
       </div>
       <div class="stat-compact stat-compact-main" data-icon="🧾">
@@ -1153,6 +1155,21 @@
         <span class="stat-compact-val red" id="statMontoDeben">$ 0</span>
         <span class="stat-compact-sub" id="statClientesDeben">0 clientes</span>
         <div class="deben-tooltip" id="debenTooltip"></div>
+      </div>
+    </div>
+
+    <div class="venc-card" id="ventasMesesBox" style="display:none;padding:14px;margin-bottom:14px;">
+      <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
+      <div id="ventasMesesChecklist" class="analisis-meses-checklist"></div>
+    </div>
+    <div class="anotar-form-grid" id="ventasRangoBox" style="display:none;margin-bottom:14px;">
+      <div class="mini-field anotar-field-fecha">
+        <label>Desde</label>
+        <input type="date" class="field" id="diaSelect">
+      </div>
+      <div class="mini-field anotar-field-fecha">
+        <label>Hasta</label>
+        <input type="date" class="field" id="diaSelectHasta">
       </div>
     </div>
 
@@ -1183,13 +1200,13 @@
             <tr id="ventasTheadRow">
               <th><input type="checkbox" id="checkAllVentas"></th>
               <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
-              <th data-sort="producto">Producto <span class="sort-arrow"></span></th>
+              <th data-sort="producto">Producto <span class="sort-arrow"></span> <span class="col-filter-icon" data-filter-field="producto">🔽</span></th>
               <th data-sort="cantidad">Cant. <span class="sort-arrow"></span></th>
               <th data-sort="precio">$ Precio <span class="sort-arrow"></span></th>
               <th data-sort="subtotal">$ Subtotal <span class="sort-arrow"></span></th>
-              <th data-sort="medio">Medio de pago <span class="sort-arrow"></span></th>
-              <th data-sort="facturado">Facturado <span class="sort-arrow"></span></th>
-              <th data-sort="cliente">Cliente <span class="sort-arrow"></span></th>
+              <th data-sort="medio">Medio de pago <span class="sort-arrow"></span> <span class="col-filter-icon" data-filter-field="medioPago">🔽</span></th>
+              <th data-sort="facturado">Facturado <span class="sort-arrow"></span> <span class="col-filter-icon" data-filter-field="facturado">🔽</span></th>
+              <th data-sort="cliente">Cliente <span class="sort-arrow"></span> <span class="col-filter-icon" data-filter-field="cliente">🔽</span></th>
               <th></th>
             </tr>
           </thead>
@@ -1538,8 +1555,9 @@ let CART = {};
 let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
-let ventasFiltro = 'hoy';
 let selectedDiasSueltos = new Set();
+let ventasFiltroModo = 'hoy';
+let ventasMesesElegidos = new Set();
 let ventasSortField = 'fecha';
 let ventasSortDir = 'desc';
 let selectedVentaIds = new Set();
@@ -2227,6 +2245,26 @@ document.getElementById('btnExportarCatalogoPDF').addEventListener('click', ()=>
   setTimeout(()=>window.print(), 150);
 });
 
+document.getElementById('btnEliminarTodosProductos').addEventListener('click', async ()=>{
+  const total = PRODUCTS.length;
+  if(total===0){ showToast('No hay productos cargados'); return; }
+  if(!confirm(`¿Eliminar los ${total} productos que tenés cargados? Esto NO se puede deshacer. Recomendado: exportá un backup antes (botón "Exportar catálogo" o desde Historial → "Exportar todo").`)) return;
+  if(!confirm(`Última confirmación: se van a borrar ${total} productos, sus fotos y todo su historial de stock. ¿Estás segura?`)) return;
+
+  showToast('Borrando productos y fotos, un momento...');
+  for(const p of PRODUCTS){
+    try{ await window.storage.delete('dc_photo_'+p.id, true); }catch(e){}
+  }
+  PRODUCTS = [];
+  await saveProducts();
+  renderChipsCatalogo();
+  renderCatalogo();
+  renderChipsCostos();
+  renderCostos();
+  renderProveedores();
+  showToast(`${total} productos eliminados ✓. Ya podés importar tu Excel nuevo.`);
+});
+
 function renderCostos(){
   const term = document.getElementById('searchCostos').value.trim().toLowerCase();
   const list = document.getElementById('listCostos');
@@ -2368,7 +2406,7 @@ document.getElementById('listCostos').addEventListener('click', async (e)=>{
     p.activo = (p.activo === false) ? true : false;
     await saveProducts();
     renderCostos(); renderCatalogo();
-    showToast(p.activo === false ? 'Marcado como sin stock — ya no aparece en Ventas POS' : 'Producto reactivado ✓');
+    showToast(p.activo === false ? 'Marcado como sin stock — ya no aparece en Vender' : 'Producto reactivado ✓');
   }
   if(action==='borrar'){
     if(!confirm('¿Eliminar "'+p.nombre+'" del catálogo? Esto no borra ventas ya registradas.')) return;
@@ -2640,11 +2678,19 @@ document.getElementById('fileExcelVentas').addEventListener('change', (e)=>{
         const match = findProductFuzzy(producto);
         const nombreFinal = match ? match.nombre : producto.toUpperCase();
 
-        let precioUnitario = parseFloat(getField(norm, ['PRECIO','PRECIO UNITARIO','UNITARIO']));
+        let precioUnitario = NaN;
+        const unitarioRaw = getField(norm, ['PRECIO UNITARIO','UNITARIO']);
+        if(unitarioRaw !== ''){
+          const v = parseFloat(unitarioRaw);
+          if(!isNaN(v)) precioUnitario = v;
+        }
         if(isNaN(precioUnitario)){
-          const subtotal = parseFloat(getField(norm, ['SUBTOTAL','TOTAL','IMPORTE']));
-          if(!isNaN(subtotal) && cantidad>0){
-            precioUnitario = subtotal / cantidad;
+          // "PRECIO", "SUBTOTAL", "TOTAL" e "IMPORTE" se tratan como el total de la línea,
+          // no como precio por unidad — se divide por la cantidad
+          const totalRaw = getField(norm, ['SUBTOTAL','TOTAL','IMPORTE','PRECIO']);
+          if(totalRaw !== ''){
+            const v = parseFloat(totalRaw);
+            if(!isNaN(v) && cantidad>0) precioUnitario = v / cantidad;
           }
         }
         if(isNaN(precioUnitario)){
@@ -2931,60 +2977,171 @@ document.getElementById('diasGridSueltos').addEventListener('click', (e)=>{
   renderVentas();
 });
 
+document.getElementById('diaSelect').addEventListener('change', renderVentas);
+document.getElementById('diaSelectHasta').addEventListener('change', renderVentas);
+
+function populateVentasMesesChecklist(){
+  const box = document.getElementById('ventasMesesChecklist');
+  const meses = getMesesConActividad();
+  if(ventasMesesElegidos.size===0 && meses.length>0){
+    ventasMesesElegidos.add(meses[0]); // por defecto, el más reciente
+  }
+  box.innerHTML = meses.map(m=>{
+    const checked = ventasMesesElegidos.has(m);
+    return `<label class="analisis-mes-check ${checked?'checked':''}">
+      <input type="checkbox" data-mes="${m}" ${checked?'checked':''}>
+      ${formatMes(m)}
+    </label>`;
+  }).join('');
+}
+
+document.getElementById('ventasMesesChecklist').addEventListener('change', (e)=>{
+  const input = e.target.closest('input[data-mes]');
+  if(!input) return;
+  const mes = input.dataset.mes;
+  if(input.checked) ventasMesesElegidos.add(mes);
+  else ventasMesesElegidos.delete(mes);
+  input.closest('.analisis-mes-check').classList.toggle('checked', input.checked);
+  renderVentas();
+});
+
 document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
   chip.addEventListener('click', ()=>{
     document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
-    ventasFiltro = chip.dataset.f;
+    ventasFiltroModo = chip.dataset.vf;
     selectedDiasSueltos.clear();
     document.getElementById('mesDiasSueltos').value = '';
     renderDiasGridSueltos();
-    const boxMes = document.getElementById('mesAnterioresBox');
-    const boxDia = document.getElementById('diaBox');
-    boxMes.style.display = 'none';
-    boxDia.style.display = 'none';
-    if(ventasFiltro === 'acumulado'){
-      populateMesAnteriorSelect();
-      boxMes.style.display = 'block';
-    } else if(ventasFiltro === 'dia'){
-      if(!document.getElementById('diaSelect').value){
-        document.getElementById('diaSelect').value = todayISO();
-      }
-      boxDia.style.display = 'block';
-    }
+    document.getElementById('ventasMesesBox').style.display = ventasFiltroModo==='meses' ? 'block' : 'none';
+    document.getElementById('ventasRangoBox').style.display = ventasFiltroModo==='rango' ? 'flex' : 'none';
+    if(ventasFiltroModo==='meses') populateVentasMesesChecklist();
     renderVentas();
   });
 });
 
-document.getElementById('diaSelect').addEventListener('change', renderVentas);
-document.getElementById('diaSelectHasta').addEventListener('change', renderVentas);
-document.getElementById('mesAnteriorSelect').addEventListener('change', renderVentas);
-document.getElementById('filtroMedio').addEventListener('change', renderVentas);
-
 document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
-  ventasFiltro = 'acumulado';
+  ventasFiltroModo = 'hoy';
   document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
-  document.querySelector('#panel-ventas .chip-row .chip-v[data-f="acumulado"]').classList.add('active');
-  populateMesAnteriorSelect();
-  document.getElementById('mesAnteriorSelect').value = '';
-  document.getElementById('mesAnterioresBox').style.display = 'block';
-  document.getElementById('diaBox').style.display = 'none';
+  document.querySelector('#panel-ventas .chip-row .chip-v[data-vf="hoy"]').classList.add('active');
+  document.getElementById('ventasMesesBox').style.display = 'none';
+  document.getElementById('ventasRangoBox').style.display = 'none';
+  document.getElementById('diaSelect').value = '';
   document.getElementById('diaSelectHasta').value = '';
-  document.getElementById('filtroMedio').value = '';
   document.getElementById('searchHistorial').value = '';
   selectedDiasSueltos.clear();
+  ventasMesesElegidos.clear();
   document.getElementById('mesDiasSueltos').value = '';
   renderDiasGridSueltos();
+  filtroColumnas.producto.clear();
+  filtroColumnas.medioPago.clear();
+  filtroColumnas.cliente.clear();
+  filtroColumnas.facturado.clear();
   renderVentas();
   showToast('Filtros limpiados ✓');
 });
 
-function aplicarFiltrosSecundarios(items){
-  const medio = document.getElementById('filtroMedio').value;
-  const term = document.getElementById('searchHistorial').value.trim().toLowerCase();
-  if(medio){
-    items = items.filter(s => String(s.medioPago||'').trim().toLowerCase() === medio.toLowerCase());
+/* ---- Filtros tipo Excel por columna ---- */
+let filtroColumnas = {
+  producto: new Set(),
+  medioPago: new Set(),
+  cliente: new Set(),
+  facturado: new Set(),
+};
+let columnaFiltroAbierta = null;
+
+function getValoresColumna(campo){
+  const vals = new Set();
+  SALES.forEach(s=>{
+    if(campo==='facturado'){
+      vals.add(s.facturado ? 'Facturado' : 'No facturado');
+    } else {
+      const v = String(s[campo]||'').trim();
+      vals.add(v || '(vacío)');
+    }
+  });
+  return Array.from(vals).sort((a,b)=>a.localeCompare(b));
+}
+
+function toggleColumnFilterDropdown(campo, thEl){
+  if(columnaFiltroAbierta === campo){
+    cerrarColumnFilterDropdown();
+    return;
   }
+  cerrarColumnFilterDropdown();
+  columnaFiltroAbierta = campo;
+  const valores = getValoresColumna(campo);
+  const activos = filtroColumnas[campo];
+  const dd = document.createElement('div');
+  dd.className = 'col-filter-dropdown';
+  dd.innerHTML = `
+    <div class="col-filter-actions">
+      <button data-action="col-todos">Tildar todos</button>
+      <button data-action="col-ninguno">Destildar todos</button>
+    </div>
+    <div class="col-filter-list">
+      ${valores.map(v=>`
+        <label class="col-filter-item">
+          <input type="checkbox" value="${escapeHtml(v)}" ${activos.size===0 || activos.has(v) ? 'checked' : ''}>
+          ${escapeHtml(v)}
+        </label>
+      `).join('')}
+    </div>
+    <button class="btn btn-gold btn-sm col-filter-aplicar" style="width:100%;margin-top:8px;">Aplicar</button>
+  `;
+  thEl.style.position = 'relative';
+  thEl.appendChild(dd);
+
+  dd.querySelector('[data-action="col-todos"]').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    dd.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=true);
+  });
+  dd.querySelector('[data-action="col-ninguno"]').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    dd.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+  });
+  dd.querySelector('.col-filter-aplicar').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const marcados = Array.from(dd.querySelectorAll('input[type="checkbox"]:checked')).map(c=>c.value);
+    if(marcados.length === valores.length){
+      filtroColumnas[campo].clear(); // todos tildados = sin filtro
+    } else {
+      filtroColumnas[campo] = new Set(marcados);
+    }
+    cerrarColumnFilterDropdown();
+    renderVentas();
+  });
+  dd.addEventListener('click', (e)=>e.stopPropagation());
+}
+
+function cerrarColumnFilterDropdown(){
+  document.querySelectorAll('.col-filter-dropdown').forEach(el=>el.remove());
+  columnaFiltroAbierta = null;
+}
+
+document.addEventListener('click', cerrarColumnFilterDropdown);
+
+document.getElementById('ventasTheadRow').addEventListener('click', (e)=>{
+  const filterIcon = e.target.closest('.col-filter-icon');
+  if(!filterIcon) return;
+  e.stopPropagation();
+  const campo = filterIcon.dataset.filterField;
+  const th = filterIcon.closest('th');
+  toggleColumnFilterDropdown(campo, th);
+});
+
+function valorColumnaDeVenta(s, campo){
+  if(campo==='facturado') return s.facturado ? 'Facturado' : 'No facturado';
+  return String(s[campo]||'').trim() || '(vacío)';
+}
+
+function aplicarFiltrosSecundarios(items){
+  const term = document.getElementById('searchHistorial').value.trim().toLowerCase();
+  ['producto','medioPago','cliente','facturado'].forEach(campo=>{
+    if(filtroColumnas[campo].size > 0){
+      items = items.filter(s => filtroColumnas[campo].has(valorColumnaDeVenta(s, campo)));
+    }
+  });
   if(term){
     items = items.filter(s =>
       (s.producto||'').toLowerCase().includes(term) ||
@@ -3085,6 +3242,7 @@ function updateSortArrows(){
 }
 
 document.getElementById('ventasTheadRow').addEventListener('click', (e)=>{
+  if(e.target.closest('.col-filter-icon')) return;
   const th = e.target.closest('th[data-sort]');
   if(!th) return;
   const field = th.dataset.sort;
@@ -3101,42 +3259,42 @@ function renderVentas(){
   const tbody = document.getElementById('ventasTbody');
   let items = SALES.slice();
   const todayStr = todayISO();
-  const curMonth = todayStr.slice(0,7);
-
-  const labels = {hoy:'TOTAL DE HOY', mes:'TOTAL DE ESTE MES'};
 
   if(selectedDiasSueltos.size > 0){
     items = items.filter(s=>s.fecha && selectedDiasSueltos.has(s.fecha));
     const n = selectedDiasSueltos.size;
     document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${n} DÍA${n===1?'':'S'} ELEGIDO${n===1?'':'S'}`;
-  }
-  else if(ventasFiltro==='hoy') items = items.filter(s=>s.fecha===todayStr);
-  else if(ventasFiltro==='dia'){
-    const desde = document.getElementById('diaSelect').value || todayStr;
+  } else if(ventasFiltroModo === 'hoy'){
+    items = items.filter(s=>s.fecha===todayStr);
+    document.getElementById('ventasFiltroLabel').textContent = 'TOTAL DE HOY';
+  } else if(ventasFiltroModo === 'meses'){
+    items = items.filter(s=>s.fecha && ventasMesesElegidos.has(s.fecha.slice(0,7)));
+    const n = ventasMesesElegidos.size;
+    document.getElementById('ventasFiltroLabel').textContent = n>0
+      ? `TOTAL DE ${n} MES${n===1?'':'ES'} ELEGIDO${n===1?'':'S'}`
+      : 'ELEGÍ UN MES ABAJO';
+  } else if(ventasFiltroModo === 'acumulado'){
+    document.getElementById('ventasFiltroLabel').textContent = 'TOTAL ACUMULADO';
+  } else if(ventasFiltroModo === 'rango'){
+    const desde = document.getElementById('diaSelect').value;
     const hasta = document.getElementById('diaSelectHasta').value;
-    if(hasta && hasta !== desde){
-      const d1 = desde < hasta ? desde : hasta;
-      const d2 = desde < hasta ? hasta : desde;
-      items = items.filter(s=>s.fecha && s.fecha>=d1 && s.fecha<=d2);
-      document.getElementById('ventasFiltroLabel').textContent = `TOTAL ${d1.split('-').reverse().join('/')} A ${d2.split('-').reverse().join('/')}`;
+    if(desde || hasta){
+      let d1 = desde, d2 = hasta;
+      if(d1 && d2 && d1 > d2){ [d1, d2] = [d2, d1]; }
+      if(d1) items = items.filter(s=>s.fecha && s.fecha>=d1);
+      if(d2) items = items.filter(s=>s.fecha && s.fecha<=d2);
+      if(d1 && d2 && d1===d2){
+        document.getElementById('ventasFiltroLabel').textContent = `TOTAL DEL ${d1.split('-').reverse().join('/')}`;
+      } else if(d1 && d2){
+        document.getElementById('ventasFiltroLabel').textContent = `TOTAL ${d1.split('-').reverse().join('/')} A ${d2.split('-').reverse().join('/')}`;
+      } else if(d1){
+        document.getElementById('ventasFiltroLabel').textContent = `TOTAL DESDE ${d1.split('-').reverse().join('/')}`;
+      } else {
+        document.getElementById('ventasFiltroLabel').textContent = `TOTAL HASTA ${d2.split('-').reverse().join('/')}`;
+      }
     } else {
-      items = items.filter(s=>s.fecha===desde);
-      document.getElementById('ventasFiltroLabel').textContent = `TOTAL DEL ${desde.split('-').reverse().join('/')}`;
+      document.getElementById('ventasFiltroLabel').textContent = 'ELEGÍ UN RANGO ABAJO';
     }
-  }
-  else if(ventasFiltro==='mes') items = items.filter(s=>s.fecha && s.fecha.slice(0,7)===curMonth);
-  else if(ventasFiltro==='acumulado'){
-    const mesElegido = document.getElementById('mesAnteriorSelect').value;
-    if(mesElegido){
-      items = items.filter(s=>s.fecha && s.fecha.slice(0,7)===mesElegido);
-      document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${formatMes(mesElegido).toUpperCase()}`;
-    } else {
-      document.getElementById('ventasFiltroLabel').textContent = 'TOTAL ACUMULADO';
-    }
-  }
-
-  if(selectedDiasSueltos.size===0 && (ventasFiltro==='hoy' || ventasFiltro==='mes')){
-    document.getElementById('ventasFiltroLabel').textContent = labels[ventasFiltro] || 'TOTAL';
   }
 
   items = aplicarFiltrosSecundarios(items);
@@ -3144,6 +3302,11 @@ function renderVentas(){
   items.sort(compareVentas);
 
   updateSortArrows();
+
+  document.querySelectorAll('.col-filter-icon').forEach(icon=>{
+    const campo = icon.dataset.filterField;
+    icon.classList.toggle('activo', filtroColumnas[campo] && filtroColumnas[campo].size > 0);
+  });
 
   const total = items.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
   document.getElementById('totalDia').textContent = fmt(total);
