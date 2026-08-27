@@ -737,25 +737,34 @@
   .cal-side .venc-cal-day{min-height:44px;padding:3px;}
   .cal-side .venc-cal-item{font-size:8px;}
   .gastos-fijos-side{flex:1 1 480px;min-width:0;}
+  .gf-scroll-wrap{position:relative;}
   .gastos-fijos-table-wrap{max-height:520px;overflow-y:auto;}
-  table.gastos-fijos-table{font-size:12px;min-width:900px;}
-  table.gastos-fijos-table th, table.gastos-fijos-table td{padding:7px 6px;white-space:nowrap;}
-  table.gastos-fijos-table .gf-detalle-cell{cursor:pointer;font-weight:800;min-width:110px;}
+  .gf-scroll-hint{
+    position:absolute;top:0;right:0;bottom:0;width:34px;pointer-events:none;
+    background:linear-gradient(to right, rgba(255,255,255,0), var(--card) 75%);
+    display:flex;align-items:center;justify-content:flex-end;padding-right:4px;
+    font-size:20px;font-weight:800;color:var(--gold-deep);opacity:.9;transition:opacity .2s;
+  }
+  .gf-scroll-hint.oculto{opacity:0;}
+  table.gastos-fijos-table{font-size:12px;min-width:1080px;}
+  table.gastos-fijos-table th, table.gastos-fijos-table td{padding:6px;white-space:nowrap;}
+  table.gastos-fijos-table .gf-detalle-cell{cursor:pointer;font-weight:800;min-width:120px;}
   table.gastos-fijos-table .gf-cat-badge{
     display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:999px;
     background:var(--gold-pale);color:var(--gold-deep);margin-top:2px;
   }
-  .gf-cell{display:flex;align-items:center;gap:3px;}
-  .gf-cell input{width:64px;border:1.5px solid transparent;border-radius:6px;padding:4px 5px;font-size:11.5px;font-weight:700;text-align:right;background:transparent;}
-  .gf-cell input:hover{border-color:var(--border);}
-  .gf-cell input:focus{border-color:var(--gold);background:#fff;outline:none;}
-  .gf-cell.pagado{background:var(--green-pale);}
-  .gf-cell.pagado input{color:var(--green);}
-  .gf-pago-toggle{
-    width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);background:#fff;
-    cursor:pointer;flex:0 0 auto;font-size:9px;line-height:1;padding:0;color:transparent;
+  .gf-cell{
+    display:flex;align-items:center;justify-content:center;padding:6px 4px;border-radius:8px;
+    cursor:pointer;border:1.5px solid transparent;
   }
-  .gf-cell.pagado .gf-pago-toggle{background:var(--green);border-color:var(--green);color:#fff;}
+  .gf-cell:hover{border-color:var(--border);}
+  .gf-cell input{
+    width:76px;border:none;border-radius:6px;padding:2px;font-size:15px;font-weight:800;
+    text-align:center;background:transparent;cursor:text;
+  }
+  .gf-cell input:focus{background:#fff;outline:2px solid var(--gold);}
+  .gf-cell.pagado{background:var(--green-pale);border-color:var(--green);}
+  .gf-cell.pagado input{color:var(--green);}
   #gastosFijosTotalRow{font-weight:800;background:var(--dark-surface);color:#fff;}
   #gastosFijosTotalRow td{padding:8px 6px;}
   @media(max-width:1000px){
@@ -835,26 +844,27 @@
     display:flex;align-items:stretch;gap:12px;margin-bottom:10px;flex-wrap:wrap;
     position:sticky;top:70px;z-index:15;background:var(--cream);padding-top:2px;
   }
-  .ventas-stats-sticky .stat-compact{flex:2.2 1 180px;padding:12px 14px;}
+  .ventas-stats-sticky .stat-compact{flex:1.5 1 150px;padding:10px 12px;}
   .vfs-filters{
-    flex:1.4 1 220px;display:flex;flex-direction:column;gap:6px;position:relative;
+    flex:2.2 1 260px;display:flex;flex-direction:column;gap:6px;position:relative;
     background:var(--card);border:2px solid var(--border);border-radius:15px;padding:10px;
   }
-  .vfs-filters .chip-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0;}
+  .vfs-filters .chip-row-5{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:0;}
   .vfs-filters .chip-v{padding:9px 8px;font-size:12px;border-radius:9px;text-align:center;white-space:nowrap;}
   .vfs-medio-select{font-size:12.5px;padding:7px 8px;}
 
-  /* Estos dos se despliegan flotando por arriba, sin empujar nada hacia abajo */
+  /* Estos se despliegan flotando por arriba, sin empujar nada hacia abajo */
   .vfs-float{
-    position:absolute;top:calc(100% + 6px);left:0;right:-380px;z-index:40;
+    position:absolute;top:calc(100% + 6px);left:0;right:-560px;z-index:40;
     box-shadow:0 10px 28px rgba(0,0,0,.18);
   }
-  @media(max-width:1100px){ .vfs-float{right:0;} }
+  @media(max-width:1300px){ .vfs-float{right:0;} }
   .vfs-inline-box{background:#fff;border:1.5px solid var(--gold-light);border-radius:10px;padding:10px 12px;}
   .vfs-inline-box label{font-size:10px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;display:block;margin-bottom:3px;}
   .vfs-inline-box input, .vfs-inline-box select{font-size:13px;padding:8px 9px;}
 
-  .dias-sueltos-box{background:var(--card);border:2px solid var(--border);border-radius:15px;padding:9px 12px;margin-bottom:10px;}
+  .dias-sueltos-box{background:var(--card);border:2px solid var(--border);border-radius:15px;padding:9px 12px;}
+  .dias-sueltos-box.vfs-float{background:#fff;border-color:var(--gold-light);}
   .dias-sueltos-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
   .dias-sueltos-head label{font-size:11px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;}
   .dias-sueltos-head select{font-size:13px;padding:6px 8px;max-width:180px;}
@@ -886,7 +896,8 @@
     }
     .ventas-stats-sticky .stat-compact{max-width:none;}
     .vfs-filters{max-width:none;}
-    .vfs-float{position:static;box-shadow:none;margin-top:6px;}
+    .vfs-float{position:static;box-shadow:none;margin-top:6px;max-width:none;}
+    .vfs-filters .chip-row-5{grid-template-columns:1fr 1fr;}
   }
   .total-dia{background:var(--dark-surface);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .total-dia .lbl{font-size:12px;color:var(--gold-light);font-weight:700;letter-spacing:.4px;}
@@ -1134,11 +1145,32 @@
   <section class="panel" id="panel-ventas">
     <div class="ventas-stats-sticky" id="ventasStatsBlock">
       <div class="vfs-filters">
-        <div class="chip-row">
+        <div class="chip-row chip-row-5">
           <button class="chip-v active" data-vf="hoy">☀️ Hoy</button>
           <button class="chip-v" data-vf="meses">📅 Meses</button>
           <button class="chip-v" data-vf="acumulado">📊 Acumulado</button>
           <button class="chip-v" data-vf="rango">📆 Desde / Hasta</button>
+          <button class="chip-v" data-vf="dias">🗓️ Días sueltos</button>
+        </div>
+
+        <div class="venc-card vfs-float" id="ventasMesesBox" style="display:none;padding:14px;">
+          <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
+          <div id="ventasMesesChecklist" class="analisis-meses-checklist"></div>
+        </div>
+        <div class="vfs-inline-box vfs-float" id="ventasRangoBox" style="display:none;">
+          <label>Desde</label>
+          <input type="date" class="field" id="diaSelect">
+          <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
+          <input type="date" class="field" id="diaSelectHasta">
+        </div>
+        <div class="dias-sueltos-box vfs-float" id="diasSueltosBox" style="display:none;">
+          <div class="dias-sueltos-head">
+            <label>📆 Días sueltos de</label>
+            <select class="field" id="mesDiasSueltos">
+              <option value="">Elegí un mes...</option>
+            </select>
+          </div>
+          <div class="dias-grid" id="diasGridSueltos"></div>
         </div>
       </div>
       <div class="stat-compact stat-compact-main" data-icon="🧾">
@@ -1156,31 +1188,6 @@
         <span class="stat-compact-sub" id="statClientesDeben">0 clientes</span>
         <div class="deben-tooltip" id="debenTooltip"></div>
       </div>
-    </div>
-
-    <div class="venc-card" id="ventasMesesBox" style="display:none;padding:14px;margin-bottom:14px;">
-      <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
-      <div id="ventasMesesChecklist" class="analisis-meses-checklist"></div>
-    </div>
-    <div class="anotar-form-grid" id="ventasRangoBox" style="display:none;margin-bottom:14px;">
-      <div class="mini-field anotar-field-fecha">
-        <label>Desde</label>
-        <input type="date" class="field" id="diaSelect">
-      </div>
-      <div class="mini-field anotar-field-fecha">
-        <label>Hasta</label>
-        <input type="date" class="field" id="diaSelectHasta">
-      </div>
-    </div>
-
-    <div class="dias-sueltos-box">
-      <div class="dias-sueltos-head">
-        <label>📆 Días sueltos de</label>
-        <select class="field" id="mesDiasSueltos">
-          <option value="">Elegí un mes...</option>
-        </select>
-      </div>
-      <div class="dias-grid" id="diasGridSueltos"></div>
     </div>
 
     <div class="ventas-main-full">
@@ -1296,12 +1303,15 @@
           <div class="price-lookup-title" style="font-size:19px;">💸 Gastos fijos <span id="gastosFijosYearLabel">2026</span></div>
           <button class="btn btn-outline btn-sm" id="btnNuevoVencimiento">＋ Agregar gasto fijo</button>
         </div>
-        <div class="table-wrap gastos-fijos-table-wrap">
-          <table class="ventas-table gastos-fijos-table" id="gastosFijosTable">
-            <thead><tr id="gastosFijosThead"></tr></thead>
-            <tbody id="gastosFijosTbody"></tbody>
-            <tfoot><tr id="gastosFijosTotalRow"></tr></tfoot>
-          </table>
+        <div class="gf-scroll-wrap" id="gfScrollWrap">
+          <div class="table-wrap gastos-fijos-table-wrap" id="gfTableWrap">
+            <table class="ventas-table gastos-fijos-table" id="gastosFijosTable">
+              <thead><tr id="gastosFijosThead"></tr></thead>
+              <tbody id="gastosFijosTbody"></tbody>
+              <tfoot><tr id="gastosFijosTotalRow"></tr></tfoot>
+            </table>
+          </div>
+          <div class="gf-scroll-hint" id="gfScrollHint">›</div>
         </div>
       </div>
     </div>
@@ -1925,6 +1935,12 @@ document.getElementById('tabsNav').addEventListener('click', (e)=>{
   document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
   updateTabsActions(btn.dataset.tab);
   window.scrollTo({top:0, behavior:'instant'});
+  if(btn.dataset.tab === 'admin' && typeof VENCIMIENTOS !== 'undefined'){
+    requestAnimationFrame(()=>{
+      scrollGastosFijosAlMesRelevante(VENCIMIENTOS);
+      actualizarSombraScrollGastosFijos();
+    });
+  }
 });
 
 /* ============================================================
@@ -3005,27 +3021,52 @@ document.getElementById('ventasMesesChecklist').addEventListener('change', (e)=>
   renderVentas();
 });
 
+function cerrarPanelesVentasFlotantes(){
+  document.getElementById('ventasMesesBox').style.display = 'none';
+  document.getElementById('ventasRangoBox').style.display = 'none';
+  document.getElementById('diasSueltosBox').style.display = 'none';
+}
+
 document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
+  chip.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const yaActivo = chip.classList.contains('active');
     document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
+
+    if(yaActivo && chip.dataset.vf !== 'hoy' && chip.dataset.vf !== 'acumulado'){
+      // tocar de nuevo el mismo botón (que tiene panel) lo cierra, sin perder la selección
+      cerrarPanelesVentasFlotantes();
+      chip.classList.add('active');
+      return;
+    }
+
     chip.classList.add('active');
     ventasFiltroModo = chip.dataset.vf;
-    selectedDiasSueltos.clear();
-    document.getElementById('mesDiasSueltos').value = '';
-    renderDiasGridSueltos();
-    document.getElementById('ventasMesesBox').style.display = ventasFiltroModo==='meses' ? 'block' : 'none';
-    document.getElementById('ventasRangoBox').style.display = ventasFiltroModo==='rango' ? 'flex' : 'none';
-    if(ventasFiltroModo==='meses') populateVentasMesesChecklist();
+    if(ventasFiltroModo !== 'dias') selectedDiasSueltos.clear();
+    cerrarPanelesVentasFlotantes();
+    if(ventasFiltroModo==='meses'){
+      document.getElementById('ventasMesesBox').style.display = 'block';
+      populateVentasMesesChecklist();
+    } else if(ventasFiltroModo==='rango'){
+      document.getElementById('ventasRangoBox').style.display = 'flex';
+    } else if(ventasFiltroModo==='dias'){
+      document.getElementById('diasSueltosBox').style.display = 'block';
+    }
     renderVentas();
   });
+});
+
+document.getElementById('panelVentasWrap')?.addEventListener('click', ()=>{});
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('.vfs-float') || e.target.closest('.chip-row-5')) return;
+  cerrarPanelesVentasFlotantes();
 });
 
 document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
   ventasFiltroModo = 'hoy';
   document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
   document.querySelector('#panel-ventas .chip-row .chip-v[data-vf="hoy"]').classList.add('active');
-  document.getElementById('ventasMesesBox').style.display = 'none';
-  document.getElementById('ventasRangoBox').style.display = 'none';
+  cerrarPanelesVentasFlotantes();
   document.getElementById('diaSelect').value = '';
   document.getElementById('diaSelectHasta').value = '';
   document.getElementById('searchHistorial').value = '';
@@ -3295,6 +3336,9 @@ function renderVentas(){
     } else {
       document.getElementById('ventasFiltroLabel').textContent = 'ELEGÍ UN RANGO ABAJO';
     }
+  } else if(ventasFiltroModo === 'dias'){
+    items = [];
+    document.getElementById('ventasFiltroLabel').textContent = 'ELEGÍ LOS DÍAS ABAJO';
   }
 
   items = aplicarFiltrosSecundarios(items);
@@ -3649,10 +3693,12 @@ function renderAdmin(){
 
 document.getElementById('btnFinYearPrev').addEventListener('click', ()=>{
   finYear--;
+  gastosFijosScrollPendiente = true;
   renderAdmin();
 });
 document.getElementById('btnFinYearNext').addEventListener('click', ()=>{
   finYear++;
+  gastosFijosScrollPendiente = true;
   renderAdmin();
 });
 document.getElementById('finMesFiltro').addEventListener('change', renderGastosTabla);
@@ -3938,6 +3984,42 @@ function actualizarBadgeVencimientos(){
   else{ badge.style.display = 'none'; }
 }
 
+function actualizarSombraScrollGastosFijos(){
+  const wrap = document.getElementById('gfTableWrap');
+  const hint = document.getElementById('gfScrollHint');
+  if(!wrap || !hint) return;
+  const llegoAlFinal = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 4;
+  const hayScroll = wrap.scrollWidth > wrap.clientWidth;
+  hint.classList.toggle('oculto', llegoAlFinal || !hayScroll);
+}
+document.getElementById('gfTableWrap')?.addEventListener('scroll', actualizarSombraScrollGastosFijos);
+
+let gastosFijosScrollPendiente = true;
+
+function getMesRelevanteGastosFijos(items){
+  const mesActualReal = parseInt(todayISO().slice(5,7), 10);
+  const esAnioActual = finYear === parseInt(todayISO().slice(0,4), 10);
+  for(let m=1; m<=12; m++){
+    const mm = String(m).padStart(2,'0');
+    const ym = `${finYear}-${mm}`;
+    const relevantes = items.filter(v => v.montosPorMes && v.montosPorMes[ym] !== undefined);
+    if(relevantes.length === 0) continue; // sin datos cargados ese mes, seguimos buscando
+    const hayPendiente = relevantes.some(v => !(v.pagadoMeses||[]).includes(ym));
+    if(hayPendiente) return m;
+  }
+  return esAnioActual ? mesActualReal : 1; // todo pagado (o sin datos): mes actual real, o enero si es otro año
+}
+
+function scrollGastosFijosAlMesRelevante(items){
+  const wrap = document.getElementById('gfTableWrap');
+  const thead = document.getElementById('gastosFijosThead');
+  if(!wrap || !thead || !thead.children.length) return;
+  const mesRelevante = getMesRelevanteGastosFijos(items);
+  const th = thead.children[mesRelevante]; // índice 0 = Gasto, 1 = Enero ... 12 = Diciembre
+  if(!th) return;
+  wrap.scrollLeft = Math.max(0, th.offsetLeft - 70);
+}
+
 function renderGastosFijosTable(){
   document.getElementById('gastosFijosYearLabel').textContent = finYear;
   const thead = document.getElementById('gastosFijosThead');
@@ -3956,8 +4038,7 @@ function renderGastosFijosTable(){
         const monto = (v.montosPorMes && v.montosPorMes[ym]) || '';
         const pagado = (v.pagadoMeses||[]).includes(ym);
         return `<td>
-          <div class="gf-cell ${pagado?'pagado':''}">
-            <button class="gf-pago-toggle" data-action="toggle-pago-gf" data-id="${v.id}" data-ym="${ym}" title="Marcar pagado">✓</button>
+          <div class="gf-cell ${pagado?'pagado':''}" data-action="toggle-pago-gf" data-id="${v.id}" data-ym="${ym}" title="${pagado?'Tocá para desmarcar':'Tocá para marcar pagado'}">
             <input type="number" data-action="monto-gf" data-id="${v.id}" data-ym="${ym}" value="${monto}" placeholder="—">
           </div>
         </td>`;
@@ -3980,9 +4061,20 @@ function renderGastosFijosTable(){
   totalRow.innerHTML = `<td>TOTAL</td>${totalCeldas}<td></td>`;
 
   actualizarBadgeVencimientos();
+
+  if(gastosFijosScrollPendiente){
+    gastosFijosScrollPendiente = false;
+    requestAnimationFrame(()=> {
+      scrollGastosFijosAlMesRelevante(items);
+      actualizarSombraScrollGastosFijos();
+    });
+  } else {
+    actualizarSombraScrollGastosFijos();
+  }
 }
 
 document.getElementById('gastosFijosTbody').addEventListener('click', async (e)=>{
+  if(e.target.closest('input')) return; // tocar el número lo edita, no marca pagado
   const pagoBtn = e.target.closest('[data-action="toggle-pago-gf"]');
   const editBtn = e.target.closest('[data-action="editar-venc"]');
   const delBtn = e.target.closest('[data-action="delete-vencimiento"]');
