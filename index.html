@@ -2698,7 +2698,7 @@ document.getElementById('fileExcelVentas').addEventListener('change', (e)=>{
 
         const fecha = parseFechaCell(getField(norm, ['FECHA','DATE']));
         const cantidad = parseInt(getField(norm, ['CANTIDAD','CANT']), 10) || 1;
-        const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO']));
+        const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO'])) || 'Otros';
         const cliente = String(getField(norm, ['CLIENTE','NOMBRE CLIENTE']) || '').trim() || 'Consumidor final';
         const facturado = normFacturadoCell(getField(norm, ['FACTURADO']));
 
@@ -4346,7 +4346,7 @@ function renderAnalisis(){
     const raw = String(s.medioPago||'').trim();
     if(raw.toLowerCase()==='debe') return;
     const match = MEDIOS_CANONICOS.find(m=>m.toLowerCase()===raw.toLowerCase()) || ALIAS_MEDIOS[normalizeAccents(raw).toLowerCase()];
-    const key = match || (raw ? 'Otros' : 'Otros (sin especificar)');
+    const key = match || 'Otros';
     gMedios[key] = (gMedios[key]||0) + s.cantidad*s.precioUnitario;
   });
   const sortedMedios = Object.entries(gMedios).sort((a,b)=>b[1]-a[1]);
