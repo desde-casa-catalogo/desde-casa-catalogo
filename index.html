@@ -361,6 +361,22 @@
   .ajuste-input-wrap input:focus{outline:none;}
   .ajuste-input-wrap:focus-within{border-color:var(--gold);}
 
+  .ajuste-segmentada{
+    display:flex;align-items:stretch;border:1.5px solid var(--border);border-radius:12px;
+    overflow:hidden;margin-top:10px;background:var(--card);
+  }
+  .ajuste-seg-btn{
+    flex:1 1 auto;background:var(--card);border:none;border-right:1.5px solid var(--border);
+    padding:12px 6px;font-weight:800;font-size:12.5px;color:var(--ink-soft);cursor:pointer;white-space:nowrap;
+  }
+  .ajuste-seg-btn.selected{background:var(--cream);color:var(--ink);}
+  .ajuste-seg-monto{
+    flex:1 1 auto;display:flex;align-items:center;gap:4px;padding:0 10px;background:var(--card);min-width:0;
+  }
+  .ajuste-seg-monto .dollar{font-weight:800;color:var(--ink-soft);font-size:14px;}
+  .ajuste-seg-monto input{border:none;background:transparent;padding:11px 0;font-size:15px;font-weight:700;width:100%;min-width:0;}
+  .ajuste-seg-monto input:focus{outline:none;}
+
   /* ---------- VENDER TAB ---------- */
   .vender-layout{display:flex;gap:18px;align-items:flex-start;}
   .vender-catalog{flex:1 1 auto;min-width:0;}
@@ -452,14 +468,6 @@
   .prod-card.selected .cqty{display:flex;}
   .prod-card .cqty button{width:26px;height:26px;border-radius:7px;border:none;background:var(--card);color:var(--gold-deep);font-weight:800;font-size:16px;cursor:pointer;}
 
-  .cart-bar{
-    position:fixed;left:0;right:0;bottom:0;background:var(--dark-surface);color:#fff;padding:14px 18px;display:none;
-    align-items:center;justify-content:space-between;gap:12px;z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,.18);
-  }
-  .cart-bar.show{display:flex;}
-  .cart-info .cnt{font-size:12.5px;color:var(--gold-light);font-weight:700;letter-spacing:.4px;}
-  .cart-info .tot{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--gold-light);}
-
   @media(max-width:880px){
     .vender-layout{flex-direction:column;align-items:stretch;}
     .vender-summary{position:static;width:100%;max-height:none;order:2;flex:1 1 auto;}
@@ -470,9 +478,33 @@
   .overlay{position:fixed;inset:0;background:rgba(30,24,14,.5);display:none;align-items:flex-end;justify-content:center;z-index:100;}
   .overlay.show{display:flex;}
   .modal{background:var(--cream);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 20px 24px;max-height:88vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(0,0,0,.2);}
+  .modal.modal-wide{max-width:960px;}
   @media(min-width:640px){.overlay{align-items:center;}.modal{border-radius:20px;}}
   .modal h3{font-family:'Playfair Display',serif;font-size:21px;margin:0 0 16px;}
   .modal-actions{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
+
+  .np-header-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .np-header-row .mini-field{flex:1 1 220px;}
+  .np-table-wrap{overflow-x:auto;border-radius:14px;border:1.5px solid var(--border);background:#fff;}
+  table.np-table{width:100%;border-collapse:collapse;min-width:760px;}
+  table.np-table th{
+    background:var(--dark-surface);color:#fff;text-align:left;padding:10px 8px;font-size:11px;
+    text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;
+  }
+  table.np-table td{padding:6px;border-bottom:1px solid var(--border);}
+  table.np-table tr:last-child td{border-bottom:none;}
+  table.np-table th:nth-child(1), table.np-table td:nth-child(1){min-width:200px;}
+  table.np-table th:nth-child(3), table.np-table th:nth-child(4), table.np-table th:nth-child(5){width:100px;}
+  .np-input{
+    width:100%;border:1.5px solid transparent;border-radius:8px;padding:9px 8px;font-size:14px;
+    background:var(--cream);color:var(--ink);
+  }
+  .np-input:focus{border-color:var(--gold);outline:none;background:#fff;}
+  input.np-input[type="file"]{padding:6px 4px;font-size:11.5px;}
+  .np-del-row{
+    background:var(--red-pale);color:var(--red);border:none;border-radius:8px;width:30px;height:30px;
+    font-weight:800;cursor:pointer;font-size:14px;
+  }
 
   /* ---------- Stock tab ---------- */
   .stock-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);}
@@ -671,33 +703,33 @@
   .stat-compact.clickable:active{transform:scale(.98);}
   #finPromedioRow .stat-compact{max-width:420px;}
   .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);min-width:0;overflow:hidden;}
-  .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--gold-deep);margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:15px;color:var(--ink-soft);font-weight:700;gap:6px;}
+  .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:14.5px;color:var(--ink-soft);font-weight:700;gap:6px;}
   .fin-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .fin-val{font-weight:800;font-size:17px;}
+  .fin-val{font-weight:800;font-size:16px;}
   .fin-val.pos{color:var(--green);}
   .fin-val.neg{color:var(--red);}
-  .fin-row.fin-result{border-top:1.5px dashed var(--border);margin-top:6px;padding-top:9px;}
-  .fin-row.fin-result .fin-val{font-size:22px;}
+  .fin-row.fin-result{border-top:1.5px dashed var(--border);margin-top:6px;padding-top:10px;}
+  .fin-row.fin-result .fin-val{font-size:21px;}
   .fin-row.fin-promedio{padding-top:4px;}
-  .fin-row.fin-promedio .fin-val{font-size:16px;color:var(--gold-deep);}
+  .fin-row.fin-promedio .fin-val{font-size:18px;color:var(--gold-deep);}
   .fin-month-card.acumulado{background:linear-gradient(135deg,#fff 0%,var(--gold-pale) 140%);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(180,130,30,.16);}
-  .fin-month-card.acumulado .fin-month-name{font-size:19px;}
+  .fin-month-card.acumulado .fin-month-name{font-size:16px;letter-spacing:0;}
 
   /* Tamaños de letra proporcionales según cuántos meses hay que mostrar */
-  .fin-months-grid.fin-tier-sm .fin-month-card{padding:12px 10px;}
-  .fin-months-grid.fin-tier-sm .fin-month-name{font-size:13px;margin-bottom:6px;}
-  .fin-months-grid.fin-tier-sm .fin-row{font-size:11.5px;padding:3px 0;}
-  .fin-months-grid.fin-tier-sm .fin-val{font-size:12px;}
-  .fin-months-grid.fin-tier-sm .fin-row.fin-result .fin-val{font-size:15px;}
-  .fin-months-grid.fin-tier-sm .fin-row.fin-promedio .fin-val{font-size:11px;}
+  .fin-months-grid.fin-tier-sm .fin-month-card{padding:14px 12px;}
+  .fin-months-grid.fin-tier-sm .fin-month-name{font-size:15px;margin-bottom:7px;}
+  .fin-months-grid.fin-tier-sm .fin-row{font-size:13.5px;padding:4px 0;}
+  .fin-months-grid.fin-tier-sm .fin-val{font-size:14px;}
+  .fin-months-grid.fin-tier-sm .fin-row.fin-result .fin-val{font-size:18px;}
+  .fin-months-grid.fin-tier-sm .fin-row.fin-promedio .fin-val{font-size:13px;}
 
-  .fin-months-grid.fin-tier-xs .fin-month-card{padding:10px 8px;}
-  .fin-months-grid.fin-tier-xs .fin-month-name{font-size:10.5px;margin-bottom:4px;}
-  .fin-months-grid.fin-tier-xs .fin-row{font-size:9.5px;padding:2px 0;}
-  .fin-months-grid.fin-tier-xs .fin-val{font-size:9.5px;}
-  .fin-months-grid.fin-tier-xs .fin-row.fin-result .fin-val{font-size:12px;}
-  .fin-months-grid.fin-tier-xs .fin-row.fin-promedio .fin-val{font-size:8.5px;}
+  .fin-months-grid.fin-tier-xs .fin-month-card{padding:12px 10px;}
+  .fin-months-grid.fin-tier-xs .fin-month-name{font-size:12.5px;margin-bottom:5px;}
+  .fin-months-grid.fin-tier-xs .fin-row{font-size:11.5px;padding:3px 0;}
+  .fin-months-grid.fin-tier-xs .fin-val{font-size:11.5px;}
+  .fin-months-grid.fin-tier-xs .fin-row.fin-result .fin-val{font-size:14.5px;}
+  .fin-months-grid.fin-tier-xs .fin-row.fin-promedio .fin-val{font-size:10.5px;}
   .fin-months-grid.fin-tier-xs .fin-row.fin-promedio{display:none;}
 
   @media(max-width:760px){
@@ -706,36 +738,40 @@
   }
   .fin-subtitle{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin:6px 0 14px;}
 
-  /* ---------- Calendario de vencimientos ---------- */
+  /* ---------- Calendario de vencimientos (horizontal, una sola fila) ---------- */
   .venc-cal-nav{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:14px;}
-  .venc-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
-  .venc-cal-dow{text-align:center;font-size:11px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;padding-bottom:4px;}
+  .venc-cal-strip-wrap{overflow-x:auto;padding-bottom:6px;}
+  .venc-cal-strip{display:flex;gap:4px;width:max-content;}
+  .venc-cal-daycol{display:flex;flex-direction:column;flex:0 0 auto;width:46px;}
+  .venc-cal-dow-letter{
+    text-align:center;font-size:10px;font-weight:800;color:#fff;background:var(--ink-soft);
+    padding:4px 0;border-radius:7px 7px 0 0;text-transform:uppercase;
+  }
+  .venc-cal-dow-letter.weekend{background:var(--dark-surface);}
   .venc-cal-day{
-    height:64px;border:1.5px solid var(--border);border-radius:9px;padding:5px;background:#fff;
-    cursor:pointer;display:flex;flex-direction:column;gap:2px;overflow-y:auto;
+    height:78px;border:1.5px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:4px 3px;background:#fff;
+    cursor:pointer;display:flex;flex-direction:column;gap:2px;overflow-y:auto;align-items:center;
   }
   .venc-cal-day:hover{border-color:var(--gold);}
-  .venc-cal-day.empty{visibility:hidden;border:none;}
-  .venc-cal-day.today{border-color:var(--gold);background:var(--gold-pale);border-width:2px;}
-  .venc-cal-day.has-venc{border-color:var(--red);}
-  .venc-cal-daynum{font-size:12px;font-weight:800;color:var(--ink-soft);}
+  .venc-cal-day.today{box-shadow:0 0 0 3px rgba(212,160,60,.4);border-color:var(--gold);}
+  .venc-cal-day.has-venc{border-color:var(--red);background:var(--red-pale);}
+  .venc-cal-daynum{font-size:13px;font-weight:800;color:var(--ink-soft);}
   .venc-cal-item{
-    background:var(--red-pale);color:var(--red);font-size:9.5px;font-weight:800;border-radius:5px;
-    padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    background:var(--red-pale);color:var(--red);font-size:8.5px;font-weight:800;border-radius:5px;
+    padding:2px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:center;
   }
-  .venc-cal-item.pagado{background:var(--green-pale);color:var(--green);text-decoration:line-through;}
+  .venc-cal-day.has-venc .venc-cal-item{background:#fff;}
+  .venc-cal-item.pagado{background:var(--green-pale) !important;color:var(--green);text-decoration:line-through;}
   .venc-cal-hint{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:14px;font-weight:600;}
   @media(max-width:700px){
-    .venc-cal-day{height:52px;}
-    .venc-cal-item{font-size:8px;}
+    .venc-cal-day{height:64px;}
+    .venc-cal-daycol{width:38px;}
+    .venc-cal-item{font-size:7.5px;}
   }
 
   /* ---------- Calendario + Gastos fijos, lado a lado ---------- */
   .cal-gastos-layout{display:flex;flex-direction:column;gap:20px;margin-bottom:24px;}
-  .cal-side{max-width:520px;width:100%;}
-  .cal-side .venc-cal-grid{gap:5px;}
-  .cal-side .venc-cal-day{height:58px;padding:4px;}
-  .cal-side .venc-cal-item{font-size:8px;}
+  .cal-side{max-width:none;width:100%;}
   .gastos-fijos-side{width:100%;min-width:0;}
   .gf-scroll-wrap{position:relative;}
   .gastos-fijos-table-wrap{max-height:640px;overflow-y:auto;overflow-x:auto;}
@@ -1125,14 +1161,13 @@
         <button class="opt-btn opt-btn-autoconsumo" id="btnAutoconsumo" style="width:100%;margin-top:8px;">🏠 Es autoconsumo (uso propio, no cobra nada)</button>
         <div class="field-label">Cliente</div>
         <input type="text" class="field" id="ventaCliente" placeholder="Consumidor final">
-        <div class="field-label">Ajuste de precio</div>
-        <div class="btn-grid" style="grid-template-columns:1fr 1fr;">
-          <button class="opt-btn opt-btn-sm selected" data-ajuste-tipo="descuento">Descuento</button>
-          <button class="opt-btn opt-btn-sm" data-ajuste-tipo="recargo">Recargo</button>
-        </div>
-        <div class="ajuste-input-wrap" style="margin-top:8px;">
-          <span class="dollar">$</span>
-          <input type="number" class="field" id="ventaAjuste" placeholder="0" value="0">
+        <div class="ajuste-segmentada">
+          <button class="ajuste-seg-btn selected" data-ajuste-tipo="descuento">Descuento</button>
+          <button class="ajuste-seg-btn" data-ajuste-tipo="recargo">Recargo</button>
+          <div class="ajuste-seg-monto">
+            <span class="dollar">$</span>
+            <input type="number" id="ventaAjuste" placeholder="0" value="0">
+          </div>
         </div>
         <div class="venta-total-row" id="ventaSubtotalRow" style="display:none;">
           <span class="lbl">Subtotal</span>
@@ -1300,7 +1335,7 @@
           <div class="fin-year-label" id="vencMonthLabel">Mes 2026</div>
           <button class="chip-v fin-year-btn" id="btnVencMonthNext">›</button>
         </div>
-        <div class="venc-cal-grid" id="vencCalendarGrid"></div>
+        <div class="venc-cal-strip-wrap"><div class="venc-cal-strip" id="vencCalendarGrid"></div></div>
         <div class="venc-cal-hint">🔔 Esta alerta es solo dentro de la web: se muestra cuando entrás a la app. No manda avisos a WhatsApp ni al mail.</div>
       </div>
 
@@ -1473,15 +1508,6 @@
   </div>
 </div>
 
-<!-- ===================== CART BAR (mobile quick access) ===================== -->
-<div class="cart-bar" id="cartBar">
-  <div class="cart-info">
-    <div class="cnt" id="cartCount">0 PRODUCTOS</div>
-    <div class="tot" id="cartTotal">$ 0</div>
-  </div>
-  <button class="btn btn-gold" id="btnScrollSummary">Ver resumen</button>
-</div>
-
 <!-- ===================== MODAL: NUEVO PRODUCTO ===================== -->
 <!-- ===================== MODAL: EXPORTAR CATÁLOGO PDF ===================== -->
 <!-- ===================== MODAL: DESHACER UNA IMPORTACIÓN ===================== -->
@@ -1511,28 +1537,39 @@
 </div>
 
 <div class="overlay" id="overlayNuevo">
-  <div class="modal">
-    <h3>Nuevo producto</h3>
-    <div class="field-label">Nombre</div>
-    <input type="text" class="field" id="npNombre" placeholder="Nombre del producto">
-    <div class="field-label">Rubro</div>
-    <input type="text" class="field" id="npRubro" placeholder="Ej: BAZAR Y DECO" list="rubrosList">
+  <div class="modal modal-wide">
+    <h3>Cargar productos nuevos</h3>
+    <div class="np-header-row">
+      <div class="mini-field">
+        <label>Fecha</label>
+        <input type="date" class="field" id="npFecha">
+      </div>
+      <div class="mini-field">
+        <label>Proveedor</label>
+        <input type="text" class="field" id="npProveedorGlobal" placeholder="Nombre del proveedor" list="provsList">
+        <datalist id="provsList"></datalist>
+      </div>
+    </div>
     <datalist id="rubrosList"></datalist>
-    <div class="field-label">Proveedor</div>
-    <input type="text" class="field" id="npProveedor" placeholder="Nombre del proveedor (opcional)" list="provsList">
-    <datalist id="provsList"></datalist>
-    <div class="field-label">Costo</div>
-    <input type="number" class="field" id="npCosto" value="0">
-    <div class="field-label">Precio de venta</div>
-    <input type="number" class="field" id="npPrecio" value="0">
-    <div class="field-label">Stock inicial</div>
-    <input type="number" class="field" id="npStock" value="1">
-    <div class="field-label">Foto del producto (opcional)</div>
-    <input type="file" accept="image/*" class="field" id="npFotoFile" style="padding:10px;">
-    <div style="text-align:center;font-size:11.5px;color:var(--ink-faint);margin:8px 0;font-weight:700;">— o pegá un link de una foto —</div>
-    <input type="text" class="field" id="npFoto" placeholder="https://...">
+    <div class="np-table-wrap">
+      <table class="np-table" id="npTable">
+        <thead>
+          <tr>
+            <th>Nombre del producto</th>
+            <th>Rubro</th>
+            <th>Costo</th>
+            <th>Precio de venta</th>
+            <th>Stock</th>
+            <th>Foto</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="npTableBody"></tbody>
+      </table>
+    </div>
+    <button class="btn btn-outline btn-sm" id="btnAgregarFilaProducto" style="margin-top:10px;">＋ Agregar otra fila</button>
     <div class="modal-actions">
-      <button class="btn btn-gold btn-lg btn-block" id="btnGuardarNuevo">Guardar producto</button>
+      <button class="btn btn-gold btn-lg btn-block" id="btnGuardarNuevo">Guardar productos</button>
       <button class="btn btn-outline btn-block" id="btnCancelarNuevo">Cancelar</button>
     </div>
   </div>
@@ -2124,14 +2161,6 @@ function renderVentaSummary(){
     subtotalRow.style.display = 'none';
   }
   document.getElementById('ventaTotalSummary').textContent = fmt(totalFinal);
-
-  const bar = document.getElementById('cartBar');
-  if(count===0){ bar.classList.remove('show'); }
-  else{
-    bar.classList.add('show');
-    document.getElementById('cartCount').textContent = count + (count===1 ? ' PRODUCTO':' PRODUCTOS');
-    document.getElementById('cartTotal').textContent = fmt(totalFinal);
-  }
 }
 
 document.getElementById('ventaAjuste').addEventListener('input', renderVentaSummary);
@@ -2154,10 +2183,6 @@ document.getElementById('ventaItems').addEventListener('click', (e)=>{
   if(q<=0){ delete CART[id]; } else { CART[id] = q; }
   renderCatalogo();
   renderVentaSummary();
-});
-
-document.getElementById('btnScrollSummary').addEventListener('click', ()=>{
-  document.getElementById('ventaSummary').scrollIntoView({behavior:'smooth', block:'start'});
 });
 
 document.getElementById('ventaMedioGrid').addEventListener('click', (e)=>{
@@ -2445,50 +2470,95 @@ document.getElementById('listCostos').addEventListener('click', async (e)=>{
 });
 
 /* ---- Nuevo producto ---- */
+function crearFilaProductoNuevo(){
+  const tr = document.createElement('tr');
+  tr.className = 'np-row';
+  tr.innerHTML = `
+    <td><input type="text" class="np-input np-nombre" placeholder="Nombre del producto"></td>
+    <td><input type="text" class="np-input np-rubro" placeholder="Rubro" list="rubrosList"></td>
+    <td><input type="number" class="np-input np-costo" value="0"></td>
+    <td><input type="number" class="np-input np-precio" value="0"></td>
+    <td><input type="number" class="np-input np-stock" value="100"></td>
+    <td><input type="file" accept="image/*" class="np-input np-foto"></td>
+    <td><button class="np-del-row" data-action="del-row" title="Borrar esta fila">✕</button></td>
+  `;
+  return tr;
+}
+
+function resetTablaProductoNuevo(cantidadFilas){
+  const tbody = document.getElementById('npTableBody');
+  tbody.innerHTML = '';
+  for(let i=0; i<cantidadFilas; i++){
+    tbody.appendChild(crearFilaProductoNuevo());
+  }
+}
+
 document.getElementById('btnNuevoProducto').addEventListener('click', ()=>{
-  document.getElementById('npNombre').value = '';
-  document.getElementById('npRubro').value = '';
-  document.getElementById('npProveedor').value = '';
-  document.getElementById('npCosto').value = 0;
-  document.getElementById('npPrecio').value = 0;
-  document.getElementById('npStock').value = 1;
-  document.getElementById('npFoto').value = '';
-  document.getElementById('npFotoFile').value = '';
+  document.getElementById('npFecha').value = todayISO();
+  document.getElementById('npProveedorGlobal').value = '';
   document.getElementById('rubrosList').innerHTML = getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(titleCase(r))}">`).join('');
   document.getElementById('provsList').innerHTML = [...new Set(PRODUCTS.map(p=>p.proveedor).filter(Boolean))].sort().map(p=>`<option value="${escapeHtml(titleCase(p))}">`).join('');
+  resetTablaProductoNuevo(3);
   document.getElementById('overlayNuevo').classList.add('show');
 });
+
+document.getElementById('btnAgregarFilaProducto').addEventListener('click', ()=>{
+  document.getElementById('npTableBody').appendChild(crearFilaProductoNuevo());
+});
+
+document.getElementById('npTableBody').addEventListener('click', (e)=>{
+  const delBtn = e.target.closest('[data-action="del-row"]');
+  if(!delBtn) return;
+  const tbody = document.getElementById('npTableBody');
+  if(tbody.children.length <= 1){ showToast('Dejá al menos una fila'); return; }
+  delBtn.closest('tr').remove();
+});
+
 document.getElementById('btnCancelarNuevo').addEventListener('click', ()=>{
   document.getElementById('overlayNuevo').classList.remove('show');
 });
-document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
-  const nombre = document.getElementById('npNombre').value.trim();
-  if(!nombre){ showToast('Ponele un nombre al producto'); return; }
-  const rubro = document.getElementById('npRubro').value.trim().toUpperCase() || 'SIN CATEGORÍA';
-  const proveedor = document.getElementById('npProveedor').value.trim();
-  const costo = parseFloat(document.getElementById('npCosto').value) || 0;
-  const precio = parseFloat(document.getElementById('npPrecio').value) || 0;
-  const stock = parseInt(document.getElementById('npStock').value,10) || 0;
-  const foto = document.getElementById('npFoto').value.trim();
-  const fotoFile = document.getElementById('npFotoFile').files[0];
 
-  const newId = 'p_'+Date.now();
-  PRODUCTS.push({ id: newId, nombre: nombre.toUpperCase(), proveedor, costo, precio, rubro, stock, foto });
+document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
+  const fecha = document.getElementById('npFecha').value || todayISO();
+  const proveedorGlobal = document.getElementById('npProveedorGlobal').value.trim();
+  const filas = Array.from(document.querySelectorAll('#npTableBody .np-row'));
+
+  const pendientes = [];
+  let cargados = 0;
+
+  for(const fila of filas){
+    const nombre = fila.querySelector('.np-nombre').value.trim();
+    if(!nombre) continue; // fila vacía, se ignora sin molestar
+
+    const rubro = fila.querySelector('.np-rubro').value.trim().toUpperCase() || 'SIN CATEGORÍA';
+    const costo = parseFloat(fila.querySelector('.np-costo').value) || 0;
+    const precio = parseFloat(fila.querySelector('.np-precio').value) || 0;
+    const stock = parseInt(fila.querySelector('.np-stock').value, 10) || 0;
+    const fotoFile = fila.querySelector('.np-foto').files[0];
+
+    const newId = 'p_'+Date.now()+'_'+Math.floor(Math.random()*10000);
+    PRODUCTS.push({ id: newId, nombre: nombre.toUpperCase(), proveedor: proveedorGlobal, costo, precio, rubro, stock, foto: '', fechaCompra: fecha });
+    cargados++;
+    if(fotoFile) pendientes.push({ id: newId, file: fotoFile });
+  }
+
+  if(cargados === 0){ showToast('Escribí al menos un nombre de producto'); return; }
+
   await saveProducts();
 
-  if(fotoFile){
+  for(const { id, file } of pendientes){
     try{
-      const dataUrl = await compressImageFile(fotoFile);
-      await window.storage.set('dc_photo_'+newId, dataUrl, true);
-      PHOTOS[newId] = dataUrl;
+      const dataUrl = await compressImageFile(file);
+      await window.storage.set('dc_photo_'+id, dataUrl, true);
+      PHOTOS[id] = dataUrl;
     }catch(err){
-      showToast('El producto se guardó, pero no pude procesar la foto.');
+      showToast('Un producto se guardó, pero no pude procesar su foto.');
     }
   }
 
   document.getElementById('overlayNuevo').classList.remove('show');
   renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
-  showToast('Producto agregado ✓');
+  showToast(`${cargados} producto${cargados===1?'':'s'} agregado${cargados===1?'':'s'} ✓`);
 });
 
 /* ---- Importar Excel ---- */
@@ -3889,33 +3959,48 @@ let vencCalMonth = new Date().getMonth();
 let vencCalYear = new Date().getFullYear();
 let vencEditandoId = null;
 
+const DIAS_SEMANA_LETRA = ['L','M','M','J','V','S','D'];
+
 function renderVencCalendar(){
   document.getElementById('vencMonthLabel').textContent = `${MESES_NOMBRES[vencCalMonth]} ${vencCalYear}`;
-  const grid = document.getElementById('vencCalendarGrid');
-  const primerDia = new Date(vencCalYear, vencCalMonth, 1);
+  const strip = document.getElementById('vencCalendarGrid');
   const diasEnMes = new Date(vencCalYear, vencCalMonth+1, 0).getDate();
-  let primerDiaSemana = primerDia.getDay();
-  primerDiaSemana = primerDiaSemana===0 ? 6 : primerDiaSemana-1;
 
   const hoy = new Date();
   const esMesActual = hoy.getFullYear()===vencCalYear && hoy.getMonth()===vencCalMonth;
   const ciclo = `${vencCalYear}-${String(vencCalMonth+1).padStart(2,'0')}`;
 
-  let html = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`<div class="venc-cal-dow">${d}</div>`).join('');
-  for(let i=0;i<primerDiaSemana;i++){ html += '<div class="venc-cal-day empty"></div>'; }
+  let html = '';
   for(let d=1; d<=diasEnMes; d++){
+    const fechaDia = new Date(vencCalYear, vencCalMonth, d);
+    let diaSemana = fechaDia.getDay(); // 0=domingo
+    diaSemana = diaSemana===0 ? 6 : diaSemana-1; // 0=lunes ... 6=domingo
+    const esFinde = diaSemana >= 5;
+    const letra = DIAS_SEMANA_LETRA[diaSemana];
+
     const vencimientosDelDia = VENCIMIENTOS.filter(v=>v.diaDelMes===d);
     const esHoy = esMesActual && hoy.getDate()===d;
-    html += `<div class="venc-cal-day ${esHoy?'today':''} ${vencimientosDelDia.length?'has-venc':''}" data-dia="${d}">
-      <span class="venc-cal-daynum">${d}</span>
-      ${vencimientosDelDia.map(v=>{
-        const pagado = (v.pagadoMeses||[]).includes(ciclo);
-        const monto = (v.montosPorMes && v.montosPorMes[ciclo]) || 0;
-        return `<div class="venc-cal-item ${pagado?'pagado':''}" data-id="${v.id}" title="${escapeHtml(v.detalle)}${monto?' — '+fmt(monto):''}">${escapeHtml(v.detalle)}</div>`;
-      }).join('')}
+
+    html += `<div class="venc-cal-daycol">
+      <div class="venc-cal-dow-letter ${esFinde?'weekend':''}">${letra}</div>
+      <div class="venc-cal-day ${esHoy?'today':''} ${vencimientosDelDia.length?'has-venc':''}" data-dia="${d}">
+        <span class="venc-cal-daynum">${d}</span>
+        ${vencimientosDelDia.map(v=>{
+          const pagado = (v.pagadoMeses||[]).includes(ciclo);
+          const monto = (v.montosPorMes && v.montosPorMes[ciclo]) || 0;
+          return `<div class="venc-cal-item ${pagado?'pagado':''}" data-id="${v.id}" title="${escapeHtml(v.detalle)}${monto?' — '+fmt(monto):''}">${escapeHtml(v.detalle)}</div>`;
+        }).join('')}
+      </div>
     </div>`;
   }
-  grid.innerHTML = html;
+  strip.innerHTML = html;
+
+  if(esMesActual){
+    requestAnimationFrame(()=>{
+      const hoyEl = strip.querySelector('.venc-cal-day.today');
+      if(hoyEl) hoyEl.scrollIntoView({inline:'center', block:'nearest'});
+    });
+  }
 }
 
 document.getElementById('btnVencMonthPrev').addEventListener('click', ()=>{
