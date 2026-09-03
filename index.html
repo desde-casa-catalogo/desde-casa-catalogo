@@ -1318,6 +1318,8 @@
       <div class="price-lookup-results" id="dondeComprarResults"></div>
       <button class="btn btn-outline btn-sm" id="btnAnotarPrecio" style="margin-top:12px;">💲 Anotar un precio de proveedor</button>
       <button class="btn btn-gold btn-sm" id="btnNuevaCompra" style="margin-top:8px;">🧾 Nueva compra (sin detalle)</button>
+      <button class="btn btn-outline btn-sm" id="btnImportarCompras" style="margin-top:8px;" title="Columnas: FECHA, PROVEEDOR, MONTO. Cada fila es una compra">📤 Importación COMPRAS (Excel)</button>
+      <input type="file" id="fileExcelCompras" accept=".xlsx,.xls,.csv" style="display:none;">
     </div>
     <div id="listProv"></div>
   </section>
@@ -1354,6 +1356,15 @@
         <span class="dollar">$</span>
         <input type="number" id="ncMonto" value="0">
       </div>
+      <div class="field-label">Medio de pago</div>
+      <select class="field" id="ncMedioPago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="Transferencia">Transferencia</option>
+        <option value="QR">QR</option>
+        <option value="Débito">Débito</option>
+        <option value="Crédito">Crédito</option>
+      </select>
+      <p style="font-size:11.5px;color:var(--ink-faint);margin-top:8px;">Esto se guarda como un gasto de categoría "Proveedor" en Administración — se suma sola a tus totales del mes.</p>
       <div class="modal-actions">
         <button class="btn btn-gold btn-lg btn-block" id="btnGuardarNuevaCompra">Guardar compra</button>
         <button class="btn btn-outline btn-block" id="btnCancelarNuevaCompra">Cancelar</button>
@@ -1657,7 +1668,7 @@ let PROV_INFO = {};
 let SALES = [];
 let GASTOS = [];
 let PRECIOS = [];
-let COMPRAS = [];
+let COMPRAS = []; // ya no se usa para nada nuevo — se mantiene solo por compatibilidad con datos viejos guardados
 let VENCIMIENTOS = [];
 let CONFIG = {pin:"1234"};
 let PHOTOS = {};
@@ -2582,8 +2593,6 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
 
   const pendientes = [];
   let nuevos = 0, actualizados = 0;
-  let totalCompra = 0;
-  const itemsCompra = [];
 
   for(const fila of filas){
     const nombre = fila.querySelector('.np-nombre').value.trim();
@@ -2618,23 +2627,16 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
 
     if(fotoFile) pendientes.push({ id: idProducto, file: fotoFile });
 
-    // Sumamos al total de esta compra, y anotamos el precio para "¿Dónde compro más barato?"
-    if(costo>0 && cantidadComprada>0) totalCompra += costo * cantidadComprada;
+    // Anotamos el precio para "¿Dónde compro más barato?" (esto sí es confiable, no depende del stock)
     if(proveedorGlobal && costo>0){
       PRECIOS.push({ id: uid(), producto: nombre.toUpperCase(), proveedor: proveedorGlobal, costo, fecha });
     }
-    itemsCompra.push({ nombre: nombre.toUpperCase(), cantidad: cantidadComprada, costoUnitario: costo });
   }
 
   if(nuevos + actualizados === 0){ showToast('Escribí al menos un nombre de producto'); return; }
 
   await saveProducts();
   if(proveedorGlobal) await savePrecios();
-
-  if(proveedorGlobal && totalCompra > 0){
-    COMPRAS.push({ id: uid(), fecha, proveedor: proveedorGlobal, monto: totalCompra, origen: 'detallada', items: itemsCompra });
-    await saveCompras();
-  }
 
   for(const { id, file } of pendientes){
     try{
@@ -2921,10 +2923,11 @@ function getProveedores(){
     const key = p.proveedor && p.proveedor.trim() ? p.proveedor.trim() : '__SIN_PROVEEDOR__';
     map[key] = (map[key]||0) + 1;
   });
-  // Un proveedor puede tener compras cargadas sin tener todavía ningún producto asociado
-  COMPRAS.forEach(c=>{
-    const key = c.proveedor && c.proveedor.trim();
-    if(key && !(key in map)) map[key] = 0;
+  // Un proveedor puede tener gastos cargados en Administración sin tener todavía ningún producto asociado
+  GASTOS.forEach(g=>{
+    if(g.categoria!=='Proveedor') return;
+    const key = g.detalle && g.detalle.trim();
+    if(key && !Object.keys(map).some(k=>normalizeForMatch(k)===normalizeForMatch(key))) map[key] = 0;
   });
   return map;
 }
@@ -2941,7 +2944,7 @@ function resolverNombreProveedor(nombreEscrito){
   const norm = normalizeForMatch(escrito).toLowerCase();
   const existentes = new Set();
   PRODUCTS.forEach(p=>{ if(p.proveedor && p.proveedor.trim()) existentes.add(p.proveedor.trim()); });
-  COMPRAS.forEach(c=>{ if(c.proveedor && c.proveedor.trim()) existentes.add(c.proveedor.trim()); });
+  GASTOS.forEach(g=>{ if(g.categoria==='Proveedor' && g.detalle && g.detalle.trim()) existentes.add(g.detalle.trim()); });
   for(const ex of existentes){
     if(normalizeForMatch(ex).toLowerCase() === norm) return ex;
   }
@@ -3046,6 +3049,7 @@ document.getElementById('btnNuevaCompra').addEventListener('click', ()=>{
   document.getElementById('ncProveedor').value = '';
   document.getElementById('ncFecha').value = todayISO();
   document.getElementById('ncMonto').value = 0;
+  document.getElementById('ncMedioPago').value = 'Efectivo';
   document.getElementById('overlayNuevaCompra').classList.add('show');
 });
 document.getElementById('btnCancelarNuevaCompra').addEventListener('click', ()=>{
@@ -3055,14 +3059,16 @@ document.getElementById('btnGuardarNuevaCompra').addEventListener('click', async
   const proveedor = resolverNombreProveedor(document.getElementById('ncProveedor').value.trim());
   const fecha = document.getElementById('ncFecha').value || todayISO();
   const monto = parseFloat(document.getElementById('ncMonto').value) || 0;
+  const medioPago = document.getElementById('ncMedioPago').value;
   if(!proveedor){ showToast('Escribí el nombre del proveedor'); return; }
   if(monto<=0){ showToast('Poné el monto de la compra'); return; }
 
-  COMPRAS.push({ id: uid(), fecha, proveedor, monto, origen: 'manual', items: [] });
-  await saveCompras();
+  GASTOS.push({ id: uid(), fecha, detalle: proveedor, categoria: 'Proveedor', monto, medioPago });
+  await saveGastos();
   document.getElementById('overlayNuevaCompra').classList.remove('show');
   renderProveedores();
-  showToast('Compra registrada ✓');
+  renderAdmin();
+  showToast('Compra registrada como gasto ✓');
 });
 
 function renderProveedores(){
@@ -3116,13 +3122,16 @@ function renderProveedores(){
 }
 
 function renderComprasDeProveedor(nombreProveedor){
-  const compras = COMPRAS.filter(c=>c.proveedor===nombreProveedor).sort((a,b)=>b.fecha.localeCompare(a.fecha));
-  if(compras.length===0) return '<div class="prov-compra-empty">Todavía no hay compras registradas para este proveedor.</div>';
-  return compras.map(c=>`
+  const nombreNorm = normalizeForMatch(nombreProveedor);
+  const compras = GASTOS
+    .filter(g => g.categoria==='Proveedor' && normalizeForMatch(g.detalle)===nombreNorm)
+    .sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  if(compras.length===0) return '<div class="prov-compra-empty">Todavía no hay gastos de categoría "Proveedor" cargados con este nombre. Cargalos desde Administración → Nuevo gasto.</div>';
+  const total = compras.reduce((acc,c)=>acc+(c.monto||0), 0);
+  return `<div class="prov-compra-total">Total: ${fmt(total)}</div>` + compras.map(c=>`
     <div class="prov-compra-row">
       <span class="pc-fecha">${c.fecha.split('-').reverse().join('/')}</span>
       <span class="pc-monto">${fmt(c.monto)}</span>
-      <span class="pc-origen">${c.origen==='detallada'?'con detalle':'monto total'}</span>
     </div>
   `).join('');
 }
@@ -4018,10 +4027,53 @@ document.getElementById('btnGuardarGasto').addEventListener('click', async ()=>{
   document.getElementById('overlayNuevoGasto').classList.remove('show');
   finYear = parseInt(fecha.slice(0,4), 10);
   renderAdmin();
+  if(categoria==='Proveedor') renderProveedores();
   showToast('Gasto agregado ✓');
 });
 
 /* ---- Importar gastos (Excel) ---- */
+document.getElementById('btnImportarCompras').addEventListener('click', ()=>{
+  document.getElementById('fileExcelCompras').click();
+});
+document.getElementById('fileExcelCompras').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (evt)=>{
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array', cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+
+      let cargados = 0;
+      rows.forEach(row=>{
+        const norm = {};
+        Object.keys(row).forEach(k=> norm[k.trim().toUpperCase()] = row[k]);
+
+        const proveedor = String(getField(norm, ['PROVEEDOR','NOMBRE PROVEEDOR']) || '').trim();
+        const monto = parseFloat(getField(norm, ['MONTO','TOTAL','COSTO','IMPORTE'])) || 0;
+        if(!proveedor || monto<=0) return; // fila incompleta, se ignora sin molestar
+
+        const fecha = parseFechaCell(getField(norm, ['FECHA','DATE']));
+        const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO'])) || 'Otros';
+
+        GASTOS.push({ id: uid(), fecha, detalle: proveedor, categoria: 'Proveedor', monto, medioPago });
+        cargados++;
+      });
+
+      await saveGastos();
+      renderProveedores();
+      renderAdmin();
+      showToast(`Importado ✓ ${cargados} compras cargadas como gastos`);
+    }catch(err){
+      showToast('No pude leer el archivo. Revisá el formato.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+});
+
 document.getElementById('btnImportarGastos').addEventListener('click', ()=>{
   document.getElementById('fileExcelGastos').click();
 });
