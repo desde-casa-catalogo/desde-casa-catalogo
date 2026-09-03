@@ -901,7 +901,8 @@
     flex:2.2 1 260px;display:flex;flex-direction:column;gap:6px;position:relative;
     background:var(--card);border:2px solid var(--border);border-radius:15px;padding:10px;
   }
-  .vfs-filters .chip-row-5{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:0;}
+  .vfs-filters .chip-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:0;}
+  #gastosPeriodoChips.chip-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;max-width:420px;margin:12px 0;}
   .vfs-filters .chip-v{padding:9px 8px;font-size:12px;border-radius:9px;text-align:center;white-space:nowrap;}
   .vfs-medio-select{font-size:12.5px;padding:7px 8px;}
 
@@ -954,7 +955,7 @@
     }
     .ventas-stats-sticky .stat-compact{max-width:none;}
     .vfs-filters{max-width:none;}
-    .vfs-filters .chip-row-5{grid-template-columns:1fr 1fr;}
+    .vfs-filters .chip-row-3{grid-template-columns:1fr 1fr 1fr;}
   }
   .total-dia{background:var(--dark-surface);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .total-dia .lbl{font-size:12px;color:var(--gold-light);font-weight:700;letter-spacing:.4px;}
@@ -988,6 +989,30 @@
   .col-filter-item{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:4px 3px;border-radius:6px;cursor:pointer;}
   .col-filter-item:hover{background:var(--gold-pale);}
   .col-filter-item input{width:15px;height:15px;cursor:pointer;flex:0 0 auto;}
+
+  .gastos-col-filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .col-filter-icon-standalone{
+    position:relative;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;
+    color:var(--ink-soft);background:var(--card);border:1.5px solid var(--border);border-radius:9px;
+    padding:7px 10px;cursor:default;white-space:nowrap;
+  }
+  .col-filter-icon-standalone .col-filter-icon{color:var(--gold-deep);opacity:.7;font-size:10px;}
+  .col-filter-icon-standalone .col-filter-icon.activo{opacity:1;color:var(--gold-light);background:var(--gold-deep);border-radius:4px;padding:2px 4px;}
+  .col-filter-icon-standalone .col-filter-dropdown{color:var(--ink);}
+
+  .gastos-cat-card{background:var(--card);border:2px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+  .gastos-cat-header{
+    width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:none;border:none;
+    cursor:pointer;text-align:left;
+  }
+  .gastos-cat-nombre{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:var(--ink);flex:1 1 auto;}
+  .gastos-cat-count{font-size:12px;color:var(--ink-faint);font-weight:600;white-space:nowrap;}
+  .gastos-cat-total{font-size:17px;font-weight:800;color:var(--price-color);white-space:nowrap;}
+  .gastos-cat-caret{font-size:14px;color:var(--gold-deep);}
+  .gastos-cat-body{border-top:1.5px solid var(--border);padding:8px;}
+  table.gastos-cat-table{width:100%;font-size:13px;}
+  table.gastos-cat-table th{text-align:left;padding:6px 8px;font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;}
+  table.gastos-cat-table td{padding:6px 8px;}
 
   table.ventas-table td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
@@ -1103,7 +1128,7 @@
 
 <nav class="tabs" id="tabsNav">
   <div class="tabs-scroll">
-    <button class="tab-btn active" data-tab="vender"><span class="ico">🛒</span>Vender</button>
+    <button class="tab-btn active" data-tab="vender"><span class="ico">🛒</span>Cobrar</button>
     <button class="tab-btn" data-tab="ventas"><span class="ico">🧾</span>Ventas</button>
     <button class="tab-btn" data-tab="productos"><span class="ico">💰</span>Productos</button>
     <button class="tab-btn" data-tab="proveedores"><span class="ico">🏷️</span>Proveedores</button>
@@ -1127,6 +1152,7 @@
     <div class="action-bar-inline" data-for="admin">
       <button class="btn btn-outline btn-sm" id="btnImportarGastos" title="Siempre agrega, no actualiza. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importación GASTOS</button>
       <input type="file" id="fileExcelGastos" accept=".xlsx,.xls,.csv" style="display:none;">
+      <button class="btn btn-outline btn-sm" id="btnDeshacerImportGastos" title="Ver y eliminar una importación completa, sin tocar lo cargado a mano">🗂️ Deshacer una importación</button>
       <button class="btn btn-gold btn-sm" id="btnNuevoGasto">＋ Nuevo gasto</button>
     </div>
     <div class="action-bar-inline" data-for="analisis">
@@ -1192,7 +1218,7 @@
           <span class="lbl">Total a cobrar</span>
           <span class="val" id="ventaTotalSummary">$ 0</span>
         </div>
-        <button class="btn btn-gold btn-lg btn-block" id="btnVenderConfirm">Vender</button>
+        <button class="btn btn-gold btn-lg btn-block" id="btnVenderConfirm">Cobrar</button>
       </aside>
     </div>
   </section>
@@ -1201,12 +1227,10 @@
   <section class="panel" id="panel-ventas">
     <div class="ventas-stats-sticky" id="ventasStatsBlock">
       <div class="vfs-filters">
-        <div class="chip-row chip-row-5">
+        <div class="chip-row chip-row-3">
           <button class="chip-v active" data-vf="hoy">☀️ Hoy</button>
           <button class="chip-v" data-vf="meses">📅 Meses</button>
           <button class="chip-v" data-vf="acumulado">📊 Acumulado</button>
-          <button class="chip-v" data-vf="rango">📆 Desde / Hasta</button>
-          <button class="chip-v" data-vf="dias">🗓️ Días sueltos</button>
         </div>
 
         <div class="venc-card vfs-float" id="ventasMesesBox" style="display:none;padding:14px;">
@@ -1215,26 +1239,6 @@
             <button class="vfs-float-cerrar" data-cerrar-float="ventasMesesBox">✕ Cerrar</button>
           </div>
           <div id="ventasMesesChecklist" class="analisis-meses-checklist"></div>
-        </div>
-        <div class="vfs-inline-box vfs-float" id="ventasRangoBox" style="display:none;">
-          <div class="vfs-float-head">
-            <span></span>
-            <button class="vfs-float-cerrar" data-cerrar-float="ventasRangoBox">✕ Cerrar</button>
-          </div>
-          <label>Desde</label>
-          <input type="date" class="field" id="diaSelect">
-          <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
-          <input type="date" class="field" id="diaSelectHasta">
-        </div>
-        <div class="dias-sueltos-box vfs-float" id="diasSueltosBox" style="display:none;">
-          <div class="dias-sueltos-head">
-            <label>📆 Días sueltos de</label>
-            <select class="field" id="mesDiasSueltos">
-              <option value="">Elegí un mes...</option>
-            </select>
-            <button class="vfs-float-cerrar" data-cerrar-float="diasSueltosBox" style="margin-left:auto;">✕ Cerrar</button>
-          </div>
-          <div class="dias-grid" id="diasGridSueltos"></div>
         </div>
       </div>
       <div class="stat-compact stat-compact-main" data-icon="🧾">
@@ -1270,7 +1274,7 @@
           <thead>
             <tr id="ventasTheadRow">
               <th><input type="checkbox" id="checkAllVentas"></th>
-              <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
+              <th data-sort="fecha">Fecha <span class="sort-arrow"></span> <span class="col-filter-icon" data-filter-field="fecha">🔽</span></th>
               <th data-sort="producto">Producto <span class="sort-arrow"></span> <span class="col-filter-icon" data-filter-field="producto">🔽</span></th>
               <th data-sort="cantidad">Cant. <span class="sort-arrow"></span></th>
               <th data-sort="precio">$ Precio <span class="sort-arrow"></span></th>
@@ -1317,9 +1321,7 @@
       <input type="text" class="search" id="searchDondeComprar" placeholder="Escribí el producto que necesitás comprar...">
       <div class="price-lookup-results" id="dondeComprarResults"></div>
       <button class="btn btn-outline btn-sm" id="btnAnotarPrecio" style="margin-top:12px;">💲 Anotar un precio de proveedor</button>
-      <button class="btn btn-gold btn-sm" id="btnNuevaCompra" style="margin-top:8px;">🧾 Nueva compra (sin detalle)</button>
-      <button class="btn btn-outline btn-sm" id="btnImportarCompras" style="margin-top:8px;" title="Columnas: FECHA, PROVEEDOR, MONTO. Cada fila es una compra">📤 Importación COMPRAS (Excel)</button>
-      <input type="file" id="fileExcelCompras" accept=".xlsx,.xls,.csv" style="display:none;">
+      <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px;">Para cargar una compra, andá a Administración → "Importación GASTOS" (o "+ Nuevo gasto") con categoría "Proveedor" — se va a ver también acá, en "Ver compras" de cada proveedor.</p>
     </div>
     <div id="listProv"></div>
   </section>
@@ -1340,34 +1342,6 @@
       <div class="modal-actions">
         <button class="btn btn-gold btn-lg btn-block" id="btnGuardarPrecio">Guardar precio</button>
         <button class="btn btn-outline btn-block" id="btnCancelarPrecio">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="overlay" id="overlayNuevaCompra">
-    <div class="modal">
-      <h3>Nueva compra (sin detalle)</h3>
-      <div class="field-label">Proveedor</div>
-      <input type="text" class="field" id="ncProveedor" list="provsList" placeholder="Nombre del proveedor">
-      <div class="field-label">Fecha</div>
-      <input type="date" class="field" id="ncFecha">
-      <div class="field-label">Monto total de la compra</div>
-      <div class="ajuste-input-wrap">
-        <span class="dollar">$</span>
-        <input type="number" id="ncMonto" value="0">
-      </div>
-      <div class="field-label">Medio de pago</div>
-      <select class="field" id="ncMedioPago">
-        <option value="Efectivo">Efectivo</option>
-        <option value="Transferencia">Transferencia</option>
-        <option value="QR">QR</option>
-        <option value="Débito">Débito</option>
-        <option value="Crédito">Crédito</option>
-      </select>
-      <p style="font-size:11.5px;color:var(--ink-faint);margin-top:8px;">Esto se guarda como un gasto de categoría "Proveedor" en Administración — se suma sola a tus totales del mes.</p>
-      <div class="modal-actions">
-        <button class="btn btn-gold btn-lg btn-block" id="btnGuardarNuevaCompra">Guardar compra</button>
-        <button class="btn btn-outline btn-block" id="btnCancelarNuevaCompra">Cancelar</button>
       </div>
     </div>
   </div>
@@ -1423,39 +1397,32 @@
       <div class="search-wrap">
         <input type="text" class="search" id="searchGastos" placeholder="Buscar en detalle o medio de pago...">
       </div>
-      <div class="mini-field" style="max-width:200px;">
-        <label>Categoría</label>
-        <select class="field" id="finCategoriaFiltro">
-          <option value="">Todas</option>
-        </select>
-      </div>
-      <div class="mini-field" style="max-width:200px;">
-        <label>Filtrar por mes</label>
-        <select class="field" id="finMesFiltro">
-          <option value="">Todos los meses</option>
-        </select>
+      <div class="gastos-col-filtros">
+        <span class="col-filter-icon-standalone" data-filter-field="fecha">📅 Fecha <span class="col-filter-icon" data-gfilter-field="fecha">🔽</span></span>
+        <span class="col-filter-icon-standalone" data-filter-field="detalle">📝 Detalle <span class="col-filter-icon" data-gfilter-field="detalle">🔽</span></span>
+        <span class="col-filter-icon-standalone" data-filter-field="monto">💲 Monto <span class="col-filter-icon" data-gfilter-field="monto">🔽</span></span>
+        <span class="col-filter-icon-standalone" data-filter-field="medioPago">💳 Medio de pago <span class="col-filter-icon" data-gfilter-field="medioPago">🔽</span></span>
       </div>
     </div>
+
+    <div class="chip-row chip-row-3" id="gastosPeriodoChips">
+      <button class="chip-v" data-gf="mes">Este mes</button>
+      <button class="chip-v" data-gf="meses">Meses</button>
+      <button class="chip-v active" data-gf="acumulado">Acumulado</button>
+    </div>
+    <div class="venc-card vfs-float" id="gastosMesesBox" style="display:none;padding:12px;position:static;box-shadow:none;margin:8px 0 0;">
+      <div class="vfs-float-head">
+        <div class="price-lookup-title" style="font-size:12.5px;margin:0;">Tildá los meses</div>
+        <button class="vfs-float-cerrar" data-cerrar-float="gastosMesesBox">✕ Cerrar</button>
+      </div>
+      <div id="gastosMesesChecklist" class="analisis-meses-checklist"></div>
+    </div>
+
     <div class="bulk-toolbar" id="bulkToolbarGastos">
       <span id="bulkCountGastos">0 seleccionados</span>
       <button class="btn btn-danger btn-sm" id="btnBulkDeleteGastos">🗑️ Eliminar seleccionados</button>
     </div>
-    <div class="table-wrap">
-      <table class="ventas-table">
-        <thead>
-          <tr id="gastosTheadRow">
-            <th><input type="checkbox" id="checkAllGastos"></th>
-            <th data-sort="fecha">Fecha <span class="sort-arrow"></span></th>
-            <th data-sort="detalle">Detalle <span class="sort-arrow"></span></th>
-            <th data-sort="categoria">Categoría <span class="sort-arrow"></span></th>
-            <th data-sort="monto">$ Monto <span class="sort-arrow"></span></th>
-            <th data-sort="medioPago">Medio de pago <span class="sort-arrow"></span></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="gastosTbody"></tbody>
-      </table>
-    </div>
+    <div id="gastosPorCategoria"></div>
   </section>
 
   <!-- ===================== ANÁLISIS ===================== -->
@@ -1583,6 +1550,17 @@
   </div>
 </div>
 
+<div class="overlay" id="overlayDeshacerImportGastos">
+  <div class="modal">
+    <h3>Deshacer una importación de gastos</h3>
+    <p style="font-size:13px;color:var(--ink-faint);font-weight:600;margin:-8px 0 14px;">Acá aparecen los Excel de gastos que importaste desde que agregamos esta función. Borrar un lote elimina solo esas filas — nunca toca lo que cargaste a mano.</p>
+    <div id="loteImportGastosList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-block" id="btnCerrarDeshacerImportGastos">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlayCatalogoPDF">
   <div class="modal">
     <h3>Exportar catálogo en PDF</h3>
@@ -1677,8 +1655,15 @@ let CART = {};
 let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
-let selectedDiasSueltos = new Set();
 let ventasFiltroModo = 'hoy';
+/* Filtros tipo Excel por columna en Ventas (declarado bien arriba para que esté listo apenas arranca la app) */
+let filtroColumnas = {
+  fecha: new Set(),
+  producto: new Set(),
+  medioPago: new Set(),
+  cliente: new Set(),
+  facturado: new Set(),
+};
 let ventasMesesElegidos = new Set();
 let ventasSortField = 'fecha';
 let ventasSortDir = 'desc';
@@ -2526,7 +2511,7 @@ document.getElementById('listCostos').addEventListener('click', async (e)=>{
     p.activo = (p.activo === false) ? true : false;
     await saveProducts();
     renderCostos(); renderCatalogo();
-    showToast(p.activo === false ? 'Marcado como sin stock — ya no aparece en Vender' : 'Producto reactivado ✓');
+    showToast(p.activo === false ? 'Marcado como sin stock — ya no aparece en Cobrar' : 'Producto reactivado ✓');
   }
   if(action==='borrar'){
     if(!confirm('¿Eliminar "'+p.nombre+'" del catálogo? Esto no borra ventas ya registradas.')) return;
@@ -3044,33 +3029,6 @@ document.getElementById('btnGuardarPrecio').addEventListener('click', async ()=>
   showToast('Precio anotado ✓');
 });
 
-document.getElementById('btnNuevaCompra').addEventListener('click', ()=>{
-  populateProvsList();
-  document.getElementById('ncProveedor').value = '';
-  document.getElementById('ncFecha').value = todayISO();
-  document.getElementById('ncMonto').value = 0;
-  document.getElementById('ncMedioPago').value = 'Efectivo';
-  document.getElementById('overlayNuevaCompra').classList.add('show');
-});
-document.getElementById('btnCancelarNuevaCompra').addEventListener('click', ()=>{
-  document.getElementById('overlayNuevaCompra').classList.remove('show');
-});
-document.getElementById('btnGuardarNuevaCompra').addEventListener('click', async ()=>{
-  const proveedor = resolverNombreProveedor(document.getElementById('ncProveedor').value.trim());
-  const fecha = document.getElementById('ncFecha').value || todayISO();
-  const monto = parseFloat(document.getElementById('ncMonto').value) || 0;
-  const medioPago = document.getElementById('ncMedioPago').value;
-  if(!proveedor){ showToast('Escribí el nombre del proveedor'); return; }
-  if(monto<=0){ showToast('Poné el monto de la compra'); return; }
-
-  GASTOS.push({ id: uid(), fecha, detalle: proveedor, categoria: 'Proveedor', monto, medioPago });
-  await saveGastos();
-  document.getElementById('overlayNuevaCompra').classList.remove('show');
-  renderProveedores();
-  renderAdmin();
-  showToast('Compra registrada como gasto ✓');
-});
-
 function renderProveedores(){
   const list = document.getElementById('listProv');
   const map = getProveedores();
@@ -3192,67 +3150,6 @@ function getMesesConActividad(){
   return Array.from(set).sort().reverse();
 }
 
-function populateMesAnteriorSelect(){
-  const sel = document.getElementById('mesAnteriorSelect');
-  const meses = getMesesConActividad();
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">Todos los meses</option>' + meses.map(m => `<option value="${m}">${formatMes(m)}</option>`).join('');
-  if(meses.includes(prev)) sel.value = prev;
-}
-
-function populateMesDiasSueltos(){
-  const sel = document.getElementById('mesDiasSueltos');
-  const meses = getMesesConActividad();
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">Elegí un mes...</option>' + meses.map(m => `<option value="${m}">${formatMes(m)}</option>`).join('');
-  if(meses.includes(prev)) sel.value = prev;
-}
-
-const DIAS_SEMANA_CORTO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-
-function renderDiasGridSueltos(){
-  const ym = document.getElementById('mesDiasSueltos').value;
-  const grid = document.getElementById('diasGridSueltos');
-  if(!ym){ grid.innerHTML = ''; return; }
-  const [y, m] = ym.split('-').map(Number);
-  const diasEnMes = new Date(y, m, 0).getDate();
-  let html = '';
-  for(let d=1; d<=diasEnMes; d++){
-    const fecha = `${ym}-${String(d).padStart(2,'0')}`;
-    const dow = DIAS_SEMANA_CORTO[new Date(y, m-1, d).getDay()];
-    const activo = selectedDiasSueltos.has(fecha);
-    html += `<button class="dia-suelto-btn ${activo?'selected':''}" data-fecha="${fecha}">
-      <span class="dsb-num">${d}</span>
-      <span class="dsb-dow">${dow}</span>
-    </button>`;
-  }
-  grid.innerHTML = html;
-}
-
-document.getElementById('mesDiasSueltos').addEventListener('change', ()=>{
-  selectedDiasSueltos.clear();
-  renderDiasGridSueltos();
-  renderVentas();
-});
-
-document.getElementById('diasGridSueltos').addEventListener('click', (e)=>{
-  const btn = e.target.closest('.dia-suelto-btn');
-  if(!btn) return;
-  const fecha = btn.dataset.fecha;
-  if(selectedDiasSueltos.has(fecha)) selectedDiasSueltos.delete(fecha);
-  else selectedDiasSueltos.add(fecha);
-  btn.classList.toggle('selected');
-  renderVentas();
-});
-
-document.getElementById('diaSelect').addEventListener('change', renderVentas);
-document.getElementById('diaSelectHasta').addEventListener('change', ()=>{
-  renderVentas();
-  if(document.getElementById('diaSelect').value && document.getElementById('diaSelectHasta').value){
-    document.getElementById('ventasRangoBox').style.display = 'none';
-  }
-});
-
 function populateVentasMesesChecklist(){
   const box = document.getElementById('ventasMesesChecklist');
   const meses = getMesesConActividad();
@@ -3280,8 +3177,6 @@ document.getElementById('ventasMesesChecklist').addEventListener('change', (e)=>
 
 function cerrarPanelesVentasFlotantes(){
   document.getElementById('ventasMesesBox').style.display = 'none';
-  document.getElementById('ventasRangoBox').style.display = 'none';
-  document.getElementById('diasSueltosBox').style.display = 'none';
 }
 
 document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
@@ -3290,8 +3185,8 @@ document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
     const yaActivo = chip.classList.contains('active');
     document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
 
-    if(yaActivo && chip.dataset.vf !== 'hoy' && chip.dataset.vf !== 'acumulado'){
-      // tocar de nuevo el mismo botón (que tiene panel) lo cierra, sin perder la selección
+    if(yaActivo && chip.dataset.vf === 'meses'){
+      // tocar de nuevo "Meses" lo cierra, sin perder la selección
       cerrarPanelesVentasFlotantes();
       chip.classList.add('active');
       return;
@@ -3299,15 +3194,10 @@ document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
 
     chip.classList.add('active');
     ventasFiltroModo = chip.dataset.vf;
-    if(ventasFiltroModo !== 'dias') selectedDiasSueltos.clear();
     cerrarPanelesVentasFlotantes();
     if(ventasFiltroModo==='meses'){
       document.getElementById('ventasMesesBox').style.display = 'block';
       populateVentasMesesChecklist();
-    } else if(ventasFiltroModo==='rango'){
-      document.getElementById('ventasRangoBox').style.display = 'flex';
-    } else if(ventasFiltroModo==='dias'){
-      document.getElementById('diasSueltosBox').style.display = 'block';
     }
     renderVentas();
   });
@@ -3320,7 +3210,7 @@ document.addEventListener('click', (e)=>{
     document.getElementById(cerrarBtn.dataset.cerrarFloat).style.display = 'none';
     return;
   }
-  if(e.target.closest('.vfs-float') || e.target.closest('.chip-row-5')) return;
+  if(e.target.closest('.vfs-float') || e.target.closest('.chip-row-3')) return;
   cerrarPanelesVentasFlotantes();
 });
 
@@ -3329,13 +3219,9 @@ document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
   document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
   document.querySelector('#panel-ventas .chip-row .chip-v[data-vf="hoy"]').classList.add('active');
   cerrarPanelesVentasFlotantes();
-  document.getElementById('diaSelect').value = '';
-  document.getElementById('diaSelectHasta').value = '';
   document.getElementById('searchHistorial').value = '';
-  selectedDiasSueltos.clear();
   ventasMesesElegidos.clear();
-  document.getElementById('mesDiasSueltos').value = '';
-  renderDiasGridSueltos();
+  filtroColumnas.fecha.clear();
   filtroColumnas.producto.clear();
   filtroColumnas.medioPago.clear();
   filtroColumnas.cliente.clear();
@@ -3344,16 +3230,14 @@ document.getElementById('btnQuitarFiltros').addEventListener('click', ()=>{
   showToast('Filtros limpiados ✓');
 });
 
-/* ---- Filtros tipo Excel por columna ---- */
-let filtroColumnas = {
-  producto: new Set(),
-  medioPago: new Set(),
-  cliente: new Set(),
-  facturado: new Set(),
-};
 let columnaFiltroAbierta = null;
 
 function getValoresColumna(campo){
+  if(campo==='fecha'){
+    const isoSet = new Set();
+    SALES.forEach(s=>{ if(s.fecha) isoSet.add(s.fecha); });
+    return Array.from(isoSet).sort().reverse().map(iso=>iso.split('-').reverse().join('/'));
+  }
   const vals = new Set();
   SALES.forEach(s=>{
     if(campo==='facturado'){
@@ -3435,12 +3319,13 @@ document.getElementById('ventasTheadRow').addEventListener('click', (e)=>{
 
 function valorColumnaDeVenta(s, campo){
   if(campo==='facturado') return s.facturado ? 'Facturado' : 'No facturado';
+  if(campo==='fecha') return s.fecha ? s.fecha.split('-').reverse().join('/') : '(vacío)';
   return String(s[campo]||'').trim() || '(vacío)';
 }
 
 function aplicarFiltrosSecundarios(items){
   const term = document.getElementById('searchHistorial').value.trim().toLowerCase();
-  ['producto','medioPago','cliente','facturado'].forEach(campo=>{
+  ['fecha','producto','medioPago','cliente','facturado'].forEach(campo=>{
     if(filtroColumnas[campo].size > 0){
       items = items.filter(s => filtroColumnas[campo].has(valorColumnaDeVenta(s, campo)));
     }
@@ -3563,11 +3448,7 @@ function renderVentas(){
   let items = SALES.slice();
   const todayStr = todayISO();
 
-  if(selectedDiasSueltos.size > 0){
-    items = items.filter(s=>s.fecha && selectedDiasSueltos.has(s.fecha));
-    const n = selectedDiasSueltos.size;
-    document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${n} DÍA${n===1?'':'S'} ELEGIDO${n===1?'':'S'}`;
-  } else if(ventasFiltroModo === 'hoy'){
+  if(ventasFiltroModo === 'hoy'){
     items = items.filter(s=>s.fecha===todayStr);
     document.getElementById('ventasFiltroLabel').textContent = 'TOTAL DE HOY';
   } else if(ventasFiltroModo === 'meses'){
@@ -3578,29 +3459,6 @@ function renderVentas(){
       : 'ELEGÍ UN MES ABAJO';
   } else if(ventasFiltroModo === 'acumulado'){
     document.getElementById('ventasFiltroLabel').textContent = 'TOTAL ACUMULADO';
-  } else if(ventasFiltroModo === 'rango'){
-    const desde = document.getElementById('diaSelect').value;
-    const hasta = document.getElementById('diaSelectHasta').value;
-    if(desde || hasta){
-      let d1 = desde, d2 = hasta;
-      if(d1 && d2 && d1 > d2){ [d1, d2] = [d2, d1]; }
-      if(d1) items = items.filter(s=>s.fecha && s.fecha>=d1);
-      if(d2) items = items.filter(s=>s.fecha && s.fecha<=d2);
-      if(d1 && d2 && d1===d2){
-        document.getElementById('ventasFiltroLabel').textContent = `TOTAL DEL ${d1.split('-').reverse().join('/')}`;
-      } else if(d1 && d2){
-        document.getElementById('ventasFiltroLabel').textContent = `TOTAL ${d1.split('-').reverse().join('/')} A ${d2.split('-').reverse().join('/')}`;
-      } else if(d1){
-        document.getElementById('ventasFiltroLabel').textContent = `TOTAL DESDE ${d1.split('-').reverse().join('/')}`;
-      } else {
-        document.getElementById('ventasFiltroLabel').textContent = `TOTAL HASTA ${d2.split('-').reverse().join('/')}`;
-      }
-    } else {
-      document.getElementById('ventasFiltroLabel').textContent = 'ELEGÍ UN RANGO ABAJO';
-    }
-  } else if(ventasFiltroModo === 'dias'){
-    items = [];
-    document.getElementById('ventasFiltroLabel').textContent = 'ELEGÍ LOS DÍAS ABAJO';
   }
 
   items = aplicarFiltrosSecundarios(items);
@@ -3823,46 +3681,156 @@ function renderAdminDashboard(){
 }
 
 function populateFinMesFiltro(){
-  const sel = document.getElementById('finMesFiltro');
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">Todos los meses</option>' +
-    MESES_NOMBRES.map((nombre, i)=>`<option value="${i+1}">${nombre}</option>`).join('');
-  sel.value = prev;
+  // ya no hace falta: reemplazado por los botones Este mes / Meses / Acumulado
 }
 
-let gastosSortField = 'fecha';
-let gastosSortDir = 'desc';
+let gastosFiltroModo = 'acumulado';
+let gastosMesesElegidos = new Set();
+let categoriasAbiertas = new Set();
 let selectedGastoIds = new Set();
 
-function compareGastos(a, b){
-  let va, vb;
-  switch(gastosSortField){
-    case 'detalle': va = (a.detalle||'').toLowerCase(); vb = (b.detalle||'').toLowerCase(); break;
-    case 'categoria': va = (a.categoria||'').toLowerCase(); vb = (b.categoria||'').toLowerCase(); break;
-    case 'monto': va = a.monto||0; vb = b.monto||0; break;
-    case 'medioPago': va = (a.medioPago||'').toLowerCase(); vb = (b.medioPago||'').toLowerCase(); break;
-    default: va = a.fecha||''; vb = b.fecha||'';
+/* ---- Filtros tipo Excel por columna en Detalle de lo pagado ---- */
+let filtroColumnasGastos = {
+  fecha: new Set(),
+  detalle: new Set(),
+  monto: new Set(),
+  medioPago: new Set(),
+};
+let columnaFiltroGastosAbierta = null;
+
+function valorColumnaDeGasto(g, campo){
+  if(campo==='fecha') return g.fecha ? g.fecha.split('-').reverse().join('/') : '(vacío)';
+  if(campo==='monto') return fmt(g.monto||0);
+  return String(g[campo]||'').trim() || '(vacío)';
+}
+
+function getValoresColumnaGastos(campo){
+  if(campo==='fecha'){
+    const isoSet = new Set();
+    GASTOS.forEach(g=>{ if(g.fecha) isoSet.add(g.fecha); });
+    return Array.from(isoSet).sort().reverse().map(iso=>iso.split('-').reverse().join('/'));
   }
-  let cmp = va < vb ? -1 : va > vb ? 1 : (a.id||'').localeCompare(b.id||'');
-  return gastosSortDir === 'asc' ? cmp : -cmp;
+  const vals = new Set();
+  GASTOS.forEach(g=> vals.add(valorColumnaDeGasto(g, campo)));
+  return Array.from(vals).sort((a,b)=>a.localeCompare(b));
 }
 
-function updateGastosSortArrows(){
-  document.querySelectorAll('#gastosTheadRow th[data-sort]').forEach(th=>{
-    const arrow = th.querySelector('.sort-arrow');
-    const isActive = th.dataset.sort === gastosSortField;
-    th.classList.toggle('sort-active', isActive);
-    arrow.textContent = isActive ? (gastosSortDir === 'asc' ? '▲' : '▼') : '⇅';
+function toggleColumnFilterDropdownGastos(campo, anchorEl){
+  if(columnaFiltroGastosAbierta === campo){
+    cerrarColumnFilterDropdownGastos();
+    return;
+  }
+  cerrarColumnFilterDropdownGastos();
+  columnaFiltroGastosAbierta = campo;
+  const valores = getValoresColumnaGastos(campo);
+  const activos = filtroColumnasGastos[campo];
+  const dd = document.createElement('div');
+  dd.className = 'col-filter-dropdown';
+  dd.innerHTML = `
+    <div class="col-filter-actions">
+      <button data-action="col-todos">Tildar todos</button>
+      <button data-action="col-ninguno">Destildar todos</button>
+    </div>
+    <div class="col-filter-list">
+      ${valores.map(v=>`
+        <label class="col-filter-item">
+          <input type="checkbox" value="${escapeHtml(v)}" ${activos.size===0 || activos.has(v) ? 'checked' : ''}>
+          ${escapeHtml(v)}
+        </label>
+      `).join('')}
+    </div>
+    <button class="btn btn-gold btn-sm col-filter-aplicar" style="width:100%;margin-top:8px;">Aplicar</button>
+  `;
+  anchorEl.style.position = 'relative';
+  anchorEl.appendChild(dd);
+
+  dd.querySelector('[data-action="col-todos"]').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    dd.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=true);
   });
+  dd.querySelector('[data-action="col-ninguno"]').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    dd.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+  });
+  dd.querySelector('.col-filter-aplicar').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const marcados = Array.from(dd.querySelectorAll('input[type="checkbox"]:checked')).map(c=>c.value);
+    if(marcados.length === valores.length){
+      filtroColumnasGastos[campo].clear();
+    } else {
+      filtroColumnasGastos[campo] = new Set(marcados);
+    }
+    cerrarColumnFilterDropdownGastos();
+    renderGastosTabla();
+  });
+  dd.addEventListener('click', (e)=>e.stopPropagation());
 }
 
-document.getElementById('gastosTheadRow').addEventListener('click', (e)=>{
-  const th = e.target.closest('th[data-sort]');
-  if(!th) return;
-  const field = th.dataset.sort;
-  if(gastosSortField === field){ gastosSortDir = gastosSortDir === 'asc' ? 'desc' : 'asc'; }
-  else { gastosSortField = field; gastosSortDir = 'asc'; }
+function cerrarColumnFilterDropdownGastos(){
+  document.querySelectorAll('.col-filter-dropdown').forEach(el=>{
+    if(el.closest('.gastos-col-filtros')) el.remove();
+  });
+  columnaFiltroGastosAbierta = null;
+}
+
+document.querySelector('.gastos-col-filtros').addEventListener('click', (e)=>{
+  const icon = e.target.closest('.col-filter-icon');
+  if(!icon) return;
+  e.stopPropagation();
+  const campo = icon.dataset.gfilterField;
+  const anchor = icon.closest('.col-filter-icon-standalone');
+  toggleColumnFilterDropdownGastos(campo, anchor);
+});
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('.gastos-col-filtros')) return;
+  cerrarColumnFilterDropdownGastos();
+});
+
+function cerrarPanelesGastos(){
+  document.getElementById('gastosMesesBox').style.display = 'none';
+}
+
+document.querySelectorAll('#gastosPeriodoChips .chip-v').forEach(chip=>{
+  chip.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    document.querySelectorAll('#gastosPeriodoChips .chip-v').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    gastosFiltroModo = chip.dataset.gf;
+    cerrarPanelesGastos();
+    if(gastosFiltroModo==='meses'){
+      document.getElementById('gastosMesesBox').style.display = 'block';
+      populateGastosMesesChecklist();
+    }
+    renderGastosTabla();
+  });
+});
+
+function populateGastosMesesChecklist(){
+  const box = document.getElementById('gastosMesesChecklist');
+  const meses = Array.from(new Set(GASTOS.filter(g=>g.fecha).map(g=>g.fecha.slice(0,7)))).sort().reverse();
+  if(gastosMesesElegidos.size===0 && meses.length>0) gastosMesesElegidos.add(meses[0]);
+  box.innerHTML = meses.map(m=>{
+    const checked = gastosMesesElegidos.has(m);
+    return `<label class="analisis-mes-check ${checked?'checked':''}">
+      <input type="checkbox" data-mes="${m}" ${checked?'checked':''}>
+      ${formatMes(m)}
+    </label>`;
+  }).join('');
+}
+document.getElementById('gastosMesesChecklist').addEventListener('change', (e)=>{
+  const input = e.target.closest('input[data-mes]');
+  if(!input) return;
+  if(input.checked) gastosMesesElegidos.add(input.dataset.mes);
+  else gastosMesesElegidos.delete(input.dataset.mes);
+  input.closest('.analisis-mes-check').classList.toggle('checked', input.checked);
   renderGastosTabla();
+});
+
+document.addEventListener('click', (e)=>{
+  const cerrarBtn = e.target.closest('[data-cerrar-float="gastosMesesBox"]');
+  if(cerrarBtn){ document.getElementById('gastosMesesBox').style.display = 'none'; return; }
+  if(e.target.closest('#gastosMesesBox') || e.target.closest('#gastosPeriodoChips')) return;
+  cerrarPanelesGastos();
 });
 
 function updateBulkToolbarGastos(){
@@ -3870,20 +3838,7 @@ function updateBulkToolbarGastos(){
   const count = selectedGastoIds.size;
   bar.classList.toggle('show', count>0);
   document.getElementById('bulkCountGastos').textContent = count + (count===1 ? ' gasto seleccionado' : ' gastos seleccionados');
-  const allChecks = document.querySelectorAll('#gastosTbody .row-check');
-  const allChecked = allChecks.length>0 && Array.from(allChecks).every(c=>c.checked);
-  document.getElementById('checkAllGastos').checked = allChecked;
 }
-
-document.getElementById('checkAllGastos').addEventListener('change', (e)=>{
-  const checks = document.querySelectorAll('#gastosTbody .row-check');
-  checks.forEach(c=>{
-    c.checked = e.target.checked;
-    if(e.target.checked) selectedGastoIds.add(c.dataset.id);
-    else selectedGastoIds.delete(c.dataset.id);
-  });
-  updateBulkToolbarGastos();
-});
 
 document.getElementById('btnBulkDeleteGastos').addEventListener('click', async ()=>{
   const n = selectedGastoIds.size;
@@ -3897,21 +3852,28 @@ document.getElementById('btnBulkDeleteGastos').addEventListener('click', async (
 });
 
 document.getElementById('searchGastos').addEventListener('input', renderGastosTabla);
-document.getElementById('finCategoriaFiltro').addEventListener('change', renderGastosTabla);
+
+function gastosDelPeriodo(){
+  let items = GASTOS.filter(g => g.fecha && g.fecha.slice(0,4) == finYear);
+  if(gastosFiltroModo==='mes'){
+    const hoy = todayISO();
+    items = items.filter(g => g.fecha.slice(0,7) === hoy.slice(0,7));
+  } else if(gastosFiltroModo==='meses'){
+    items = items.filter(g => gastosMesesElegidos.has(g.fecha.slice(0,7)));
+  }
+  return items;
+}
 
 function renderGastosTabla(){
-  const tbody = document.getElementById('gastosTbody');
-  const mesFiltro = document.getElementById('finMesFiltro').value;
-  const catFiltro = document.getElementById('finCategoriaFiltro').value;
+  const box = document.getElementById('gastosPorCategoria');
   const term = document.getElementById('searchGastos').value.trim().toLowerCase();
-  let items = GASTOS.filter(g => g.fecha && g.fecha.slice(0,4) == finYear);
-  if(mesFiltro){
-    const mm = String(mesFiltro).padStart(2,'0');
-    items = items.filter(g => g.fecha.slice(5,7) === mm);
-  }
-  if(catFiltro){
-    items = items.filter(g => (g.categoria||'') === catFiltro);
-  }
+  let items = gastosDelPeriodo();
+
+  ['fecha','detalle','monto','medioPago'].forEach(campo=>{
+    if(filtroColumnasGastos[campo].size > 0){
+      items = items.filter(g => filtroColumnasGastos[campo].has(valorColumnaDeGasto(g, campo)));
+    }
+  });
   if(term){
     items = items.filter(g =>
       (g.detalle||'').toLowerCase().includes(term) ||
@@ -3919,29 +3881,75 @@ function renderGastosTabla(){
       (g.categoria||'').toLowerCase().includes(term)
     );
   }
-  items.sort(compareGastos);
-  updateGastosSortArrows();
+
+  document.querySelectorAll('.gastos-col-filtros .col-filter-icon').forEach(icon=>{
+    const campo = icon.dataset.gfilterField;
+    icon.classList.toggle('activo', filtroColumnasGastos[campo] && filtroColumnasGastos[campo].size > 0);
+  });
 
   if(items.length===0){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><span class="big">🧾</span>No hay gastos que coincidan con estos filtros.</div></td></tr>`;
+    box.innerHTML = `<div class="empty-state"><span class="big">🧾</span>No hay gastos que coincidan con estos filtros.</div>`;
     updateBulkToolbarGastos();
     return;
   }
 
-  tbody.innerHTML = items.map(g=>{
-    const ligado = !!g.origenVencimientoId;
-    return `<tr data-id="${g.id}">
-      <td><input type="checkbox" class="row-check" data-id="${g.id}" ${selectedGastoIds.has(g.id)?'checked':''}></td>
-      <td><input type="date" class="cell-edit" data-id="${g.id}" data-field="fecha" value="${g.fecha}" ${ligado?'disabled title="Viene de un gasto fijo marcado como pagado"':''}></td>
-      <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="detalle" value="${escapeHtml(g.detalle||'')}"></td>
-      <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="categoria" value="${escapeHtml(g.categoria||'')}" list="categoriasList"></td>
-      <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
-      <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="medioPago" value="${escapeHtml(g.medioPago||'')}"></td>
-      <td><button class="btn-del link-btn danger" data-id="${g.id}" data-action="delete-gasto">Eliminar</button></td>
-    </tr>`;
+  const porCategoria = {};
+  items.forEach(g=>{
+    const cat = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+    if(!porCategoria[cat]) porCategoria[cat] = [];
+    porCategoria[cat].push(g);
+  });
+  const categorias = Object.keys(porCategoria).sort((a,b)=>{
+    const totalA = porCategoria[a].reduce((s,g)=>s+(g.monto||0),0);
+    const totalB = porCategoria[b].reduce((s,g)=>s+(g.monto||0),0);
+    return totalB - totalA; // categoría con más gasto primero
+  });
+
+  box.innerHTML = categorias.map(cat=>{
+    const gastosCat = porCategoria[cat].slice().sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||''));
+    const total = gastosCat.reduce((s,g)=>s+(g.monto||0),0);
+    const abierta = categoriasAbiertas.has(cat);
+    return `<div class="gastos-cat-card">
+      <button class="gastos-cat-header" data-toggle-cat="${escapeHtml(cat)}">
+        <span class="gastos-cat-nombre">${escapeHtml(cat)}</span>
+        <span class="gastos-cat-count">${gastosCat.length} gasto${gastosCat.length===1?'':'s'}</span>
+        <span class="gastos-cat-total">${fmt(total)}</span>
+        <span class="gastos-cat-caret">${abierta?'▴':'▾'}</span>
+      </button>
+      <div class="gastos-cat-body" style="display:${abierta?'block':'none'};">
+        <table class="ventas-table gastos-cat-table">
+          <thead><tr><th></th><th>Fecha</th><th>Detalle</th><th>$ Monto</th><th>Medio de pago</th><th></th></tr></thead>
+          <tbody>
+            ${gastosCat.map(g=>{
+              const ligado = !!g.origenVencimientoId;
+              return `<tr data-id="${g.id}">
+                <td><input type="checkbox" class="row-check" data-id="${g.id}" ${selectedGastoIds.has(g.id)?'checked':''}></td>
+                <td><input type="date" class="cell-edit" data-id="${g.id}" data-field="fecha" value="${g.fecha}" ${ligado?'disabled title="Viene de un gasto fijo marcado como pagado"':''}></td>
+                <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="detalle" value="${escapeHtml(g.detalle||'')}"></td>
+                <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
+                <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="medioPago" value="${escapeHtml(g.medioPago||'')}"></td>
+                <td><button class="btn-del link-btn danger" data-id="${g.id}" data-action="delete-gasto">Eliminar</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
   }).join('');
+
   updateBulkToolbarGastos();
 }
+
+document.getElementById('gastosPorCategoria').addEventListener('click', (e)=>{
+  const catBtn = e.target.closest('[data-toggle-cat]');
+  if(catBtn){
+    const cat = catBtn.dataset.toggleCat;
+    if(categoriasAbiertas.has(cat)) categoriasAbiertas.delete(cat);
+    else categoriasAbiertas.add(cat);
+    renderGastosTabla();
+    return;
+  }
+});
 
 function renderAdmin(){
   renderAdminDashboard();
@@ -3963,9 +3971,8 @@ document.getElementById('btnFinYearNext').addEventListener('click', ()=>{
   gastosFijosScrollPendiente = true;
   renderAdmin();
 });
-document.getElementById('finMesFiltro').addEventListener('change', renderGastosTabla);
 
-document.getElementById('gastosTbody').addEventListener('click', async (e)=>{
+document.getElementById('gastosPorCategoria').addEventListener('click', async (e)=>{
   const delBtn = e.target.closest('[data-action="delete-gasto"]');
   if(!delBtn) return;
   const id = delBtn.dataset.id;
@@ -3975,7 +3982,7 @@ document.getElementById('gastosTbody').addEventListener('click', async (e)=>{
   renderAdmin();
 });
 
-document.getElementById('gastosTbody').addEventListener('change', async (e)=>{
+document.getElementById('gastosPorCategoria').addEventListener('change', async (e)=>{
   const rowCheck = e.target.closest('.row-check');
   if(rowCheck){
     if(rowCheck.checked) selectedGastoIds.add(rowCheck.dataset.id);
@@ -4032,48 +4039,6 @@ document.getElementById('btnGuardarGasto').addEventListener('click', async ()=>{
 });
 
 /* ---- Importar gastos (Excel) ---- */
-document.getElementById('btnImportarCompras').addEventListener('click', ()=>{
-  document.getElementById('fileExcelCompras').click();
-});
-document.getElementById('fileExcelCompras').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async (evt)=>{
-    try{
-      const data = new Uint8Array(evt.target.result);
-      const wb = XLSX.read(data, {type:'array', cellDates:true});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-
-      let cargados = 0;
-      rows.forEach(row=>{
-        const norm = {};
-        Object.keys(row).forEach(k=> norm[k.trim().toUpperCase()] = row[k]);
-
-        const proveedor = String(getField(norm, ['PROVEEDOR','NOMBRE PROVEEDOR']) || '').trim();
-        const monto = parseFloat(getField(norm, ['MONTO','TOTAL','COSTO','IMPORTE'])) || 0;
-        if(!proveedor || monto<=0) return; // fila incompleta, se ignora sin molestar
-
-        const fecha = parseFechaCell(getField(norm, ['FECHA','DATE']));
-        const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO'])) || 'Otros';
-
-        GASTOS.push({ id: uid(), fecha, detalle: proveedor, categoria: 'Proveedor', monto, medioPago });
-        cargados++;
-      });
-
-      await saveGastos();
-      renderProveedores();
-      renderAdmin();
-      showToast(`Importado ✓ ${cargados} compras cargadas como gastos`);
-    }catch(err){
-      showToast('No pude leer el archivo. Revisá el formato.');
-    }
-    e.target.value = '';
-  };
-  reader.readAsArrayBuffer(file);
-});
-
 document.getElementById('btnImportarGastos').addEventListener('click', ()=>{
   document.getElementById('fileExcelGastos').click();
 });
@@ -4087,27 +4052,32 @@ document.getElementById('fileExcelGastos').addEventListener('change', (e)=>{
       const wb = XLSX.read(data, {type:'array', cellDates:true});
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      const loteId = 'lote_' + Date.now();
+      const loteNombreArchivo = file.name;
 
       let cargados = 0;
+      let huboProveedor = false;
       rows.forEach(row=>{
         const norm = {};
         Object.keys(row).forEach(k=> norm[k.trim().toUpperCase()] = row[k]);
 
-        const detalle = String(getField(norm, ['DETALLE','IMPUESTO/PROVEEDOR','IMPUESTO / PROVEEDOR','CONCEPTO']) || '').trim();
+        const detalle = String(getField(norm, ['DETALLE','IMPUESTO/PROVEEDOR','IMPUESTO / PROVEEDOR','CONCEPTO','PROVEEDOR']) || '').trim();
         if(!detalle) return;
 
         const fecha = parseFechaCell(getField(norm, ['FECHA','DATE']));
-        const monto = parseFloat(getField(norm, ['MONTO','IMPORTE','TOTAL'])) || 0;
+        const monto = parseFloat(getField(norm, ['MONTO','IMPORTE','TOTAL','COSTO'])) || 0;
         const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO']));
         const categoriaExcel = String(getField(norm, ['CATEGORIA','CATEGORÍA']) || '').trim();
         const categoria = categoriaExcel || sugerirCategoria(detalle);
+        if(categoria==='Proveedor') huboProveedor = true;
 
-        GASTOS.push({ id: uid(), fecha, detalle, categoria, monto, medioPago });
+        GASTOS.push({ id: uid(), fecha, detalle, categoria, monto, medioPago, origen: 'excel', loteId, loteArchivo: loteNombreArchivo, loteFecha: todayISO() });
         cargados++;
       });
 
       await saveGastos();
       renderAdmin();
+      if(huboProveedor) renderProveedores();
       showToast(`Importado ✓ ${cargados} gastos cargados`);
     }catch(err){
       showToast('No pude leer el archivo. Revisá el formato.');
@@ -4172,11 +4142,7 @@ function populateCategoriasList(){
 }
 
 function populateCategoriaFiltro(){
-  const sel = document.getElementById('finCategoriaFiltro');
-  const prev = sel.value;
-  const cats = getCategoriasConocidas();
-  sel.innerHTML = '<option value="">Todas</option>' + cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  if(cats.includes(prev)) sel.value = prev;
+  // ya no hace falta: la Categoría ahora es la agrupación principal del acordeón
 }
 
 let vencCalMonth = new Date().getMonth();
@@ -4857,6 +4823,57 @@ document.getElementById('loteImportList').addEventListener('click', async (e)=>{
   showToast('Importación deshecha ✓');
 });
 
+function getLotesImportacionGastos(){
+  const lotes = {};
+  GASTOS.forEach(g=>{
+    if(g.origen==='excel' && g.loteId){
+      if(!lotes[g.loteId]) lotes[g.loteId] = { loteId: g.loteId, archivo: g.loteArchivo || 'Excel', fecha: g.loteFecha || '', count: 0, total: 0 };
+      lotes[g.loteId].count++;
+      lotes[g.loteId].total += g.monto || 0;
+    }
+  });
+  return Object.values(lotes).sort((a,b)=> (b.loteId||'').localeCompare(a.loteId||''));
+}
+
+function renderLotesImportGastos(){
+  const lotes = getLotesImportacionGastos();
+  const box = document.getElementById('loteImportGastosList');
+  if(lotes.length===0){
+    box.innerHTML = '<div class="empty-state" style="padding:14px;"><span class="big">🗂️</span>No hay importaciones de gastos registradas con esta función todavía (las que ya hiciste antes de hoy no quedaron marcadas).</div>';
+    return;
+  }
+  box.innerHTML = lotes.map(l=>`
+    <div class="venc-row">
+      <span class="venc-detalle">${escapeHtml(l.archivo)}<br><span style="font-weight:600;color:var(--ink-faint);font-size:11px;">${l.fecha}</span></span>
+      <span class="venc-dia">${l.count} gasto${l.count===1?'':'s'} · ${fmt(l.total)}</span>
+      <button class="venc-del" data-action="deshacer-lote-gastos" data-lote="${l.loteId}" title="Eliminar este lote completo">🗑️ Eliminar</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('btnDeshacerImportGastos').addEventListener('click', ()=>{
+  renderLotesImportGastos();
+  document.getElementById('overlayDeshacerImportGastos').classList.add('show');
+});
+document.getElementById('btnCerrarDeshacerImportGastos').addEventListener('click', ()=>{
+  document.getElementById('overlayDeshacerImportGastos').classList.remove('show');
+});
+document.getElementById('loteImportGastosList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('[data-action="deshacer-lote-gastos"]');
+  if(!btn) return;
+  const loteId = btn.dataset.lote;
+  const afectaProveedor = GASTOS.some(g=>g.loteId===loteId && g.categoria==='Proveedor');
+  const n = GASTOS.filter(g=>g.loteId===loteId).length;
+  if(!confirm(`¿Eliminar los ${n} gastos de esta importación? Esto NO afecta nada de lo que cargaste a mano.`)) return;
+  GASTOS = GASTOS.filter(g=>g.loteId!==loteId);
+  await saveGastos();
+  renderGastosTabla();
+  renderAdmin();
+  if(afectaProveedor) renderProveedores();
+  renderLotesImportGastos();
+  showToast('Importación deshecha ✓');
+});
+
 async function boot(){
   const list = document.getElementById('listCatalogo');
   list.innerHTML = '<div class="loading-msg">Cargando catálogo…</div>';
@@ -4875,7 +4892,6 @@ async function boot(){
   renderChipsCostos();
   renderCostos();
   renderProveedores();
-  populateMesDiasSueltos();
   renderVentas();
   renderAdmin();
 
