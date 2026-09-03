@@ -1001,11 +1001,17 @@
   .col-filter-icon-standalone .col-filter-dropdown{color:var(--ink);}
 
   .gastos-cat-card{background:var(--card);border:2px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
-  .gastos-cat-header{
-    width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:none;border:none;
-    cursor:pointer;text-align:left;
+  .gastos-cat-header{width:100%;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;}
+  .gastos-cat-toggle-btn{
+    flex:1 1 auto;display:flex;align-items:center;gap:12px;background:none;border:none;
+    cursor:pointer;text-align:left;padding:6px 0;min-width:0;
   }
-  .gastos-cat-nombre{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:var(--ink);flex:1 1 auto;}
+  .gastos-cat-vaciar{
+    flex:0 0 auto;background:var(--red-pale);color:var(--red);border:1.5px solid #E9BBB4;border-radius:8px;
+    padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;
+  }
+  .gastos-cat-vaciar:hover{background:var(--red);color:#fff;}
+  .gastos-cat-nombre{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .gastos-cat-count{font-size:12px;color:var(--ink-faint);font-weight:600;white-space:nowrap;}
   .gastos-cat-total{font-size:17px;font-weight:800;color:var(--price-color);white-space:nowrap;}
   .gastos-cat-caret{font-size:14px;color:var(--gold-deep);}
@@ -3864,8 +3870,7 @@ function gastosDelPeriodo(){
   return items;
 }
 
-function renderGastosTabla(){
-  const box = document.getElementById('gastosPorCategoria');
+function gastosFiltradosActuales(){
   const term = document.getElementById('searchGastos').value.trim().toLowerCase();
   let items = gastosDelPeriodo();
 
@@ -3881,6 +3886,12 @@ function renderGastosTabla(){
       (g.categoria||'').toLowerCase().includes(term)
     );
   }
+  return items;
+}
+
+function renderGastosTabla(){
+  const box = document.getElementById('gastosPorCategoria');
+  let items = gastosFiltradosActuales();
 
   document.querySelectorAll('.gastos-col-filtros .col-filter-icon').forEach(icon=>{
     const campo = icon.dataset.gfilterField;
@@ -3910,12 +3921,15 @@ function renderGastosTabla(){
     const total = gastosCat.reduce((s,g)=>s+(g.monto||0),0);
     const abierta = categoriasAbiertas.has(cat);
     return `<div class="gastos-cat-card">
-      <button class="gastos-cat-header" data-toggle-cat="${escapeHtml(cat)}">
-        <span class="gastos-cat-nombre">${escapeHtml(cat)}</span>
-        <span class="gastos-cat-count">${gastosCat.length} gasto${gastosCat.length===1?'':'s'}</span>
-        <span class="gastos-cat-total">${fmt(total)}</span>
-        <span class="gastos-cat-caret">${abierta?'▴':'▾'}</span>
-      </button>
+      <div class="gastos-cat-header">
+        <button class="gastos-cat-toggle-btn" data-toggle-cat="${escapeHtml(cat)}">
+          <span class="gastos-cat-nombre">${escapeHtml(cat)}</span>
+          <span class="gastos-cat-count">${gastosCat.length} gasto${gastosCat.length===1?'':'s'}</span>
+          <span class="gastos-cat-total">${fmt(total)}</span>
+          <span class="gastos-cat-caret">${abierta?'▴':'▾'}</span>
+        </button>
+        <button class="gastos-cat-vaciar" data-vaciar-cat="${escapeHtml(cat)}" title="Borrar todos los gastos de esta categoría">🗑️ Vaciar</button>
+      </div>
       <div class="gastos-cat-body" style="display:${abierta?'block':'none'};">
         <table class="ventas-table gastos-cat-table">
           <thead><tr><th></th><th>Fecha</th><th>Detalle</th><th>$ Monto</th><th>Medio de pago</th><th></th></tr></thead>
@@ -3940,7 +3954,23 @@ function renderGastosTabla(){
   updateBulkToolbarGastos();
 }
 
-document.getElementById('gastosPorCategoria').addEventListener('click', (e)=>{
+document.getElementById('gastosPorCategoria').addEventListener('click', async (e)=>{
+  const vaciarBtn = e.target.closest('[data-vaciar-cat]');
+  if(vaciarBtn){
+    const cat = vaciarBtn.dataset.vaciarCat;
+    const items = gastosFiltradosActuales().filter(g => (g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría') === cat);
+    const n = items.length;
+    if(n===0) return;
+    if(!confirm(`¿Borrar los ${n} gastos de "${cat}" que ves en el período elegido arriba (${document.querySelector('#gastosPeriodoChips .chip-v.active').textContent})? Esto NO se puede deshacer.`)) return;
+    if(!confirm(`Última confirmación: se van a borrar ${n} gastos de "${cat}". ¿Estás segura?`)) return;
+    const idsABorrar = new Set(items.map(g=>g.id));
+    GASTOS = GASTOS.filter(g => !idsABorrar.has(g.id));
+    await saveGastos();
+    renderAdmin();
+    renderProveedores();
+    showToast(`${n} gastos de "${cat}" eliminados ✓`);
+    return;
+  }
   const catBtn = e.target.closest('[data-toggle-cat]');
   if(catBtn){
     const cat = catBtn.dataset.toggleCat;
