@@ -577,9 +577,18 @@
   .mini-field-wide input{padding:10px 12px;font-size:15.5px;font-weight:600;}
   textarea.prov-notes{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:14.5px;resize:vertical;min-height:44px;}
   .prov-toggle{background:transparent;border:none;color:var(--gold-deep);font-weight:700;font-size:13.5px;cursor:pointer;padding:8px 0 0;}
+  .prov-toggle-row{display:flex;gap:18px;}
   .prov-products{margin-top:8px;font-size:13.5px;color:var(--ink-soft);max-height:130px;overflow-y:auto;border-top:1px dashed var(--border);padding-top:8px;display:none;}
   .prov-products.show{display:block;}
   .prov-products div{padding:3px 0;}
+  .prov-compras-list{margin-top:8px;font-size:13.5px;color:var(--ink-soft);max-height:160px;overflow-y:auto;border-top:1px dashed var(--border);padding-top:8px;display:none;}
+  .prov-compras-list.show{display:block;}
+  .prov-compra-row{display:flex;justify-content:space-between;align-items:center;padding:6px 2px;border-bottom:1px dashed var(--border);gap:8px;}
+  .prov-compra-row:last-child{border-bottom:none;}
+  .prov-compra-row .pc-fecha{font-weight:700;color:var(--ink);}
+  .prov-compra-row .pc-monto{font-weight:800;color:var(--price-color);}
+  .prov-compra-row .pc-origen{font-size:10.5px;color:var(--ink-faint);font-style:italic;}
+  .prov-compra-empty{color:var(--ink-faint);font-size:12.5px;text-align:center;padding:6px 0;}
 
   /* ---------- Comparador: ¿dónde compro? ---------- */
   .price-lookup-card{
@@ -664,7 +673,8 @@
   .analisis-mes-check input{width:16px;height:16px;cursor:pointer;}
   .analisis-mes-check.checked{border-color:var(--gold);background:var(--gold-pale);color:var(--gold-deep);}
   .analisis-top-layout{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;}
-  .analisis-filtros-col{flex:0 0 200px;width:200px;display:flex;flex-direction:column;gap:10px;}
+  .analisis-filtros-col{flex:0 0 200px;width:200px;display:flex;flex-direction:column;gap:10px;position:relative;}
+  .analisis-filtros-col .vfs-float{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:40;box-shadow:0 10px 28px rgba(0,0,0,.18);}
   .chip-row-compact{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:0;}
   .chip-row-compact .chip-v{padding:10px 8px;font-size:12px;text-align:center;}
   .analisis-filtros-col .mini-field label{font-size:11px;}
@@ -741,8 +751,8 @@
   /* ---------- Calendario de vencimientos (horizontal, una sola fila) ---------- */
   .venc-cal-nav{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:14px;}
   .venc-cal-strip-wrap{overflow-x:auto;padding-bottom:6px;}
-  .venc-cal-strip{display:flex;gap:4px;width:max-content;}
-  .venc-cal-daycol{display:flex;flex-direction:column;flex:0 0 auto;width:46px;}
+  .venc-cal-strip{display:flex;gap:4px;width:100%;}
+  .venc-cal-daycol{display:flex;flex-direction:column;flex:1 1 0;min-width:32px;}
   .venc-cal-dow-letter{
     text-align:center;font-size:10px;font-weight:800;color:#fff;background:var(--ink-soft);
     padding:4px 0;border-radius:7px 7px 0 0;text-transform:uppercase;
@@ -765,7 +775,7 @@
   .venc-cal-hint{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:14px;font-weight:600;}
   @media(max-width:700px){
     .venc-cal-day{height:64px;}
-    .venc-cal-daycol{width:38px;}
+    .venc-cal-daycol{min-width:30px;}
     .venc-cal-item{font-size:7.5px;}
   }
 
@@ -901,6 +911,12 @@
     box-shadow:0 10px 28px rgba(0,0,0,.18);
   }
   @media(max-width:1300px){ .vfs-float{right:0;} }
+  .vfs-float-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .vfs-float-cerrar{
+    background:var(--gold-pale);color:var(--gold-deep);border:1px solid var(--gold-light);border-radius:8px;
+    padding:6px 10px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;flex:0 0 auto;
+  }
+  .vfs-float-cerrar:hover{background:var(--gold-light);color:#fff;}
   .vfs-inline-box{background:#fff;border:1.5px solid var(--gold-light);border-radius:10px;padding:10px 12px;}
   .vfs-inline-box label{font-size:10px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.2px;display:block;margin-bottom:3px;}
   .vfs-inline-box input, .vfs-inline-box select{font-size:13px;padding:8px 9px;}
@@ -938,7 +954,6 @@
     }
     .ventas-stats-sticky .stat-compact{max-width:none;}
     .vfs-filters{max-width:none;}
-    .vfs-float{position:static;box-shadow:none;margin-top:6px;max-width:none;}
     .vfs-filters .chip-row-5{grid-template-columns:1fr 1fr;}
   }
   .total-dia{background:var(--dark-surface);color:#fff;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
@@ -1195,10 +1210,17 @@
         </div>
 
         <div class="venc-card vfs-float" id="ventasMesesBox" style="display:none;padding:14px;">
-          <div class="price-lookup-title" style="font-size:14px;margin-bottom:10px;">Tildá los meses que querés incluir</div>
+          <div class="vfs-float-head">
+            <div class="price-lookup-title" style="font-size:14px;margin:0;">Tildá los meses que querés incluir</div>
+            <button class="vfs-float-cerrar" data-cerrar-float="ventasMesesBox">✕ Cerrar</button>
+          </div>
           <div id="ventasMesesChecklist" class="analisis-meses-checklist"></div>
         </div>
         <div class="vfs-inline-box vfs-float" id="ventasRangoBox" style="display:none;">
+          <div class="vfs-float-head">
+            <span></span>
+            <button class="vfs-float-cerrar" data-cerrar-float="ventasRangoBox">✕ Cerrar</button>
+          </div>
           <label>Desde</label>
           <input type="date" class="field" id="diaSelect">
           <label style="margin-top:6px;">Hasta <span style="text-transform:none;font-weight:600;color:var(--ink-faint);">(opcional)</span></label>
@@ -1210,6 +1232,7 @@
             <select class="field" id="mesDiasSueltos">
               <option value="">Elegí un mes...</option>
             </select>
+            <button class="vfs-float-cerrar" data-cerrar-float="diasSueltosBox" style="margin-left:auto;">✕ Cerrar</button>
           </div>
           <div class="dias-grid" id="diasGridSueltos"></div>
         </div>
@@ -1294,6 +1317,7 @@
       <input type="text" class="search" id="searchDondeComprar" placeholder="Escribí el producto que necesitás comprar...">
       <div class="price-lookup-results" id="dondeComprarResults"></div>
       <button class="btn btn-outline btn-sm" id="btnAnotarPrecio" style="margin-top:12px;">💲 Anotar un precio de proveedor</button>
+      <button class="btn btn-gold btn-sm" id="btnNuevaCompra" style="margin-top:8px;">🧾 Nueva compra (sin detalle)</button>
     </div>
     <div id="listProv"></div>
   </section>
@@ -1314,6 +1338,25 @@
       <div class="modal-actions">
         <button class="btn btn-gold btn-lg btn-block" id="btnGuardarPrecio">Guardar precio</button>
         <button class="btn btn-outline btn-block" id="btnCancelarPrecio">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlayNuevaCompra">
+    <div class="modal">
+      <h3>Nueva compra (sin detalle)</h3>
+      <div class="field-label">Proveedor</div>
+      <input type="text" class="field" id="ncProveedor" list="provsList" placeholder="Nombre del proveedor">
+      <div class="field-label">Fecha</div>
+      <input type="date" class="field" id="ncFecha">
+      <div class="field-label">Monto total de la compra</div>
+      <div class="ajuste-input-wrap">
+        <span class="dollar">$</span>
+        <input type="number" id="ncMonto" value="0">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-gold btn-lg btn-block" id="btnGuardarNuevaCompra">Guardar compra</button>
+        <button class="btn btn-outline btn-block" id="btnCancelarNuevaCompra">Cancelar</button>
       </div>
     </div>
   </div>
@@ -1414,11 +1457,18 @@
           <button class="chip-v" data-af="acumulado">Acumulado</button>
           <button class="chip-v" data-af="rango">Desde / Hasta</button>
         </div>
-        <div class="venc-card" id="analisisMesesBox" style="display:none;padding:12px;">
-          <div class="price-lookup-title" style="font-size:12.5px;margin-bottom:8px;">Tildá los meses</div>
+        <div class="venc-card vfs-float" id="analisisMesesBox" style="display:none;padding:12px;">
+          <div class="vfs-float-head">
+            <div class="price-lookup-title" style="font-size:12.5px;margin:0;">Tildá los meses</div>
+            <button class="vfs-float-cerrar" data-cerrar-float="analisisMesesBox">✕ Cerrar</button>
+          </div>
           <div id="analisisMesesChecklist" class="analisis-meses-checklist"></div>
         </div>
-        <div class="mini-field" id="analisisRangoBox" style="display:none;">
+        <div class="mini-field vfs-float" id="analisisRangoBox" style="display:none;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px;">
+          <div class="vfs-float-head">
+            <span></span>
+            <button class="vfs-float-cerrar" data-cerrar-float="analisisRangoBox">✕ Cerrar</button>
+          </div>
           <label>Desde</label>
           <input type="date" class="field" id="analisisDesde">
           <label style="margin-top:6px;">Hasta</label>
@@ -1559,7 +1609,7 @@
             <th>Rubro</th>
             <th>Costo</th>
             <th>Precio de venta</th>
-            <th>Stock</th>
+            <th>Stock <span style="font-weight:400;text-transform:none;font-size:9px;opacity:.8;">(se suma si ya existe)</span></th>
             <th>Foto</th>
             <th></th>
           </tr>
@@ -1607,6 +1657,7 @@ let PROV_INFO = {};
 let SALES = [];
 let GASTOS = [];
 let PRECIOS = [];
+let COMPRAS = [];
 let VENCIMIENTOS = [];
 let CONFIG = {pin:"1234"};
 let PHOTOS = {};
@@ -1674,6 +1725,11 @@ async function loadAll(){
     const r = await window.storage.get('dc_precios', true);
     PRECIOS = JSON.parse(r.value);
   }catch(e){ PRECIOS = []; }
+
+  try{
+    const r = await window.storage.get('dc_compras', true);
+    COMPRAS = JSON.parse(r.value);
+  }catch(e){ COMPRAS = []; }
 
   try{
     const r = await window.storage.get('dc_vencimientos', true);
@@ -1900,6 +1956,7 @@ async function saveProvInfo(){ try{ await window.storage.set('dc_providers_info'
 async function saveSales(){ try{ await window.storage.set('dc_sales', JSON.stringify(SALES), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveGastos(){ try{ await window.storage.set('dc_gastos', JSON.stringify(GASTOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function savePrecios(){ try{ await window.storage.set('dc_precios', JSON.stringify(PRECIOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
+async function saveCompras(){ try{ await window.storage.set('dc_compras', JSON.stringify(COMPRAS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveVencimientos(){ try{ await window.storage.set('dc_vencimientos', JSON.stringify(VENCIMIENTOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveConfig(){ try{ await window.storage.set('dc_config', JSON.stringify(CONFIG), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 
@@ -2520,31 +2577,64 @@ document.getElementById('btnCancelarNuevo').addEventListener('click', ()=>{
 
 document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
   const fecha = document.getElementById('npFecha').value || todayISO();
-  const proveedorGlobal = document.getElementById('npProveedorGlobal').value.trim();
+  const proveedorGlobal = resolverNombreProveedor(document.getElementById('npProveedorGlobal').value.trim());
   const filas = Array.from(document.querySelectorAll('#npTableBody .np-row'));
 
   const pendientes = [];
-  let cargados = 0;
+  let nuevos = 0, actualizados = 0;
+  let totalCompra = 0;
+  const itemsCompra = [];
 
   for(const fila of filas){
     const nombre = fila.querySelector('.np-nombre').value.trim();
     if(!nombre) continue; // fila vacía, se ignora sin molestar
 
-    const rubro = fila.querySelector('.np-rubro').value.trim().toUpperCase() || 'SIN CATEGORÍA';
+    const rubro = fila.querySelector('.np-rubro').value.trim().toUpperCase();
     const costo = parseFloat(fila.querySelector('.np-costo').value) || 0;
     const precio = parseFloat(fila.querySelector('.np-precio').value) || 0;
-    const stock = parseInt(fila.querySelector('.np-stock').value, 10) || 0;
+    const cantidadComprada = parseInt(fila.querySelector('.np-stock').value, 10) || 0;
     const fotoFile = fila.querySelector('.np-foto').files[0];
 
-    const newId = 'p_'+Date.now()+'_'+Math.floor(Math.random()*10000);
-    PRODUCTS.push({ id: newId, nombre: nombre.toUpperCase(), proveedor: proveedorGlobal, costo, precio, rubro, stock, foto: '', fechaCompra: fecha });
-    cargados++;
-    if(fotoFile) pendientes.push({ id: newId, file: fotoFile });
+    // Buscamos si el producto YA existe (por nombre exacto) para no duplicarlo
+    const existente = PRODUCTS.find(p => p.nombre.trim().toLowerCase() === nombre.toLowerCase());
+    let idProducto;
+
+    if(existente){
+      existente.stock = (existente.stock||0) + cantidadComprada;
+      if(costo>0) existente.costo = costo;
+      if(precio>0) existente.precio = precio;
+      if(proveedorGlobal) existente.proveedor = proveedorGlobal;
+      if(rubro) existente.rubro = rubro;
+      idProducto = existente.id;
+      actualizados++;
+    } else {
+      idProducto = 'p_'+Date.now()+'_'+Math.floor(Math.random()*10000);
+      PRODUCTS.push({
+        id: idProducto, nombre: nombre.toUpperCase(), proveedor: proveedorGlobal,
+        costo, precio, rubro: rubro || 'SIN CATEGORÍA', stock: cantidadComprada, foto: ''
+      });
+      nuevos++;
+    }
+
+    if(fotoFile) pendientes.push({ id: idProducto, file: fotoFile });
+
+    // Sumamos al total de esta compra, y anotamos el precio para "¿Dónde compro más barato?"
+    if(costo>0 && cantidadComprada>0) totalCompra += costo * cantidadComprada;
+    if(proveedorGlobal && costo>0){
+      PRECIOS.push({ id: uid(), producto: nombre.toUpperCase(), proveedor: proveedorGlobal, costo, fecha });
+    }
+    itemsCompra.push({ nombre: nombre.toUpperCase(), cantidad: cantidadComprada, costoUnitario: costo });
   }
 
-  if(cargados === 0){ showToast('Escribí al menos un nombre de producto'); return; }
+  if(nuevos + actualizados === 0){ showToast('Escribí al menos un nombre de producto'); return; }
 
   await saveProducts();
+  if(proveedorGlobal) await savePrecios();
+
+  if(proveedorGlobal && totalCompra > 0){
+    COMPRAS.push({ id: uid(), fecha, proveedor: proveedorGlobal, monto: totalCompra, origen: 'detallada', items: itemsCompra });
+    await saveCompras();
+  }
 
   for(const { id, file } of pendientes){
     try{
@@ -2558,7 +2648,10 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
 
   document.getElementById('overlayNuevo').classList.remove('show');
   renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
-  showToast(`${cargados} producto${cargados===1?'':'s'} agregado${cargados===1?'':'s'} ✓`);
+  const partes = [];
+  if(nuevos>0) partes.push(`${nuevos} nuevo${nuevos===1?'':'s'}`);
+  if(actualizados>0) partes.push(`${actualizados} con stock sumado`);
+  showToast(`Guardado ✓ ${partes.join(' · ')}`);
 });
 
 /* ---- Importar Excel ---- */
@@ -2828,11 +2921,31 @@ function getProveedores(){
     const key = p.proveedor && p.proveedor.trim() ? p.proveedor.trim() : '__SIN_PROVEEDOR__';
     map[key] = (map[key]||0) + 1;
   });
+  // Un proveedor puede tener compras cargadas sin tener todavía ningún producto asociado
+  COMPRAS.forEach(c=>{
+    const key = c.proveedor && c.proveedor.trim();
+    if(key && !(key in map)) map[key] = 0;
+  });
   return map;
 }
 
 function normalizeForMatch(s){
   return normalizeAccents(s||'').trim();
+}
+
+// Si el proveedor que se escribió ya existe (aunque tenga otras mayúsculas/minúsculas),
+// devuelve el nombre EXACTO ya guardado, para no crear una tarjeta de proveedor duplicada.
+function resolverNombreProveedor(nombreEscrito){
+  const escrito = String(nombreEscrito||'').trim();
+  if(!escrito) return escrito;
+  const norm = normalizeForMatch(escrito).toLowerCase();
+  const existentes = new Set();
+  PRODUCTS.forEach(p=>{ if(p.proveedor && p.proveedor.trim()) existentes.add(p.proveedor.trim()); });
+  COMPRAS.forEach(c=>{ if(c.proveedor && c.proveedor.trim()) existentes.add(c.proveedor.trim()); });
+  for(const ex of existentes){
+    if(normalizeForMatch(ex).toLowerCase() === norm) return ex;
+  }
+  return escrito;
 }
 
 function getPreciosParaProducto(p){
@@ -2914,7 +3027,7 @@ document.getElementById('btnCancelarPrecio').addEventListener('click', ()=>{
 });
 document.getElementById('btnGuardarPrecio').addEventListener('click', async ()=>{
   const producto = document.getElementById('pcProducto').value.trim();
-  const proveedor = document.getElementById('pcProveedor').value.trim();
+  const proveedor = resolverNombreProveedor(document.getElementById('pcProveedor').value.trim());
   const costo = parseFloat(document.getElementById('pcCosto').value) || 0;
   const fecha = document.getElementById('pcFecha').value || todayISO();
   if(!producto){ showToast('Escribí el nombre del producto'); return; }
@@ -2926,6 +3039,30 @@ document.getElementById('btnGuardarPrecio').addEventListener('click', async ()=>
   document.getElementById('searchDondeComprar').value = producto;
   renderDondeComprar();
   showToast('Precio anotado ✓');
+});
+
+document.getElementById('btnNuevaCompra').addEventListener('click', ()=>{
+  populateProvsList();
+  document.getElementById('ncProveedor').value = '';
+  document.getElementById('ncFecha').value = todayISO();
+  document.getElementById('ncMonto').value = 0;
+  document.getElementById('overlayNuevaCompra').classList.add('show');
+});
+document.getElementById('btnCancelarNuevaCompra').addEventListener('click', ()=>{
+  document.getElementById('overlayNuevaCompra').classList.remove('show');
+});
+document.getElementById('btnGuardarNuevaCompra').addEventListener('click', async ()=>{
+  const proveedor = resolverNombreProveedor(document.getElementById('ncProveedor').value.trim());
+  const fecha = document.getElementById('ncFecha').value || todayISO();
+  const monto = parseFloat(document.getElementById('ncMonto').value) || 0;
+  if(!proveedor){ showToast('Escribí el nombre del proveedor'); return; }
+  if(monto<=0){ showToast('Poné el monto de la compra'); return; }
+
+  COMPRAS.push({ id: uid(), fecha, proveedor, monto, origen: 'manual', items: [] });
+  await saveCompras();
+  document.getElementById('overlayNuevaCompra').classList.remove('show');
+  renderProveedores();
+  showToast('Compra registrada ✓');
 });
 
 function renderProveedores(){
@@ -2949,8 +3086,12 @@ function renderProveedores(){
           <div class="mini-field-sm mini-field-wide"><label>Contacto</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="contacto" value="${escapeHtml(info.contacto||'')}"></div>
         </div>
         <textarea class="prov-notes" data-name="${escapeHtml(n)}" data-field="notas" placeholder="Notas (dirección, condiciones, etc.)">${escapeHtml(info.notas||'')}</textarea>
-        <button class="prov-toggle" data-toggle="${escapeHtml(n)}">Ver productos ▾</button>
+        <div class="prov-toggle-row">
+          <button class="prov-toggle" data-toggle="${escapeHtml(n)}">Ver productos ▾</button>
+          <button class="prov-toggle" data-toggle-compras="${escapeHtml(n)}">Ver compras ▾</button>
+        </div>
         <div class="prov-products" id="prov-prods-${cssId(n)}">${products.map(p=>`<div>• ${escapeHtml(p)}</div>`).join('')}</div>
+        <div class="prov-compras-list" id="prov-compras-${cssId(n)}">${renderComprasDeProveedor(n)}</div>
       </div>
     </div>`;
   }).join('');
@@ -2974,6 +3115,18 @@ function renderProveedores(){
   list.innerHTML = html;
 }
 
+function renderComprasDeProveedor(nombreProveedor){
+  const compras = COMPRAS.filter(c=>c.proveedor===nombreProveedor).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  if(compras.length===0) return '<div class="prov-compra-empty">Todavía no hay compras registradas para este proveedor.</div>';
+  return compras.map(c=>`
+    <div class="prov-compra-row">
+      <span class="pc-fecha">${c.fecha.split('-').reverse().join('/')}</span>
+      <span class="pc-monto">${fmt(c.monto)}</span>
+      <span class="pc-origen">${c.origen==='detallada'?'con detalle':'monto total'}</span>
+    </div>
+  `).join('');
+}
+
 
 
 document.getElementById('listProv').addEventListener('click', (e)=>{
@@ -2986,13 +3139,22 @@ document.getElementById('listProv').addEventListener('click', (e)=>{
     provLine.classList.toggle('open', nowOpen);
     return;
   }
-  const t = e.target.closest('.prov-toggle');
-  if(!t) return;
-  const key = t.dataset.toggle;
-  const elId = key==='__SIN_PROVEEDOR__' ? 'prov-prods-SIN' : 'prov-prods-'+cssId(key);
-  const el = document.getElementById(elId);
-  el.classList.toggle('show');
-  t.textContent = el.classList.contains('show') ? 'Ocultar productos ▴' : 'Ver productos ▾';
+  const t = e.target.closest('.prov-toggle[data-toggle]');
+  if(t){
+    const key = t.dataset.toggle;
+    const elId = key==='__SIN_PROVEEDOR__' ? 'prov-prods-SIN' : 'prov-prods-'+cssId(key);
+    const el = document.getElementById(elId);
+    el.classList.toggle('show');
+    t.textContent = el.classList.contains('show') ? 'Ocultar productos ▴' : 'Ver productos ▾';
+    return;
+  }
+  const tc = e.target.closest('[data-toggle-compras]');
+  if(tc){
+    const key = tc.dataset.toggleCompras;
+    const el = document.getElementById('prov-compras-'+cssId(key));
+    el.classList.toggle('show');
+    tc.textContent = el.classList.contains('show') ? 'Ocultar compras ▴' : 'Ver compras ▾';
+  }
 });
 
 document.getElementById('listProv').addEventListener('change', async (e)=>{
@@ -3075,7 +3237,12 @@ document.getElementById('diasGridSueltos').addEventListener('click', (e)=>{
 });
 
 document.getElementById('diaSelect').addEventListener('change', renderVentas);
-document.getElementById('diaSelectHasta').addEventListener('change', renderVentas);
+document.getElementById('diaSelectHasta').addEventListener('change', ()=>{
+  renderVentas();
+  if(document.getElementById('diaSelect').value && document.getElementById('diaSelectHasta').value){
+    document.getElementById('ventasRangoBox').style.display = 'none';
+  }
+});
 
 function populateVentasMesesChecklist(){
   const box = document.getElementById('ventasMesesChecklist');
@@ -3139,6 +3306,11 @@ document.querySelectorAll('#panel-ventas .chip-row .chip-v').forEach(chip=>{
 
 document.getElementById('panelVentasWrap')?.addEventListener('click', ()=>{});
 document.addEventListener('click', (e)=>{
+  const cerrarBtn = e.target.closest('[data-cerrar-float]');
+  if(cerrarBtn){
+    document.getElementById(cerrarBtn.dataset.cerrarFloat).style.display = 'none';
+    return;
+  }
   if(e.target.closest('.vfs-float') || e.target.closest('.chip-row-5')) return;
   cerrarPanelesVentasFlotantes();
 });
@@ -4495,7 +4667,8 @@ function renderAnalisis(){
 }
 
 document.querySelectorAll('#panel-analisis .chip-row .chip-v').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
+  chip.addEventListener('click', (e)=>{
+    e.stopPropagation();
     document.querySelectorAll('#panel-analisis .chip-row .chip-v').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     analisisFiltro = chip.dataset.af;
@@ -4506,7 +4679,17 @@ document.querySelectorAll('#panel-analisis .chip-row .chip-v').forEach(chip=>{
   });
 });
 document.getElementById('analisisDesde').addEventListener('change', renderAnalisis);
-document.getElementById('analisisHasta').addEventListener('change', renderAnalisis);
+document.getElementById('analisisHasta').addEventListener('change', ()=>{
+  renderAnalisis();
+  if(document.getElementById('analisisDesde').value && document.getElementById('analisisHasta').value){
+    document.getElementById('analisisRangoBox').style.display = 'none';
+  }
+});
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('.analisis-filtros-col')) return;
+  document.getElementById('analisisMesesBox').style.display = 'none';
+  document.getElementById('analisisRangoBox').style.display = 'none';
+});
 
 /* ============================================================
    EXPORTAR CATÁLOGO EN PDF (por rubro o completo)
