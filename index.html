@@ -3454,7 +3454,13 @@ function renderVentas(){
   let items = SALES.slice();
   const todayStr = todayISO();
 
-  if(ventasFiltroModo === 'hoy'){
+  if(filtroColumnas.fecha.size > 0){
+    // Si tildaste días puntuales en el filtro de la columna Fecha, eso manda por sobre
+    // el botón de período (Hoy/Meses/Acumulado) — así podés ver cualquier día, aunque
+    // no sea "hoy" ni esté en los meses elegidos arriba.
+    const n = filtroColumnas.fecha.size;
+    document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${n} DÍA${n===1?'':'S'} ELEGIDO${n===1?'':'S'} (FILTRO DE FECHA)`;
+  } else if(ventasFiltroModo === 'hoy'){
     items = items.filter(s=>s.fecha===todayStr);
     document.getElementById('ventasFiltroLabel').textContent = 'TOTAL DE HOY';
   } else if(ventasFiltroModo === 'meses'){
