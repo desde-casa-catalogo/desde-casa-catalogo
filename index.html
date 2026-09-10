@@ -793,7 +793,7 @@
   }
   .gf-scroll-hint.oculto{opacity:0;}
   table.gastos-fijos-table{font-size:15px;width:100%;table-layout:fixed;}
-  table.gastos-fijos-table th, table.gastos-fijos-table td{padding:8px 4px;white-space:nowrap;text-align:center;}
+  table.gastos-fijos-table th, table.gastos-fijos-table td{padding:5px 4px;white-space:nowrap;text-align:center;}
   table.gastos-fijos-table th:first-child, table.gastos-fijos-table td:first-child{text-align:left;}
   table.gastos-fijos-table .gf-detalle-cell{cursor:pointer;font-weight:800;min-width:130px;width:150px;}
   table.gastos-fijos-table .gf-cat-badge{
@@ -801,7 +801,7 @@
     background:var(--gold-pale);color:var(--gold-deep);margin-top:2px;
   }
   .gf-cell{
-    display:flex;align-items:center;justify-content:center;padding:6px 2px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;padding:3px 2px;border-radius:8px;
     cursor:pointer;border:1.5px solid transparent;
   }
   .gf-cell:hover{border-color:var(--border);}
@@ -3646,6 +3646,25 @@ function getPromedioDiarioMes(year, mes){
   return diasDelPeriodo > 0 ? totalIngresos / diasDelPeriodo : 0;
 }
 
+function getCategoriaBreakdown(year, mes){
+  // mes = null significa "todo el año" (para la tarjeta Acumulado)
+  let items = GASTOS.filter(g => g.fecha && g.fecha.slice(0,4) == year);
+  if(mes) items = items.filter(g => parseInt(g.fecha.slice(5,7),10) === mes);
+  const porCat = {};
+  items.forEach(g=>{
+    const cat = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+    porCat[cat] = (porCat[cat]||0) + (g.monto||0);
+  });
+  return Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+}
+
+function tooltipGastosHtml(breakdown){
+  if(breakdown.length===0) return '<div class="deben-tooltip-empty">Sin gastos cargados en este período.</div>';
+  return breakdown.map(([cat, monto])=>`
+    <div class="deben-tooltip-row"><span>${escapeHtml(cat)}</span><span>${fmt(monto)}</span></div>
+  `).join('');
+}
+
 function renderAdminDashboard(){
   document.getElementById('finYearLabel').textContent = finYear;
   const rows = getMonthlyFinance(finYear).filter(r => r.ingresos !== 0 || r.gastos !== 0);
@@ -3660,7 +3679,9 @@ function renderAdminDashboard(){
     return `<div class="fin-month-card">
       <div class="fin-month-name">${MESES_NOMBRES[r.mes-1]}</div>
       <div class="fin-row"><span>Ingresos</span><span class="fin-val pos">${fmt(r.ingresos)}</span></div>
-      <div class="fin-row"><span>Gastos</span><span class="fin-val neg">${fmt(r.gastos)}</span></div>
+      <div class="fin-row deben-hover-card"><span>Gastos</span><span class="fin-val neg">${fmt(r.gastos)}</span>
+        <div class="deben-tooltip">${tooltipGastosHtml(getCategoriaBreakdown(finYear, r.mes))}</div>
+      </div>
       <div class="fin-row fin-result"><span>Resultado</span><span class="fin-val ${resClass}">${fmt(r.resultado)}</span></div>
       <div class="fin-row fin-promedio"><span>Promedio diario</span><span class="fin-val">${fmt(promedio)}</span></div>
     </div>`;
@@ -3678,7 +3699,9 @@ function renderAdminDashboard(){
   html += `<div class="fin-month-card acumulado">
     <div class="fin-month-name">📊 Acumulado ${finYear}</div>
     <div class="fin-row"><span>Ingresos</span><span class="fin-val pos">${fmt(totIngresos)}</span></div>
-    <div class="fin-row"><span>Gastos</span><span class="fin-val neg">${fmt(totGastos)}</span></div>
+    <div class="fin-row deben-hover-card"><span>Gastos</span><span class="fin-val neg">${fmt(totGastos)}</span>
+      <div class="deben-tooltip">${tooltipGastosHtml(getCategoriaBreakdown(finYear, null))}</div>
+    </div>
     <div class="fin-row fin-result"><span>Resultado</span><span class="fin-val ${totResultado>=0?'pos':'neg'}">${fmt(totResultado)}</span></div>
     <div class="fin-row fin-promedio"><span>Promedio diario</span><span class="fin-val">${fmt(promedioAcum)}</span></div>
   </div>`;
@@ -3849,7 +3872,9 @@ function updateBulkToolbarGastos(){
   const bar = document.getElementById('bulkToolbarGastos');
   const count = selectedGastoIds.size;
   bar.classList.toggle('show', count>0);
-  document.getElementById('bulkCountGastos').textContent = count + (count===1 ? ' gasto seleccionado' : ' gastos seleccionados');
+  const total = GASTOS.filter(g=>selectedGastoIds.has(g.id)).reduce((acc,g)=>acc+(g.monto||0), 0);
+  document.getElementById('bulkCountGastos').textContent =
+    count + (count===1 ? ' gasto seleccionado' : ' gastos seleccionados') + ' · Total: ' + fmt(total);
 }
 
 document.getElementById('btnBulkDeleteGastos').addEventListener('click', async ()=>{
@@ -3938,7 +3963,7 @@ function renderGastosTabla(){
       </div>
       <div class="gastos-cat-body" style="display:${abierta?'block':'none'};">
         <table class="ventas-table gastos-cat-table">
-          <thead><tr><th></th><th>Fecha</th><th>Detalle</th><th>$ Monto</th><th>Medio de pago</th><th></th></tr></thead>
+          <thead><tr><th></th><th>Fecha</th><th>Detalle</th><th>Categoría</th><th>$ Monto</th><th>Medio de pago</th><th></th></tr></thead>
           <tbody>
             ${gastosCat.map(g=>{
               const ligado = !!g.origenVencimientoId;
@@ -3946,6 +3971,7 @@ function renderGastosTabla(){
                 <td><input type="checkbox" class="row-check" data-id="${g.id}" ${selectedGastoIds.has(g.id)?'checked':''}></td>
                 <td><input type="date" class="cell-edit" data-id="${g.id}" data-field="fecha" value="${g.fecha}" ${ligado?'disabled title="Viene de un gasto fijo marcado como pagado"':''}></td>
                 <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="detalle" value="${escapeHtml(g.detalle||'')}"></td>
+                <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="categoria" value="${escapeHtml(g.categoria||'')}" list="categoriasList"></td>
                 <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
                 <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="medioPago" value="${escapeHtml(g.medioPago||'')}"></td>
                 <td><button class="btn-del link-btn danger" data-id="${g.id}" data-action="delete-gasto">Eliminar</button></td>
