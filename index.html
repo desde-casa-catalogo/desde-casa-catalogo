@@ -712,7 +712,7 @@
   .stat-compact.clickable{cursor:pointer;transition:transform .08s;}
   .stat-compact.clickable:active{transform:scale(.98);}
   #finPromedioRow .stat-compact{max-width:420px;}
-  .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);min-width:0;overflow:hidden;}
+  .fin-month-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);min-width:0;}
   .fin-month-name{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .fin-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:14.5px;color:var(--ink-soft);font-weight:700;gap:6px;}
   .fin-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -796,6 +796,13 @@
   table.gastos-fijos-table th, table.gastos-fijos-table td{padding:5px 4px;white-space:nowrap;text-align:center;}
   table.gastos-fijos-table th:first-child, table.gastos-fijos-table td:first-child{text-align:left;}
   table.gastos-fijos-table .gf-detalle-cell{cursor:pointer;font-weight:800;min-width:130px;width:150px;}
+  table.gastos-fijos-table .gf-drag-handle{
+    width:26px;cursor:grab;color:var(--ink-faint);font-size:16px;text-align:center;
+    touch-action:none;user-select:none;
+  }
+  table.gastos-fijos-table .gf-drag-handle:active{cursor:grabbing;}
+  table.gastos-fijos-table tr.gf-row-dragging{opacity:.4;}
+  table.gastos-fijos-table tr.gf-row-dropline > td{border-top:3px solid var(--gold);}
   table.gastos-fijos-table .gf-cat-badge{
     display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:999px;
     background:var(--gold-pale);color:var(--gold-deep);margin-top:2px;
@@ -2916,7 +2923,7 @@ function getProveedores(){
   });
   // Un proveedor puede tener gastos cargados en Administración sin tener todavía ningún producto asociado
   GASTOS.forEach(g=>{
-    if(g.categoria!=='Proveedor') return;
+    if(!esCategoriaProveedor(g.categoria)) return;
     const key = g.detalle && g.detalle.trim();
     if(key && !Object.keys(map).some(k=>normalizeForMatch(k)===normalizeForMatch(key))) map[key] = 0;
   });
@@ -2927,6 +2934,13 @@ function normalizeForMatch(s){
   return normalizeAccents(s||'').trim();
 }
 
+// Reconoce "Proveedor", "Proveedores", con mayúsculas o espacios distintos — para que
+// una categoría escrita de cualquiera de esas formas en un Excel se sume igual a "Ver compras".
+function esCategoriaProveedor(categoria){
+  const c = normalizeForMatch(categoria).toLowerCase();
+  return c === 'proveedor' || c === 'proveedores';
+}
+
 // Si el proveedor que se escribió ya existe (aunque tenga otras mayúsculas/minúsculas),
 // devuelve el nombre EXACTO ya guardado, para no crear una tarjeta de proveedor duplicada.
 function resolverNombreProveedor(nombreEscrito){
@@ -2935,7 +2949,7 @@ function resolverNombreProveedor(nombreEscrito){
   const norm = normalizeForMatch(escrito).toLowerCase();
   const existentes = new Set();
   PRODUCTS.forEach(p=>{ if(p.proveedor && p.proveedor.trim()) existentes.add(p.proveedor.trim()); });
-  GASTOS.forEach(g=>{ if(g.categoria==='Proveedor' && g.detalle && g.detalle.trim()) existentes.add(g.detalle.trim()); });
+  GASTOS.forEach(g=>{ if(esCategoriaProveedor(g.categoria) && g.detalle && g.detalle.trim()) existentes.add(g.detalle.trim()); });
   for(const ex of existentes){
     if(normalizeForMatch(ex).toLowerCase() === norm) return ex;
   }
@@ -3088,7 +3102,7 @@ function renderProveedores(){
 function renderComprasDeProveedor(nombreProveedor){
   const nombreNorm = normalizeForMatch(nombreProveedor);
   const compras = GASTOS
-    .filter(g => g.categoria==='Proveedor' && normalizeForMatch(g.detalle)===nombreNorm)
+    .filter(g => esCategoriaProveedor(g.categoria) && normalizeForMatch(g.detalle)===nombreNorm)
     .sort((a,b)=>b.fecha.localeCompare(a.fecha));
   if(compras.length===0) return '<div class="prov-compra-empty">Todavía no hay gastos de categoría "Proveedor" cargados con este nombre. Cargalos desde Administración → Nuevo gasto.</div>';
   const total = compras.reduce((acc,c)=>acc+(c.monto||0), 0);
@@ -4096,7 +4110,7 @@ document.getElementById('btnGuardarGasto').addEventListener('click', async ()=>{
   document.getElementById('overlayNuevoGasto').classList.remove('show');
   finYear = parseInt(fecha.slice(0,4), 10);
   renderAdmin();
-  if(categoria==='Proveedor') renderProveedores();
+  if(esCategoriaProveedor(categoria)) renderProveedores();
   showToast('Gasto agregado ✓');
 });
 
@@ -4131,7 +4145,7 @@ document.getElementById('fileExcelGastos').addEventListener('change', (e)=>{
         const medioPago = normMedioCell(getField(norm, ['MEDIO DE PAGO','MEDIO PAGO','FORMA DE PAGO','PAGO']));
         const categoriaExcel = String(getField(norm, ['CATEGORIA','CATEGORÍA']) || '').trim();
         const categoria = categoriaExcel || sugerirCategoria(detalle);
-        if(categoria==='Proveedor') huboProveedor = true;
+        if(esCategoriaProveedor(categoria)) huboProveedor = true;
 
         GASTOS.push({ id: uid(), fecha, detalle, categoria, monto, medioPago, origen: 'excel', loteId, loteArchivo: loteNombreArchivo, loteFecha: todayISO() });
         cargados++;
@@ -4266,20 +4280,23 @@ document.getElementById('btnVencMonthNext').addEventListener('click', ()=>{
   renderVencCalendar();
 });
 
+let vencModalOrigen = 'calendario'; // 'calendario' | 'tabla' — para saber qué NO hace falta redibujar al guardar
+
 document.getElementById('vencCalendarGrid').addEventListener('click', (e)=>{
   const item = e.target.closest('.venc-cal-item');
   if(item){
-    abrirModalVencimiento(item.dataset.id);
+    abrirModalVencimiento(item.dataset.id, null, 'calendario');
     return;
   }
   const day = e.target.closest('.venc-cal-day:not(.empty)');
   if(day){
-    abrirModalVencimiento(null, parseInt(day.dataset.dia,10));
+    abrirModalVencimiento(null, parseInt(day.dataset.dia,10), 'calendario');
   }
 });
 
-function abrirModalVencimiento(id, diaPrefill){
+function abrirModalVencimiento(id, diaPrefill, origen){
   vencEditandoId = id;
+  vencModalOrigen = origen || 'tabla';
   populateCategoriasList();
   const delBtn = document.getElementById('btnEliminarVencimientoModal');
   const cicloActual = getCicloActual();
@@ -4395,14 +4412,19 @@ function renderGastosFijosTable(){
   document.getElementById('gastosFijosYearLabel').textContent = finYear;
   const mesesIdx = MESES_NOMBRES.map((_, i)=>i+1).filter(m=>mesesVisiblesGF.has(m));
 
+  // Guardamos dónde estaba el scroll horizontal antes de redibujar, para no "teletransportar"
+  // a la persona a Enero cada vez que cambia algo (por ejemplo, desde el calendario).
+  const wrap = document.getElementById('gfTableWrap');
+  const scrollGuardado = wrap ? wrap.scrollLeft : 0;
+
   const thead = document.getElementById('gastosFijosThead');
-  thead.innerHTML = '<th>Gasto</th>' + mesesIdx.map(m=>`<th>${MESES_NOMBRES[m-1].slice(0,3).toUpperCase()}</th>`).join('') + '<th></th>';
+  thead.innerHTML = '<th></th><th>Gasto</th>' + mesesIdx.map(m=>`<th>${MESES_NOMBRES[m-1].slice(0,3).toUpperCase()}</th>`).join('') + '<th></th>';
 
   const tbody = document.getElementById('gastosFijosTbody');
-  const items = VENCIMIENTOS.slice().sort((a,b)=>a.detalle.localeCompare(b.detalle));
+  const items = VENCIMIENTOS; // orden manual del usuario (se arrastra con la manija ⠿), no se reordena solo
 
   if(items.length===0){
-    tbody.innerHTML = `<tr><td colspan="14"><div class="empty-state" style="padding:14px;"><span class="big">💸</span>No tenés gastos fijos cargados. Agregá uno o tocá un día en el calendario.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="15"><div class="empty-state" style="padding:14px;"><span class="big">💸</span>No tenés gastos fijos cargados. Agregá uno o tocá un día en el calendario.</div></td></tr>`;
   } else {
     tbody.innerHTML = items.map(v=>{
       const celdas = mesesIdx.map(m=>{
@@ -4416,7 +4438,8 @@ function renderGastosFijosTable(){
           </div>
         </td>`;
       }).join('');
-      return `<tr>
+      return `<tr data-venc-id="${v.id}">
+        <td class="gf-drag-handle" title="Arrastrá para reordenar">⠿</td>
         <td class="gf-detalle-cell" data-action="editar-venc" data-id="${v.id}">${escapeHtml(v.detalle)}<br><span class="gf-cat-badge">${escapeHtml(v.categoria||'Sin categoría')}</span></td>
         ${celdas}
         <td><button class="btn-del link-btn danger" data-action="delete-vencimiento" data-id="${v.id}" title="Eliminar">🗑️</button></td>
@@ -4431,11 +4454,77 @@ function renderGastosFijosTable(){
     const total = items.reduce((acc,v)=> acc + ((v.montosPorMes && v.montosPorMes[ym]) || 0), 0);
     return `<td>${total ? fmtNum(total) : '—'}</td>`;
   }).join('');
-  totalRow.innerHTML = `<td>TOTAL</td>${totalCeldas}<td></td>`;
+  totalRow.innerHTML = `<td></td><td>TOTAL</td>${totalCeldas}<td></td>`;
 
   actualizarBadgeVencimientos();
+  if(wrap) wrap.scrollLeft = scrollGuardado; // restauramos el lugar donde estabas mirando
   requestAnimationFrame(actualizarSombraScrollGastosFijos);
 }
+
+/* ---- Reordenar filas de Gastos fijos arrastrando (mouse y dedo) ---- */
+(function(){
+  const tbody = document.getElementById('gastosFijosTbody');
+  let filaArrastrada = null;
+  let idArrastrado = null;
+  let ultimoObjetivo = null; // { tr, despues }
+
+  function filaMasCercana(y){
+    const filas = Array.from(tbody.querySelectorAll('tr[data-venc-id]')).filter(tr => tr !== filaArrastrada);
+    let masCercana = null, menorDistancia = Infinity;
+    for(const tr of filas){
+      const rect = tr.getBoundingClientRect();
+      const centro = rect.top + rect.height/2;
+      const dist = Math.abs(y - centro);
+      if(dist < menorDistancia){ menorDistancia = dist; masCercana = { tr, despues: y > centro }; }
+    }
+    return masCercana;
+  }
+
+  tbody.addEventListener('pointerdown', (e)=>{
+    const handle = e.target.closest('.gf-drag-handle');
+    if(!handle) return;
+    const tr = handle.closest('tr[data-venc-id]');
+    if(!tr) return;
+    filaArrastrada = tr;
+    idArrastrado = tr.dataset.vencId;
+    ultimoObjetivo = null;
+    tr.classList.add('gf-row-dragging');
+    handle.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  tbody.addEventListener('pointermove', (e)=>{
+    if(!filaArrastrada) return;
+    document.querySelectorAll('.gf-row-dropline').forEach(el=>el.classList.remove('gf-row-dropline'));
+    ultimoObjetivo = filaMasCercana(e.clientY);
+    if(ultimoObjetivo) ultimoObjetivo.tr.classList.add('gf-row-dropline');
+  });
+
+  async function terminarArrastre(e){
+    if(!filaArrastrada) return;
+    filaArrastrada.classList.remove('gf-row-dragging');
+    document.querySelectorAll('.gf-row-dropline').forEach(el=>el.classList.remove('gf-row-dropline'));
+
+    if(ultimoObjetivo && ultimoObjetivo.tr !== filaArrastrada){
+      const idxArrastrado = VENCIMIENTOS.findIndex(v=>v.id===idArrastrado);
+      if(idxArrastrado>-1){
+        const [item] = VENCIMIENTOS.splice(idxArrastrado, 1);
+        let idxObjetivo = VENCIMIENTOS.findIndex(v=>v.id===ultimoObjetivo.tr.dataset.vencId);
+        if(idxObjetivo>-1){
+          const nuevoIdx = ultimoObjetivo.despues ? idxObjetivo+1 : idxObjetivo;
+          VENCIMIENTOS.splice(nuevoIdx, 0, item);
+          await saveVencimientos();
+        }
+      }
+    }
+    filaArrastrada = null;
+    idArrastrado = null;
+    ultimoObjetivo = null;
+    renderGastosFijosTable();
+  }
+  tbody.addEventListener('pointerup', terminarArrastre);
+  tbody.addEventListener('pointercancel', terminarArrastre);
+})();
 
 document.getElementById('gastosFijosTbody').addEventListener('click', async (e)=>{
   if(e.target.closest('input')) return; // tocar el número lo edita, no marca pagado
@@ -4463,13 +4552,12 @@ document.getElementById('gastosFijosTbody').addEventListener('click', async (e)=
     await saveVencimientos();
     await saveGastos();
     renderGastosFijosTable();
-    renderVencCalendar();
     renderGastosTabla();
     renderAnalisis();
     showToast(yaPagado ? 'Desmarcado' : 'Marcado como pagado ✓ (se sumó a Detalle de lo pagado)');
     return;
   }
-  if(editBtn){ abrirModalVencimiento(editBtn.dataset.id); return; }
+  if(editBtn){ abrirModalVencimiento(editBtn.dataset.id, null, 'tabla'); return; }
   if(delBtn){
     if(!confirm('¿Borrar este gasto fijo? También se van a borrar los pagos ya registrados en Detalle de lo pagado.')) return;
     GASTOS = GASTOS.filter(g => g.origenVencimientoId !== delBtn.dataset.id);
@@ -4477,7 +4565,6 @@ document.getElementById('gastosFijosTbody').addEventListener('click', async (e)=
     await saveVencimientos();
     await saveGastos();
     renderGastosFijosTable();
-    renderVencCalendar();
     renderGastosTabla();
     renderAnalisis();
     showToast('Gasto fijo borrado');
@@ -4506,11 +4593,10 @@ document.getElementById('gastosFijosTbody').addEventListener('change', async (e)
   if(gLigado){ gLigado.monto = val; await saveGastos(); renderGastosTabla(); renderAnalisis(); }
   await saveVencimientos();
   renderGastosFijosTable();
-  renderVencCalendar();
 });
 
 document.getElementById('btnNuevoVencimiento').addEventListener('click', ()=>{
-  abrirModalVencimiento(null);
+  abrirModalVencimiento(null, null, 'tabla');
 });
 document.getElementById('btnCancelarVencimiento').addEventListener('click', ()=>{
   document.getElementById('overlayVencimiento').classList.remove('show');
@@ -4523,8 +4609,7 @@ document.getElementById('btnEliminarVencimientoModal').addEventListener('click',
   await saveVencimientos();
   await saveGastos();
   document.getElementById('overlayVencimiento').classList.remove('show');
-  renderGastosFijosTable();
-  renderVencCalendar();
+  if(vencModalOrigen==='tabla') renderGastosFijosTable(); else renderVencCalendar();
   renderGastosTabla();
   renderAnalisis();
   showToast('Gasto fijo borrado');
@@ -4556,8 +4641,7 @@ document.getElementById('btnGuardarVencimiento').addEventListener('click', async
     }
     await saveVencimientos();
     document.getElementById('overlayVencimiento').classList.remove('show');
-    renderGastosFijosTable();
-    renderVencCalendar();
+    if(vencModalOrigen==='tabla') renderGastosFijosTable(); else renderVencCalendar();
     showToast('Vencimiento actualizado ✓');
     return;
   }
@@ -4573,8 +4657,7 @@ document.getElementById('btnGuardarVencimiento').addEventListener('click', async
 
   VENCIMIENTOS.push({ id: uid(), detalle, categoria, diaDelMes: dia, notas, montosPorMes, pagadoMeses: [] });
   await saveVencimientos();
-  renderGastosFijosTable();
-  renderVencCalendar();
+  if(vencModalOrigen==='tabla') renderGastosFijosTable(); else renderVencCalendar();
   showToast(repetir ? `Vencimiento agregado ✓ (repetido en ${Object.keys(montosPorMes).length} meses)` : 'Vencimiento agregado ✓');
 
   // Dejamos el modal abierto y listo para cargar el próximo, sin tener que reabrirlo
@@ -4924,7 +5007,7 @@ document.getElementById('loteImportGastosList').addEventListener('click', async 
   const btn = e.target.closest('[data-action="deshacer-lote-gastos"]');
   if(!btn) return;
   const loteId = btn.dataset.lote;
-  const afectaProveedor = GASTOS.some(g=>g.loteId===loteId && g.categoria==='Proveedor');
+  const afectaProveedor = GASTOS.some(g=>g.loteId===loteId && esCategoriaProveedor(g.categoria));
   const n = GASTOS.filter(g=>g.loteId===loteId).length;
   if(!confirm(`¿Eliminar los ${n} gastos de esta importación? Esto NO afecta nada de lo que cargaste a mano.`)) return;
   GASTOS = GASTOS.filter(g=>g.loteId!==loteId);
