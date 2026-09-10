@@ -1032,7 +1032,7 @@
   table.ventas-table tbody tr:nth-child(even){background:var(--cream-deep);}
   table.ventas-table tbody tr:nth-child(even):hover{background:var(--gold-pale);}
   td.num{text-align:right;font-weight:700;}
-  td.prod-cell{white-space:normal;min-width:180px;font-weight:700;letter-spacing:.15px;font-size:13.5px;}
+  td.prod-cell{white-space:normal;min-width:380px;font-weight:700;letter-spacing:.15px;font-size:13.5px;}
   td.num.price-cell{color:var(--price-color);font-weight:800;}
   td{padding:6px 10px;}
   input.cell-edit{
@@ -1045,18 +1045,19 @@
   input.cell-edit.cell-edit-num{text-align:right;font-weight:700;width:70px;}
   input.cell-edit.cell-edit-num.price{color:var(--price-color);font-weight:800;width:90px;}
   input.cell-edit.cell-edit-text{text-transform:uppercase;font-weight:700;min-width:140px;}
+  td.prod-cell input.cell-edit-text{min-width:360px;}
   input.cell-edit.cell-edit-text.medio-debe{color:var(--stat-red);font-weight:800;}
   input.cell-edit[type="date"]{font-weight:600;min-width:130px;}
   .estado-pill{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;border:none;}
   .estado-pill.pago{background:var(--green-pale);color:var(--green);}
   .estado-pill.debe{background:var(--red-pale);color:var(--red);}
   .estado-pill.neutro{background:var(--border);color:var(--ink-faint);}
-  .medio-cell{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-  .medio-cell input.cell-edit{flex:1 1 90px;min-width:90px;}
-  .pago-rapido{display:flex;gap:2px;flex:0 0 auto;flex-wrap:wrap;}
+  .medio-cell{display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
+  .medio-cell input.cell-edit{flex:1 1 70px;min-width:70px;}
+  .pago-rapido{display:flex;gap:1px;flex:0 0 auto;flex-wrap:wrap;}
   .pago-rapido button{
-    min-width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);
-    font-size:10.5px;cursor:pointer;padding:0 2px;flex:0 0 auto;font-weight:700;
+    min-width:19px;height:19px;border-radius:5px;border:1.5px solid var(--border);background:var(--card);
+    font-size:9.5px;cursor:pointer;padding:0 1px;flex:0 0 auto;font-weight:700;
   }
   .pago-rapido button:hover{border-color:var(--gold);background:var(--gold-pale);}
 
@@ -3664,12 +3665,14 @@ function getCategoriaBreakdown(year, mes){
   // mes = null significa "todo el año" (para la tarjeta Acumulado)
   let items = GASTOS.filter(g => g.fecha && g.fecha.slice(0,4) == year);
   if(mes) items = items.filter(g => parseInt(g.fecha.slice(5,7),10) === mes);
-  const porCat = {};
+  const porCat = {}; // clave normalizada → { label, total }
   items.forEach(g=>{
-    const cat = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
-    porCat[cat] = (porCat[cat]||0) + (g.monto||0);
+    const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+    const key = normalizeForMatch(catCruda).toLowerCase();
+    if(!porCat[key]) porCat[key] = { label: titleCase(catCruda), total: 0 };
+    porCat[key].total += (g.monto||0);
   });
-  return Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+  return Object.values(porCat).sort((a,b)=>b.total-a.total).map(v=>[v.label, v.total]);
 }
 
 function tooltipGastosHtml(breakdown){
@@ -3949,31 +3952,33 @@ function renderGastosTabla(){
     return;
   }
 
-  const porCategoria = {};
+  const porCategoria = {}; // clave normalizada (sin importar mayúsculas/tildes) → { label, gastos }
   items.forEach(g=>{
-    const cat = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
-    if(!porCategoria[cat]) porCategoria[cat] = [];
-    porCategoria[cat].push(g);
+    const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+    const key = normalizeForMatch(catCruda).toLowerCase();
+    if(!porCategoria[key]) porCategoria[key] = { label: titleCase(catCruda), gastos: [] };
+    porCategoria[key].gastos.push(g);
   });
   const categorias = Object.keys(porCategoria).sort((a,b)=>{
-    const totalA = porCategoria[a].reduce((s,g)=>s+(g.monto||0),0);
-    const totalB = porCategoria[b].reduce((s,g)=>s+(g.monto||0),0);
+    const totalA = porCategoria[a].gastos.reduce((s,g)=>s+(g.monto||0),0);
+    const totalB = porCategoria[b].gastos.reduce((s,g)=>s+(g.monto||0),0);
     return totalB - totalA; // categoría con más gasto primero
   });
 
-  box.innerHTML = categorias.map(cat=>{
-    const gastosCat = porCategoria[cat].slice().sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||''));
+  box.innerHTML = categorias.map(key=>{
+    const cat = porCategoria[key].label;
+    const gastosCat = porCategoria[key].gastos.slice().sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||''));
     const total = gastosCat.reduce((s,g)=>s+(g.monto||0),0);
-    const abierta = categoriasAbiertas.has(cat);
+    const abierta = categoriasAbiertas.has(key);
     return `<div class="gastos-cat-card">
       <div class="gastos-cat-header">
-        <button class="gastos-cat-toggle-btn" data-toggle-cat="${escapeHtml(cat)}">
+        <button class="gastos-cat-toggle-btn" data-toggle-cat="${escapeHtml(key)}">
           <span class="gastos-cat-nombre">${escapeHtml(cat)}</span>
           <span class="gastos-cat-count">${gastosCat.length} gasto${gastosCat.length===1?'':'s'}</span>
           <span class="gastos-cat-total">${fmt(total)}</span>
           <span class="gastos-cat-caret">${abierta?'▴':'▾'}</span>
         </button>
-        <button class="gastos-cat-vaciar" data-vaciar-cat="${escapeHtml(cat)}" title="Borrar todos los gastos de esta categoría">🗑️ Vaciar</button>
+        <button class="gastos-cat-vaciar" data-vaciar-cat="${escapeHtml(key)}" title="Borrar todos los gastos de esta categoría">🗑️ Vaciar</button>
       </div>
       <div class="gastos-cat-body" style="display:${abierta?'block':'none'};">
         <table class="ventas-table gastos-cat-table">
@@ -4003,25 +4008,29 @@ function renderGastosTabla(){
 document.getElementById('gastosPorCategoria').addEventListener('click', async (e)=>{
   const vaciarBtn = e.target.closest('[data-vaciar-cat]');
   if(vaciarBtn){
-    const cat = vaciarBtn.dataset.vaciarCat;
-    const items = gastosFiltradosActuales().filter(g => (g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría') === cat);
+    const key = vaciarBtn.dataset.vaciarCat;
+    const items = gastosFiltradosActuales().filter(g => {
+      const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+      return normalizeForMatch(catCruda).toLowerCase() === key;
+    });
     const n = items.length;
     if(n===0) return;
-    if(!confirm(`¿Borrar los ${n} gastos de "${cat}" que ves en el período elegido arriba (${document.querySelector('#gastosPeriodoChips .chip-v.active').textContent})? Esto NO se puede deshacer.`)) return;
-    if(!confirm(`Última confirmación: se van a borrar ${n} gastos de "${cat}". ¿Estás segura?`)) return;
+    const nombreLindo = items[0].categoria && items[0].categoria.trim() ? titleCase(items[0].categoria.trim()) : 'Sin categoría';
+    if(!confirm(`¿Borrar los ${n} gastos de "${nombreLindo}" que ves en el período elegido arriba (${document.querySelector('#gastosPeriodoChips .chip-v.active').textContent})? Esto NO se puede deshacer.`)) return;
+    if(!confirm(`Última confirmación: se van a borrar ${n} gastos de "${nombreLindo}". ¿Estás segura?`)) return;
     const idsABorrar = new Set(items.map(g=>g.id));
     GASTOS = GASTOS.filter(g => !idsABorrar.has(g.id));
     await saveGastos();
     renderAdmin();
     renderProveedores();
-    showToast(`${n} gastos de "${cat}" eliminados ✓`);
+    showToast(`${n} gastos de "${nombreLindo}" eliminados ✓`);
     return;
   }
   const catBtn = e.target.closest('[data-toggle-cat]');
   if(catBtn){
-    const cat = catBtn.dataset.toggleCat;
-    if(categoriasAbiertas.has(cat)) categoriasAbiertas.delete(cat);
-    else categoriasAbiertas.add(cat);
+    const key = catBtn.dataset.toggleCat;
+    if(categoriasAbiertas.has(key)) categoriasAbiertas.delete(key);
+    else categoriasAbiertas.add(key);
     renderGastosTabla();
     return;
   }
