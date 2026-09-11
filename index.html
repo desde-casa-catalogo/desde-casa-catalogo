@@ -2446,6 +2446,10 @@ function renderCostos(){
           <div class="mini-field-sm"><label>Costo</label><input type="number" class="costo-input" data-id="${p.id}" data-field="costo" value="${p.costo}"></div>
           <div class="mini-field-sm"><label>Precio venta</label><input type="number" class="costo-input" data-id="${p.id}" data-field="precio" value="${p.precio}"></div>
         </div>
+        <div class="mini-field" style="margin-top:12px;">
+          <label>Rubro</label>
+          <input type="text" class="field costo-input" data-id="${p.id}" data-field="rubro" value="${escapeHtml(p.rubro||'')}" list="rubrosList">
+        </div>
         <div class="costo-row-actions">
           <button class="link-btn" data-action="foto" data-id="${p.id}">🖼️ ${PHOTOS[p.id] ? 'Cambiar foto' : 'Subir foto'}</button>
           ${PHOTOS[p.id] ? `<button class="link-btn danger" data-action="quitar-foto" data-id="${p.id}">Quitar foto</button>` : ''}
@@ -2482,6 +2486,12 @@ document.getElementById('listCostos').addEventListener('change', async (e)=>{
     if(!val){ showToast('El nombre no puede quedar vacío'); inp.value = p.nombre; return; }
     p.nombre = val.toUpperCase();
     showToast('Nombre corregido ✓');
+  } else if(field==='rubro'){
+    const val = inp.value.trim();
+    if(!val){ showToast('El rubro no puede quedar vacío'); inp.value = p.rubro; return; }
+    p.rubro = val.toUpperCase();
+    document.getElementById('rubrosList').innerHTML = getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(titleCase(r))}">`).join('');
+    showToast('Rubro corregido ✓');
   } else if(field==='stock'){
     const val = parseInt(inp.value, 10);
     p.stock = isNaN(val) ? 0 : val;
@@ -2490,6 +2500,7 @@ document.getElementById('listCostos').addEventListener('change', async (e)=>{
     p[field] = isNaN(val) ? 0 : val;
   }
   renderCostos();
+  if(field==='rubro'){ renderChipsCostos(); renderChipsCatalogo(); renderCatalogo(); }
   await saveProducts();
 });
 
@@ -5045,6 +5056,7 @@ async function boot(){
   renderVentaSummary();
   renderChipsCostos();
   renderCostos();
+  document.getElementById('rubrosList').innerHTML = getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(titleCase(r))}">`).join('');
   renderProveedores();
   renderVentas();
   renderAdmin();
