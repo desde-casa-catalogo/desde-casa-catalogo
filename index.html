@@ -1690,7 +1690,11 @@ let pinBuffer = '';
 const fmt = (n) => '$ ' + Math.round(n).toLocaleString('es-AR');
 const fmtNum = (n) => Math.round(n).toLocaleString('es-AR');
 const todayISO = () => new Date().toISOString().slice(0,10);
-const uid = () => 'v' + Date.now() + Math.floor(Math.random()*10000);
+// Contador interno: garantiza ids únicos aunque se generen muchos en el mismo milisegundo.
+// (Antes, al importar 313 productos de una vez, era casi seguro que dos quedaran con el mismo id.)
+let __uidContador = 0;
+const uid = () => 'v' + Date.now().toString(36) + '_' + (++__uidContador).toString(36) + '_' + Math.floor(Math.random()*100000).toString(36);
+const uidProducto = () => 'p_' + Date.now().toString(36) + '_' + (++__uidContador).toString(36) + '_' + Math.floor(Math.random()*100000).toString(36);
 const titleCase = (s) => s.toLowerCase().replace(/(^|\s)\S/g, t=>t.toUpperCase());
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const cssId = (s) => s.replace(/[^a-zA-Z0-9]/g,'_');
@@ -1712,6 +1716,26 @@ async function loadAll(){
   }catch(e){
     PRODUCTS = INITIAL_PRODUCTS.map(p => ({...p}));
     try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e2){}
+  }
+
+  // Reparación: si hay productos que quedaron con el mismo id (pasaba al importar muchos de una vez),
+  // le damos uno nuevo a los repetidos. Sin esto, marcar/editar uno afectaba al otro sin querer.
+  {
+    const vistos = new Set();
+    let reparados = 0;
+    PRODUCTS.forEach(p=>{
+      if(!p.id || vistos.has(p.id)){
+        const idViejo = p.id;
+        p.id = uidProducto();
+        if(idViejo && PHOTOS[idViejo] === undefined){ /* sin foto asociada, nada que mover */ }
+        reparados++;
+      }
+      vistos.add(p.id);
+    });
+    if(reparados > 0){
+      try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e){}
+      console.log(`Se repararon ${reparados} productos que tenían el mismo identificador.`);
+    }
   }
   try{
     const r = await window.storage.get('dc_providers_info', true);
@@ -2627,7 +2651,7 @@ document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
       idProducto = existente.id;
       actualizados++;
     } else {
-      idProducto = 'p_'+Date.now()+'_'+Math.floor(Math.random()*10000);
+      idProducto = uidProducto();
       PRODUCTS.push({
         id: idProducto, nombre: nombre.toUpperCase(), proveedor: proveedorGlobal,
         costo, precio, rubro: rubro || 'SIN CATEGORÍA', stock: cantidadComprada, foto: ''
@@ -2707,7 +2731,7 @@ document.getElementById('fileExcel').addEventListener('change', (e)=>{
           actualizados++;
         } else {
           PRODUCTS.push({
-            id: 'p_'+Date.now()+'_'+Math.floor(Math.random()*10000),
+            id: uidProducto(),
             nombre: nombre.toUpperCase(), proveedor, costo, precio, rubro,
             stock: (stock!==null && !isNaN(stock)) ? stock : 100, foto
           });
