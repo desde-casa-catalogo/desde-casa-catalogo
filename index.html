@@ -1050,9 +1050,20 @@
   .gastos-cat-total{font-size:17px;font-weight:800;color:var(--price-color);white-space:nowrap;}
   .gastos-cat-caret{font-size:14px;color:var(--gold-deep);}
   .gastos-cat-body{border-top:1.5px solid var(--border);padding:8px;}
-  table.gastos-cat-table{width:100%;font-size:13px;}
-  table.gastos-cat-table th{text-align:left;padding:6px 8px;font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;}
-  table.gastos-cat-table td{padding:6px 8px;}
+  table.gastos-cat-table{width:100%;font-size:14px;}
+  table.gastos-cat-table th{
+    background:var(--dark-surface);color:#fff;text-align:left;padding:12px 14px;font-size:11.5px;
+    text-transform:uppercase;letter-spacing:.5px;font-weight:700;white-space:nowrap;
+  }
+  table.gastos-cat-table td{padding:8px 10px;font-weight:600;}
+  /* El selector de fecha siempre visible y cómodo de tocar en "Detalle de lo pagado" */
+  table.gastos-cat-table input[type="date"]{
+    min-width:150px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;
+  }
+  table.gastos-cat-table input[type="date"]:hover{border-color:var(--gold);}
+  table.gastos-cat-table input[type="date"]::-webkit-calendar-picker-indicator{
+    opacity:.85;cursor:pointer;font-size:15px;padding:2px;
+  }
 
   table.ventas-table td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
@@ -1202,6 +1213,9 @@
       <input type="file" id="fileExcelGastos" accept=".xlsx,.xls,.csv" style="display:none;">
       <button class="btn btn-outline btn-sm" id="btnDeshacerImportGastos" title="Ver y eliminar una importación completa, sin tocar lo cargado a mano">🗂️ Deshacer una importación</button>
       <button class="btn btn-gold btn-sm" id="btnNuevoGasto">＋ Nuevo gasto</button>
+    </div>
+    <div class="action-bar-inline" data-for="proveedores">
+      <button class="btn btn-gold btn-sm" id="btnNuevoProveedor">＋ Nuevo proveedor</button>
     </div>
     <div class="action-bar-inline" data-for="analisis">
       <button class="btn btn-gold btn-sm" id="btnExportarTodo">💾 Exportar todo (Excel)</button>
@@ -1373,6 +1387,26 @@
     <div id="listProv"></div>
   </section>
 
+  <!-- ===================== MODAL: NUEVO PROVEEDOR ===================== -->
+  <div class="overlay" id="overlayNuevoProveedor">
+    <div class="modal">
+      <h3 id="npvTitulo">Nuevo proveedor</h3>
+      <div class="field-label">Nombre del proveedor</div>
+      <input type="text" class="field" id="npvNombre" placeholder="Ej: Casa Goro">
+      <div class="field-label">Teléfono / WhatsApp (opcional)</div>
+      <input type="text" class="field" id="npvTelefono" placeholder="Ej: 341 555 1234">
+      <div class="field-label">Contacto (opcional)</div>
+      <input type="text" class="field" id="npvDireccion" placeholder="Ej: Marcela, encargada">
+      <div class="field-label">Notas (opcional)</div>
+      <input type="text" class="field" id="npvNotas" placeholder="Ej: entrega los martes">
+      <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px;">Los proveedores que cargues acá van a aparecer para elegir en Productos y en Administración, así no hay errores de tipeo.</p>
+      <div class="modal-actions">
+        <button class="btn btn-gold btn-lg btn-block" id="btnGuardarProveedor">Guardar proveedor</button>
+        <button class="btn btn-outline btn-block" id="btnCancelarProveedor">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== MODAL: ANOTAR PRECIO DE PROVEEDOR ===================== -->
   <div class="overlay" id="overlayPrecio">
     <div class="modal">
@@ -1381,7 +1415,9 @@
       <input type="text" class="field" id="pcProducto" list="pcProductosList" placeholder="Escribí el producto...">
       <datalist id="pcProductosList"></datalist>
       <div class="field-label">Proveedor</div>
-      <input type="text" class="field" id="pcProveedor" list="provsList" placeholder="Nombre del proveedor">
+      <select class="field" id="pcProveedor">
+        <option value="">Elegí un proveedor...</option>
+      </select>
       <div class="field-label">Costo</div>
       <input type="number" class="field" id="pcCosto" value="0">
       <div class="field-label">Fecha</div>
@@ -1568,10 +1604,11 @@
     <h3>Nuevo gasto</h3>
     <div class="field-label">Fecha</div>
     <input type="date" class="field" id="ngFecha">
-    <div class="field-label">Detalle (impuesto / proveedor)</div>
-    <input type="text" class="field" id="ngDetalle" placeholder="Ej: Alquiler, EPE, Proveedor X...">
     <div class="field-label">Categoría</div>
     <input type="text" class="field" id="ngCategoria" list="categoriasList" placeholder="Ej: Proveedor">
+    <div class="field-label" id="ngDetalleLabel">Detalle (impuesto / proveedor)</div>
+    <input type="text" class="field" id="ngDetalle" placeholder="Ej: Alquiler, EPE, Impuesto..." list="provsSugerencias">
+    <datalist id="provsSugerencias"></datalist>
     <div class="field-label">Monto ($)</div>
     <input type="number" class="field" id="ngMonto" value="0">
     <div class="field-label">Medio de pago</div>
@@ -1632,7 +1669,9 @@
       </div>
       <div class="mini-field">
         <label>Proveedor</label>
-        <input type="text" class="field" id="npProveedorGlobal" placeholder="Nombre del proveedor" list="provsList">
+        <select class="field" id="npProveedorGlobal">
+          <option value="">Elegí un proveedor...</option>
+        </select>
         <datalist id="provsList"></datalist>
       </div>
     </div>
@@ -2633,9 +2672,9 @@ function resetTablaProductoNuevo(cantidadFilas){
 
 document.getElementById('btnNuevoProducto').addEventListener('click', ()=>{
   document.getElementById('npFecha').value = todayISO();
-  document.getElementById('npProveedorGlobal').value = '';
   document.getElementById('rubrosList').innerHTML = getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(titleCase(r))}">`).join('');
-  document.getElementById('provsList').innerHTML = [...new Set(PRODUCTS.map(p=>p.proveedor).filter(Boolean))].sort().map(p=>`<option value="${escapeHtml(titleCase(p))}">`).join('');
+  poblarSelectoresProveedor();
+  document.getElementById('npProveedorGlobal').value = '';
   resetTablaProductoNuevo(3);
   document.getElementById('overlayNuevo').classList.add('show');
 });
@@ -2658,7 +2697,7 @@ document.getElementById('btnCancelarNuevo').addEventListener('click', ()=>{
 
 document.getElementById('btnGuardarNuevo').addEventListener('click', async ()=>{
   const fecha = document.getElementById('npFecha').value || todayISO();
-  const proveedorGlobal = resolverNombreProveedor(document.getElementById('npProveedorGlobal').value.trim());
+  const proveedorGlobal = document.getElementById('npProveedorGlobal').value;
   const filas = Array.from(document.querySelectorAll('#npTableBody .np-row'));
 
   const pendientes = [];
@@ -2999,7 +3038,19 @@ function getProveedores(){
     const key = g.detalle && g.detalle.trim();
     if(key && !Object.keys(map).some(k=>normalizeForMatch(k)===normalizeForMatch(key))) map[key] = 0;
   });
+  // Proveedores dados de alta a mano desde la pestaña Proveedores (aunque no tengan nada cargado todavía)
+  Object.keys(PROV_INFO).forEach(nombre=>{
+    if(!nombre || nombre === '__SIN_PROVEEDOR__') return;
+    if(!Object.keys(map).some(k=>normalizeForMatch(k)===normalizeForMatch(nombre))) map[nombre] = 0;
+  });
   return map;
+}
+
+// Lista ordenada de nombres de proveedores, para usar en todos los desplegables de la app
+function getListaProveedores(){
+  return Object.keys(getProveedores())
+    .filter(n => n && n !== '__SIN_PROVEEDOR__')
+    .sort((a,b)=>a.localeCompare(b));
 }
 
 function normalizeForMatch(s){
@@ -3089,8 +3140,23 @@ document.getElementById('dondeComprarResults').addEventListener('click', async (
   showToast('Precio borrado');
 });
 
+// Llena TODOS los desplegables de proveedor de la app desde una sola lista,
+// para que no haya errores de tipeo ni nombres duplicados.
+function poblarSelectoresProveedor(){
+  const lista = getListaProveedores();
+  const opciones = '<option value="">Elegí un proveedor...</option>' +
+    lista.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(titleCase(n))}</option>`).join('');
+  ['npProveedorGlobal','pcProveedor'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const previo = sel.value;
+    sel.innerHTML = opciones;
+    if(lista.includes(previo)) sel.value = previo;
+  });
+}
+
 function populateProvsList(){
-  document.getElementById('provsList').innerHTML = [...new Set(PRODUCTS.map(p=>p.proveedor).filter(Boolean))].sort().map(p=>`<option value="${escapeHtml(titleCase(p))}">`).join('');
+  poblarSelectoresProveedor();
 }
 
 document.getElementById('btnAnotarPrecio').addEventListener('click', ()=>{
@@ -3107,7 +3173,7 @@ document.getElementById('btnCancelarPrecio').addEventListener('click', ()=>{
 });
 document.getElementById('btnGuardarPrecio').addEventListener('click', async ()=>{
   const producto = document.getElementById('pcProducto').value.trim();
-  const proveedor = resolverNombreProveedor(document.getElementById('pcProveedor').value.trim());
+  const proveedor = document.getElementById('pcProveedor').value;
   const costo = parseFloat(document.getElementById('pcCosto').value) || 0;
   const fecha = document.getElementById('pcFecha').value || todayISO();
   if(!producto){ showToast('Escribí el nombre del producto'); return; }
@@ -3119,6 +3185,59 @@ document.getElementById('btnGuardarPrecio').addEventListener('click', async ()=>
   document.getElementById('searchDondeComprar').value = producto;
   renderDondeComprar();
   showToast('Precio anotado ✓');
+});
+
+/* ---- Alta y edición de proveedores (única fuente de verdad para toda la app) ---- */
+let proveedorEditandoNombre = null;
+
+function abrirModalProveedor(nombreExistente){
+  proveedorEditandoNombre = nombreExistente || null;
+  const info = (nombreExistente && PROV_INFO[nombreExistente]) || {};
+  document.getElementById('npvTitulo').textContent = nombreExistente ? 'Editar proveedor' : 'Nuevo proveedor';
+  document.getElementById('npvNombre').value = nombreExistente || '';
+  document.getElementById('npvTelefono').value = info.telefono || '';
+  document.getElementById('npvDireccion').value = info.contacto || '';
+  document.getElementById('npvNotas').value = info.notas || '';
+  document.getElementById('overlayNuevoProveedor').classList.add('show');
+  document.getElementById('npvNombre').focus();
+}
+
+document.getElementById('btnNuevoProveedor').addEventListener('click', ()=> abrirModalProveedor(null));
+document.getElementById('btnCancelarProveedor').addEventListener('click', ()=>{
+  document.getElementById('overlayNuevoProveedor').classList.remove('show');
+});
+
+document.getElementById('btnGuardarProveedor').addEventListener('click', async ()=>{
+  const nombre = document.getElementById('npvNombre').value.trim();
+  if(!nombre){ showToast('Escribí el nombre del proveedor'); return; }
+
+  // Si ya existe uno con ese nombre (aunque esté escrito distinto), avisamos en vez de duplicar
+  const yaExiste = getListaProveedores().find(n =>
+    normalizeForMatch(n).toLowerCase() === normalizeForMatch(nombre).toLowerCase() && n !== proveedorEditandoNombre
+  );
+  if(yaExiste){ showToast(`Ya existe un proveedor llamado "${yaExiste}"`); return; }
+
+  const datos = {
+    telefono: document.getElementById('npvTelefono').value.trim(),
+    contacto: document.getElementById('npvDireccion').value.trim(),
+    notas: document.getElementById('npvNotas').value.trim(),
+  };
+
+  // Si le cambiaron el nombre, actualizamos también productos y gastos que lo mencionaban
+  if(proveedorEditandoNombre && proveedorEditandoNombre !== nombre){
+    PRODUCTS.forEach(p=>{ if(p.proveedor === proveedorEditandoNombre) p.proveedor = nombre; });
+    GASTOS.forEach(g=>{ if(esCategoriaProveedor(g.categoria) && g.detalle === proveedorEditandoNombre) g.detalle = nombre; });
+    PRECIOS.forEach(pr=>{ if(pr.proveedor === proveedorEditandoNombre) pr.proveedor = nombre; });
+    delete PROV_INFO[proveedorEditandoNombre];
+    await saveProducts(); await saveGastos(); await savePrecios();
+  }
+
+  PROV_INFO[nombre] = datos;
+  await saveProvInfo();
+  document.getElementById('overlayNuevoProveedor').classList.remove('show');
+  renderProveedores();
+  showToast(proveedorEditandoNombre ? 'Proveedor actualizado ✓' : 'Proveedor agregado ✓');
+  proveedorEditandoNombre = null;
 });
 
 function renderProveedores(){
@@ -3969,10 +4088,12 @@ document.getElementById('btnBulkDeleteGastos').addEventListener('click', async (
   const n = selectedGastoIds.size;
   if(n===0) return;
   if(!confirm(`¿Eliminar ${n} gasto${n===1?'':'s'} seleccionado${n===1?'':'s'}?`)) return;
+  const habiaProveedor = GASTOS.some(g => selectedGastoIds.has(g.id) && esCategoriaProveedor(g.categoria));
   GASTOS = GASTOS.filter(g => !selectedGastoIds.has(g.id));
   selectedGastoIds.clear();
   await saveGastos();
   renderAdmin();
+  if(habiaProveedor) renderProveedores();
   showToast('Gastos eliminados ✓');
 });
 
@@ -4059,7 +4180,7 @@ function renderGastosTabla(){
               const ligado = !!g.origenVencimientoId;
               return `<tr data-id="${g.id}">
                 <td><input type="checkbox" class="row-check" data-id="${g.id}" ${selectedGastoIds.has(g.id)?'checked':''}></td>
-                <td><input type="date" class="cell-edit" data-id="${g.id}" data-field="fecha" value="${g.fecha}" ${ligado?'disabled title="Viene de un gasto fijo marcado como pagado"':''}></td>
+                <td><input type="date" class="cell-edit cell-edit-fecha" data-id="${g.id}" data-field="fecha" value="${g.fecha}"></td>
                 <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="detalle" value="${escapeHtml(g.detalle||'')}"></td>
                 <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="categoria" value="${escapeHtml(g.categoria||'')}" list="categoriasList"></td>
                 <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
@@ -4133,9 +4254,11 @@ document.getElementById('gastosPorCategoria').addEventListener('click', async (e
   if(!delBtn) return;
   const id = delBtn.dataset.id;
   if(!confirm('¿Eliminar este gasto?')) return;
+  const eraProveedor = esCategoriaProveedor((GASTOS.find(g=>g.id===id)||{}).categoria);
   GASTOS = GASTOS.filter(g=>g.id!==id);
   await saveGastos();
   renderAdmin();
+  if(eraProveedor) renderProveedores();
 });
 
 document.getElementById('gastosPorCategoria').addEventListener('change', async (e)=>{
@@ -4151,6 +4274,7 @@ document.getElementById('gastosPorCategoria').addEventListener('change', async (
   const g = GASTOS.find(x=>x.id===inp.dataset.id);
   if(!g) return;
   const field = inp.dataset.field;
+  const eraProveedor = esCategoriaProveedor(g.categoria); // por si le cambian la categoría
   if(field==='monto'){
     const val = parseFloat(inp.value);
     g.monto = isNaN(val) ? 0 : val;
@@ -4161,27 +4285,46 @@ document.getElementById('gastosPorCategoria').addEventListener('change', async (
   }
   await saveGastos();
   renderAdmin();
+  // Si el gasto es (o era) de un proveedor, actualizamos también "Ver compras" en Proveedores
+  if(eraProveedor || esCategoriaProveedor(g.categoria)) renderProveedores();
   showToast('Gasto actualizado ✓');
 });
 
 /* ---- Nuevo gasto (manual) ---- */
 document.getElementById('btnNuevoGasto').addEventListener('click', ()=>{
   populateCategoriasList();
+  poblarSelectoresProveedor();
   document.getElementById('ngFecha').value = todayISO();
   document.getElementById('ngDetalle').value = '';
   document.getElementById('ngCategoria').value = '';
   document.getElementById('ngMonto').value = 0;
   document.getElementById('ngMedio').value = '';
+  actualizarCampoDetalleGasto();
   document.getElementById('overlayNuevoGasto').classList.add('show');
 });
+
+// Si la categoría es "Proveedor", al escribir el detalle te sugiere los proveedores ya cargados
+function actualizarCampoDetalleGasto(){
+  const cat = document.getElementById('ngCategoria').value;
+  const esProv = esCategoriaProveedor(cat);
+  document.getElementById('ngDetalleLabel').textContent = esProv ? 'Proveedor (escribí y elegí de la lista)' : 'Detalle (impuesto / servicio)';
+  const dl = document.getElementById('provsSugerencias');
+  dl.innerHTML = esProv
+    ? getListaProveedores().map(n=>`<option value="${escapeHtml(n)}">`).join('')
+    : '';
+}
+document.getElementById('ngCategoria').addEventListener('input', actualizarCampoDetalleGasto);
+document.getElementById('ngCategoria').addEventListener('change', actualizarCampoDetalleGasto);
+
 document.getElementById('btnCancelarGasto').addEventListener('click', ()=>{
   document.getElementById('overlayNuevoGasto').classList.remove('show');
 });
 document.getElementById('btnGuardarGasto').addEventListener('click', async ()=>{
+  const categoriaEscrita = document.getElementById('ngCategoria').value.trim();
   const detalle = document.getElementById('ngDetalle').value.trim();
   if(!detalle){ showToast('Ponele un detalle al gasto'); return; }
   const fecha = document.getElementById('ngFecha').value || todayISO();
-  const categoria = document.getElementById('ngCategoria').value.trim() || sugerirCategoria(detalle);
+  const categoria = categoriaEscrita || sugerirCategoria(detalle);
   const monto = parseFloat(document.getElementById('ngMonto').value) || 0;
   const medioPago = document.getElementById('ngMedio').value.trim();
 
