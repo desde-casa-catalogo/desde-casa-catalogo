@@ -599,16 +599,34 @@
   .prov-line.open .prov-caret{transform:rotate(180deg);}
   .prov-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
   .prov-body.show{display:block;padding-top:14px;}
+
+  /* Las 3 secciones internas de cada proveedor: Datos, Ver productos, Ver compras */
+  .prov-seccion{border:1.5px solid var(--border);border-radius:11px;margin-bottom:8px;overflow:hidden;background:var(--cream);}
+  .prov-seccion-head{
+    width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;background:none;border:none;
+    cursor:pointer;text-align:left;font-weight:800;font-size:13.5px;color:var(--gold-deep);
+  }
+  .prov-seccion-head > span:first-child{flex:1 1 auto;}
+  .prov-seccion-head:hover{background:var(--gold-pale);}
+  .prov-seccion-head.open{background:var(--gold-pale);}
+  .prov-seccion-cant{
+    background:var(--card);color:var(--ink-soft);border:1px solid var(--border);border-radius:999px;
+    padding:2px 9px;font-size:11.5px;font-weight:700;
+  }
+  .prov-seccion-caret{font-size:12px;color:var(--ink-faint);}
+  .prov-seccion-body{display:none;padding:12px 13px;background:var(--card);border-top:1.5px solid var(--border);}
+  .prov-seccion-body.show{display:block;}
+
   .prov-inline-fields{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
   .mini-field-wide{width:210px;}
   .mini-field-wide input{padding:10px 12px;font-size:15.5px;font-weight:600;}
   textarea.prov-notes{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:14.5px;resize:vertical;min-height:44px;}
   .prov-toggle{background:transparent;border:none;color:var(--gold-deep);font-weight:700;font-size:13.5px;cursor:pointer;padding:8px 0 0;}
   .prov-toggle-row{display:flex;gap:18px;}
-  .prov-products{margin-top:8px;font-size:13.5px;color:var(--ink-soft);max-height:130px;overflow-y:auto;border-top:1px dashed var(--border);padding-top:8px;display:none;}
+  .prov-products{font-size:13.5px;color:var(--ink-soft);max-height:220px;overflow-y:auto;}
   .prov-products.show{display:block;}
   .prov-products div{padding:3px 0;}
-  .prov-compras-list{margin-top:8px;font-size:13.5px;color:var(--ink-soft);max-height:160px;overflow-y:auto;border-top:1px dashed var(--border);padding-top:8px;display:none;}
+  .prov-compras-list{font-size:13.5px;color:var(--ink-soft);max-height:220px;overflow-y:auto;}
   .prov-compras-list.show{display:block;}
   .prov-compra-row{display:flex;justify-content:space-between;align-items:center;padding:6px 2px;border-bottom:1px dashed var(--border);gap:8px;}
   .prov-compra-row:last-child{border-bottom:none;}
@@ -3258,17 +3276,38 @@ function renderProveedores(){
         <span class="prov-caret">▾</span>
       </button>
       <div class="prov-body" id="prov-body-${cssId(n)}">
-        <div class="prov-inline-fields">
-          <div class="mini-field-sm mini-field-wide"><label>Teléfono</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="telefono" value="${escapeHtml(info.telefono||'')}"></div>
-          <div class="mini-field-sm mini-field-wide"><label>Contacto</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="contacto" value="${escapeHtml(info.contacto||'')}"></div>
+        <div class="prov-seccion">
+          <button class="prov-seccion-head" data-toggle-datos="${escapeHtml(n)}">
+            <span>📇 Datos</span>
+            <span class="prov-seccion-caret">▾</span>
+          </button>
+          <div class="prov-seccion-body" id="prov-datos-${cssId(n)}">
+            <div class="prov-inline-fields">
+              <div class="mini-field-sm mini-field-wide"><label>Teléfono</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="telefono" value="${escapeHtml(info.telefono||'')}"></div>
+              <div class="mini-field-sm mini-field-wide"><label>Contacto</label><input type="text" class="prov-input" data-name="${escapeHtml(n)}" data-field="contacto" value="${escapeHtml(info.contacto||'')}"></div>
+            </div>
+            <textarea class="prov-notes" data-name="${escapeHtml(n)}" data-field="notas" placeholder="Notas (dirección, condiciones, etc.)">${escapeHtml(info.notas||'')}</textarea>
+          </div>
         </div>
-        <textarea class="prov-notes" data-name="${escapeHtml(n)}" data-field="notas" placeholder="Notas (dirección, condiciones, etc.)">${escapeHtml(info.notas||'')}</textarea>
-        <div class="prov-toggle-row">
-          <button class="prov-toggle" data-toggle="${escapeHtml(n)}">Ver productos ▾</button>
-          <button class="prov-toggle" data-toggle-compras="${escapeHtml(n)}">Ver compras ▾</button>
+
+        <div class="prov-seccion">
+          <button class="prov-seccion-head" data-toggle="${escapeHtml(n)}">
+            <span>📦 Ver productos</span>
+            <span class="prov-seccion-cant">${products.length}</span>
+            <span class="prov-seccion-caret">▾</span>
+          </button>
+          <div class="prov-seccion-body prov-products" id="prov-prods-${cssId(n)}">
+            ${products.length ? products.map(p=>`<div>• ${escapeHtml(p)}</div>`).join('') : '<div class="prov-compra-empty">Todavía no hay productos de este proveedor.</div>'}
+          </div>
         </div>
-        <div class="prov-products" id="prov-prods-${cssId(n)}">${products.map(p=>`<div>• ${escapeHtml(p)}</div>`).join('')}</div>
-        <div class="prov-compras-list" id="prov-compras-${cssId(n)}">${renderComprasDeProveedor(n)}</div>
+
+        <div class="prov-seccion">
+          <button class="prov-seccion-head" data-toggle-compras="${escapeHtml(n)}">
+            <span>🧾 Ver compras</span>
+            <span class="prov-seccion-caret">▾</span>
+          </button>
+          <div class="prov-seccion-body prov-compras-list" id="prov-compras-${cssId(n)}">${renderComprasDeProveedor(n)}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -3319,6 +3358,24 @@ document.getElementById('listProv').addEventListener('click', (e)=>{
     provLine.classList.toggle('open', nowOpen);
     return;
   }
+  // Las 3 secciones internas: Datos, Ver productos, Ver compras
+  const cabecera = e.target.closest('.prov-seccion-head');
+  if(cabecera){
+    const key = cabecera.dataset.toggleDatos || cabecera.dataset.toggle || cabecera.dataset.toggleCompras;
+    let elId;
+    if(cabecera.dataset.toggleDatos) elId = 'prov-datos-'+cssId(key);
+    else if(cabecera.dataset.toggle) elId = key==='__SIN_PROVEEDOR__' ? 'prov-prods-SIN' : 'prov-prods-'+cssId(key);
+    else elId = 'prov-compras-'+cssId(key);
+
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const abierta = el.classList.toggle('show');
+    cabecera.classList.toggle('open', abierta);
+    const caret = cabecera.querySelector('.prov-seccion-caret');
+    if(caret) caret.textContent = abierta ? '▴' : '▾';
+    return;
+  }
+  // Compatibilidad con la fila "Sin proveedor asignado", que sigue usando el botón simple
   const t = e.target.closest('.prov-toggle[data-toggle]');
   if(t){
     const key = t.dataset.toggle;
@@ -3326,14 +3383,6 @@ document.getElementById('listProv').addEventListener('click', (e)=>{
     const el = document.getElementById(elId);
     el.classList.toggle('show');
     t.textContent = el.classList.contains('show') ? 'Ocultar productos ▴' : 'Ver productos ▾';
-    return;
-  }
-  const tc = e.target.closest('[data-toggle-compras]');
-  if(tc){
-    const key = tc.dataset.toggleCompras;
-    const el = document.getElementById('prov-compras-'+cssId(key));
-    el.classList.toggle('show');
-    tc.textContent = el.classList.contains('show') ? 'Ocultar compras ▴' : 'Ver compras ▾';
   }
 });
 
