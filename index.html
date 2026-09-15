@@ -293,10 +293,20 @@
   .view-btn{width:40px;height:40px;border:none;background:transparent;border-radius:9px;font-size:17px;color:var(--ink-faint);cursor:pointer;}
   .view-btn.active{background:var(--gold-grad);color:#fff;}
   input[type="text"].search{
-    width:100%;padding:15px 16px 15px 44px;border-radius:14px;border:1.5px solid var(--border);
+    width:100%;padding:15px 44px 15px 44px;border-radius:14px;border:1.5px solid var(--border);
     background:var(--card);font-size:17px;color:var(--ink);box-shadow:var(--shadow);
   }
   .search-wrap::before{content:'🔍';position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:16px;opacity:0.55;}
+  .price-lookup-card .search-wrap::before{content:none;}
+  .price-lookup-card input[type="text"].search{padding-left:16px;}
+
+  .search-clear{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);width:28px;height:28px;
+    border:none;background:var(--border);color:var(--ink-soft);border-radius:50%;cursor:pointer;
+    font-size:15px;font-weight:800;line-height:1;display:none;align-items:center;justify-content:center;padding:0;
+  }
+  .search-clear.show{display:flex;}
+  .search-clear:hover{background:var(--gold);color:#fff;}
   input:focus, select:focus, button:focus-visible, textarea:focus{outline:2.5px solid var(--gold);outline-offset:1px;}
   .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
   .prod-count-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
@@ -501,6 +511,7 @@
   }
   .np-input:focus{border-color:var(--gold);outline:none;background:#fff;}
   input.np-input[type="file"]{padding:6px 4px;font-size:11.5px;}
+  .col-stock-np{display:none;} /* stock oculto por ahora — se puede reactivar */
   .np-del-row{
     background:var(--red-pale);color:var(--red);border:none;border-radius:8px;width:30px;height:30px;
     font-weight:800;cursor:pointer;font-size:14px;
@@ -1213,7 +1224,7 @@
           <button class="opt-btn" data-medio="Crédito">Crédito</button>
           <button class="opt-btn opt-btn-debe" data-medio="Debe">Debe</button>
         </div>
-        <button class="opt-btn opt-btn-autoconsumo" id="btnAutoconsumo" style="width:100%;margin-top:8px;">🏠 Es autoconsumo (uso propio, no cobra nada)</button>
+        <button class="opt-btn opt-btn-autoconsumo" id="btnAutoconsumo" style="width:100%;margin-top:8px;display:none;">🏠 Es autoconsumo (uso propio, no cobra nada)</button>
         <div class="field-label">Cliente</div>
         <input type="text" class="field" id="ventaCliente" placeholder="Consumidor final">
         <div class="ajuste-segmentada">
@@ -1316,8 +1327,6 @@
         <option value="nombre-desc">Nombre (Z-A)</option>
         <option value="precio-asc">Precio (menor a mayor)</option>
         <option value="precio-desc">Precio (mayor a menor)</option>
-        <option value="stock-asc">Stock (menor a mayor)</option>
-        <option value="stock-desc">Stock (mayor a menor)</option>
         <option value="ganancia-desc">Ganancia % (mayor a menor)</option>
       </select>
     </div>
@@ -1332,8 +1341,9 @@
   <section class="panel" id="panel-proveedores">
     <div class="price-lookup-card">
       <div class="price-lookup-title">🔍 ¿Dónde compro más barato?</div>
-      <input type="text" class="search" id="searchDondeComprar" placeholder="Escribí el producto que necesitás comprar...">
-      <div class="price-lookup-results" id="dondeComprarResults"></div>
+      <div class="search-wrap" style="margin-bottom:0;">
+        <input type="text" class="search" id="searchDondeComprar" placeholder="Escribí el producto que necesitás comprar...">
+      </div>      <div class="price-lookup-results" id="dondeComprarResults"></div>
       <button class="btn btn-outline btn-sm" id="btnAnotarPrecio" style="margin-top:12px;">💲 Anotar un precio de proveedor</button>
       <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px;">Para cargar una compra, andá a Administración → "Importación GASTOS" (o "+ Nuevo gasto") con categoría "Proveedor" — se va a ver también acá, en "Ver compras" de cada proveedor.</p>
     </div>
@@ -1612,7 +1622,7 @@
             <th>Rubro</th>
             <th>Costo</th>
             <th>Precio de venta</th>
-            <th>Stock <span style="font-weight:400;text-transform:none;font-size:9px;opacity:.8;">(se suma si ya existe)</span></th>
+            <th class="col-stock-np">Stock <span style="font-weight:400;text-transform:none;font-size:9px;opacity:.8;">(se suma si ya existe)</span></th>
             <th>Foto</th>
             <th></th>
           </tr>
@@ -1666,6 +1676,8 @@ let CONFIG = {pin:"1234"};
 let PHOTOS = {};
 let pendingPhotoProductId = null;
 let CART = {};
+// Poné esto en true para volver a mostrar el stock en toda la app (badges, listados, editores y ordenamientos).
+const MOSTRAR_STOCK = false;
 let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
@@ -2128,7 +2140,7 @@ function renderCatalogo(){
         <div class="row-thumb" style="${imgBg}">${imgHtml}</div>
         <div class="row-info">
           <div class="row-name">${escapeHtml(p.nombre)}</div>
-          <div class="row-stock ${neg?'neg':''}">Stock: ${p.stock}</div>
+          ${MOSTRAR_STOCK ? `<div class="row-stock ${neg?'neg':''}">Stock: ${p.stock}</div>` : ''}
         </div>
         <div class="row-price">${fmt(p.precio)}</div>
         <div class="row-qty">
@@ -2151,7 +2163,7 @@ function renderCatalogo(){
     const imgBg = fotoSrc ? '' : `background:${getProductIconBg(p)};`;
     return `<div class="prod-card ${checked?'selected':''}" data-id="${p.id}">
       <div class="img-wrap" style="${imgBg}">${imgHtml}</div>
-      <div class="stock-badge ${neg?'neg':''}">Stock: ${p.stock}</div>
+      ${MOSTRAR_STOCK ? `<div class="stock-badge ${neg?'neg':''}">Stock: ${p.stock}</div>` : ''}
       <div class="check-badge">✓</div>
       <div class="info">
         <div class="cname">${escapeHtml(p.nombre)}</div>
@@ -2455,7 +2467,7 @@ function renderCostos(){
         ${thumb}
         <div class="costo-name-block">
           <div class="costo-name">${escapeHtml(p.nombre)}</div>
-          <div class="costo-prov">${escapeHtml(p.proveedor ? titleCase(p.proveedor) : 'Sin proveedor')} · ${escapeHtml(titleCase(p.rubro))} · Stock: ${p.stock}</div>
+          <div class="costo-prov">${escapeHtml(p.proveedor ? titleCase(p.proveedor) : 'Sin proveedor')} · ${escapeHtml(titleCase(p.rubro))}${MOSTRAR_STOCK ? ` · Stock: ${p.stock}` : ''}</div>
         </div>
         <div class="ganancia-badge ${pos?'pos':'neg'}">${fmt(gan)} · ${pct}</div>
         <span class="prov-caret costo-caret">▾</span>
@@ -2466,7 +2478,7 @@ function renderCostos(){
           <input type="text" class="field costo-input costo-input-nombre" data-id="${p.id}" data-field="nombre" value="${escapeHtml(p.nombre)}">
         </div>
         <div class="costo-inline-fields">
-          <div class="mini-field-sm"><label>Stock</label><input type="number" class="costo-input ${p.stock<0?'neg':''}" data-id="${p.id}" data-field="stock" value="${p.stock}"></div>
+          ${MOSTRAR_STOCK ? `<div class="mini-field-sm"><label>Stock</label><input type="number" class="costo-input ${p.stock<0?'neg':''}" data-id="${p.id}" data-field="stock" value="${p.stock}"></div>` : ''}
           <div class="mini-field-sm"><label>Costo</label><input type="number" class="costo-input" data-id="${p.id}" data-field="costo" value="${p.costo}"></div>
           <div class="mini-field-sm"><label>Precio venta</label><input type="number" class="costo-input" data-id="${p.id}" data-field="precio" value="${p.precio}"></div>
         </div>
@@ -2580,7 +2592,7 @@ function crearFilaProductoNuevo(){
     <td><input type="text" class="np-input np-rubro" placeholder="Rubro" list="rubrosList"></td>
     <td><input type="number" class="np-input np-costo" value="0"></td>
     <td><input type="number" class="np-input np-precio" value="0"></td>
-    <td><input type="number" class="np-input np-stock" value="100"></td>
+    <td class="col-stock-np"><input type="number" class="np-input np-stock" value="100"></td>
     <td><input type="file" accept="image/*" class="np-input np-foto"></td>
     <td><button class="np-del-row" data-action="del-row" title="Borrar esta fila">✕</button></td>
   `;
@@ -5086,6 +5098,33 @@ async function boot(){
   renderAdmin();
 
   loadPhotosInBackground();
+  activarCrucesDeBusqueda();
+}
+
+/* Agrega una cruz para borrar en todos los buscadores de la app, de una sola vez */
+function activarCrucesDeBusqueda(){
+  document.querySelectorAll('input[type="text"].search').forEach(input=>{
+    const wrap = input.closest('.search-wrap');
+    if(!wrap || wrap.querySelector('.search-clear')) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'search-clear';
+    btn.type = 'button';
+    btn.textContent = '✕';
+    btn.title = 'Borrar la búsqueda';
+    wrap.appendChild(btn);
+
+    const actualizarVisibilidad = ()=> btn.classList.toggle('show', input.value.length > 0);
+    actualizarVisibilidad();
+    input.addEventListener('input', actualizarVisibilidad);
+
+    btn.addEventListener('click', ()=>{
+      input.value = '';
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+      input.focus();
+      actualizarVisibilidad();
+    });
+  });
 }
 
 // ---- Modo nocturno ----
