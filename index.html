@@ -14,7 +14,7 @@
   // ============================================================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs
+    getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -67,6 +67,22 @@
         const keys = [];
         snap.forEach(d => { if (!prefix || d.id.startsWith(prefix)) keys.push(d.id); });
         return { keys, prefix };
+      },
+      // Escucha en vivo: avisa apenas otra persona (u otra pestaña) cambia algo en Firebase.
+      // Así la app se actualiza sola, sin tener que recargar la página a mano.
+      escucharCambios: (onCambio) => {
+        return onSnapshot(kvCol, (snap)=>{
+          snap.docChanges().forEach(cambio=>{
+            if(cambio.type === 'removed') return;
+            const doc = cambio.doc;
+            // metadata.hasPendingWrites = el cambio lo hicimos nosotros mismos recién,
+            // así que lo ignoramos (ya lo tenemos en pantalla).
+            if(doc.metadata.hasPendingWrites) return;
+            onCambio(doc.id, doc.data().value);
+          });
+        }, (err)=>{
+          console.warn('No se pudo mantener la sincronización en vivo:', err);
+        });
       }
     };
 
@@ -1075,6 +1091,13 @@
   /* ---------- Toast ---------- */
   .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--dark-surface);color:#fff;padding:13px 20px;border-radius:12px;font-weight:600;font-size:14.5px;z-index:200;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:transform .25s ease;}
   .toast.show{transform:translateX(-50%) translateY(0);}
+  .aviso-sincro{
+    position:fixed;bottom:16px;right:16px;background:var(--green);color:#fff;padding:11px 16px;
+    border-radius:12px;font-weight:700;font-size:13px;z-index:190;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0;transform:translateY(12px);transition:opacity .25s ease, transform .25s ease;pointer-events:none;
+  }
+  .aviso-sincro.show{opacity:1;transform:translateY(0);}
+  @media(max-width:520px){ .aviso-sincro{left:16px;right:16px;text-align:center;} }
   .loading-msg{text-align:center;padding:60px 20px;color:var(--ink-faint);}
 
   @media(max-width:420px){
@@ -1654,6 +1677,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="aviso-sincro" id="avisoSincro"></div>
 
 <script>
 /* ============================================================
@@ -5099,9 +5123,86 @@ async function boot(){
 
   loadPhotosInBackground();
   activarCrucesDeBusqueda();
+  iniciarSincronizacion();
 }
 
 /* Agrega una cruz para borrar en todos los buscadores de la app, de una sola vez */
+/* ============================================================
+   SINCRONIZACIÓN EN VIVO
+   Si otra persona (o vos en otro dispositivo) carga algo, la app se actualiza
+   sola, sin recargar la página. También evita que una pantalla vieja pise
+   los cambios de la otra.
+   ============================================================ */
+let sincronizacionActiva = false;
+
+function aplicarCambioRemoto(clave, valorCrudo){
+  let datos;
+  try{ datos = JSON.parse(valorCrudo); }catch(e){ return; }
+
+  // No interrumpimos si la persona está justo escribiendo en un campo
+  const editandoAhora = document.activeElement &&
+    (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'TEXTAREA');
+
+  switch(clave){
+    case 'dc_products':
+      if(editandoAhora) return;
+      PRODUCTS = datos;
+      renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
+      avisarSincronizacion('Productos actualizados');
+      break;
+    case 'dc_sales':
+      if(editandoAhora) return;
+      SALES = datos;
+      renderVentas(); renderAdmin();
+      avisarSincronizacion('Ventas actualizadas');
+      break;
+    case 'dc_gastos':
+      if(editandoAhora) return;
+      GASTOS = datos;
+      renderAdmin(); renderProveedores();
+      avisarSincronizacion('Gastos actualizados');
+      break;
+    case 'dc_vencimientos':
+      if(editandoAhora) return;
+      VENCIMIENTOS = datos;
+      renderGastosFijosTable(); renderVencCalendar();
+      avisarSincronizacion('Gastos fijos actualizados');
+      break;
+    case 'dc_precios':
+      PRECIOS = datos;
+      renderDondeComprar();
+      break;
+    case 'dc_providers_info':
+      PROV_INFO = datos;
+      renderProveedores();
+      break;
+    case 'dc_config':
+      CONFIG = datos;
+      break;
+  }
+}
+
+let avisoSincroTimer = null;
+function avisarSincronizacion(texto){
+  const aviso = document.getElementById('avisoSincro');
+  if(!aviso) return;
+  aviso.textContent = '🔄 ' + texto + ' (cambio de otra persona)';
+  aviso.classList.add('show');
+  clearTimeout(avisoSincroTimer);
+  avisoSincroTimer = setTimeout(()=> aviso.classList.remove('show'), 4000);
+}
+
+function iniciarSincronizacion(){
+  if(sincronizacionActiva) return;
+  if(!window.storage || typeof window.storage.escucharCambios !== 'function') return;
+  try{
+    window.storage.escucharCambios(aplicarCambioRemoto);
+    sincronizacionActiva = true;
+  }catch(e){
+    console.warn('No se pudo iniciar la sincronización en vivo:', e);
+  }
+}
+
 function activarCrucesDeBusqueda(){
   document.querySelectorAll('input[type="text"].search').forEach(input=>{
     const wrap = input.closest('.search-wrap');
