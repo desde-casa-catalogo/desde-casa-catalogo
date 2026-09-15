@@ -2549,10 +2549,16 @@ function renderCostos(){
           <label>Rubro</label>
           <input type="text" class="field costo-input" data-id="${p.id}" data-field="rubro" value="${escapeHtml(p.rubro||'')}" list="rubrosList">
         </div>
+        <div class="mini-field" style="margin-top:12px;">
+          <label>Proveedor</label>
+          <select class="field costo-input" data-id="${p.id}" data-field="proveedor">
+            <option value="">Sin proveedor</option>
+            ${getListaProveedores().map(n=>`<option value="${escapeHtml(n)}" ${normalizeForMatch(n).toLowerCase()===normalizeForMatch(p.proveedor||'').toLowerCase()?'selected':''}>${escapeHtml(titleCase(n))}</option>`).join('')}
+          </select>
+        </div>
         <div class="costo-row-actions">
           <button class="link-btn" data-action="foto" data-id="${p.id}">🖼️ ${PHOTOS[p.id] ? 'Cambiar foto' : 'Subir foto'}</button>
           ${PHOTOS[p.id] ? `<button class="link-btn danger" data-action="quitar-foto" data-id="${p.id}">Quitar foto</button>` : ''}
-          <button class="link-btn" data-action="proveedor" data-id="${p.id}">🏷️ Proveedor</button>
           <button class="link-btn ${inactivo?'':'danger'}" data-action="toggle-activo" data-id="${p.id}">${inactivo ? '🔄 Reactivar' : '🚫 Marcar sin stock'}</button>
           <button class="link-btn danger" data-action="borrar" data-id="${p.id}">🗑️ Eliminar</button>
         </div>
@@ -2591,6 +2597,9 @@ document.getElementById('listCostos').addEventListener('change', async (e)=>{
     p.rubro = val.toUpperCase();
     document.getElementById('rubrosList').innerHTML = getRubros().filter(r=>r!=='Todos').map(r=>`<option value="${escapeHtml(titleCase(r))}">`).join('');
     showToast('Rubro corregido ✓');
+  } else if(field==='proveedor'){
+    p.proveedor = inp.value; // viene de la lista de Proveedores, sin riesgo de error de tipeo
+    showToast(inp.value ? 'Proveedor asignado ✓' : 'Producto sin proveedor');
   } else if(field==='stock'){
     const val = parseInt(inp.value, 10);
     p.stock = isNaN(val) ? 0 : val;
@@ -2600,6 +2609,7 @@ document.getElementById('listCostos').addEventListener('change', async (e)=>{
   }
   renderCostos();
   if(field==='rubro'){ renderChipsCostos(); renderChipsCatalogo(); renderCatalogo(); }
+  if(field==='proveedor'){ renderProveedores(); }
   await saveProducts();
 });
 
@@ -2622,14 +2632,6 @@ document.getElementById('listCostos').addEventListener('click', async (e)=>{
     delete PHOTOS[id];
     renderCostos(); renderCatalogo();
     showToast('Foto eliminada');
-  }
-  if(action==='proveedor'){
-    const val = prompt('Proveedor para "'+p.nombre+'":', p.proveedor || '');
-    if(val===null) return;
-    p.proveedor = val.trim();
-    await saveProducts();
-    renderCostos(); renderProveedores();
-    showToast('Proveedor actualizado ✓');
   }
   if(action==='toggle-activo'){
     p.activo = (p.activo === false) ? true : false;
