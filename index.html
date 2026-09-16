@@ -1087,6 +1087,45 @@
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
   table.ventas-table tbody tr:nth-child(even){background:var(--cream-deep);}
   table.ventas-table tbody tr:nth-child(even):hover{background:var(--gold-pale);}
+  /* --- Ventas agrupadas por día (Meses / Acumulado) --- */
+  table.ventas-table tbody.agrupado tr:nth-child(even){background:transparent;}
+  table.ventas-table tbody.agrupado tr:nth-child(even):hover{background:var(--gold-pale);}
+  tr.dia-header{cursor:pointer;background:var(--gold-pale) !important;}
+  tr.dia-header:hover{background:var(--gold-soft,#F3E7C9) !important;}
+  tr.dia-header td{
+    padding:13px 14px;
+    border-top:2px solid var(--gold-deep);
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  /* sticky: si corrés la tabla para el costado, el encabezado del día sigue a la vista */
+  .dia-head-inner{display:flex;align-items:center;gap:14px;width:max-content;position:sticky;left:14px;}
+  .dia-caret{
+    font-size:15px;color:var(--gold-deep);width:16px;flex:none;
+    transition:transform .15s ease;display:inline-block;
+  }
+  tr.dia-header.abierto .dia-caret{transform:rotate(90deg);}
+  .dia-fecha{
+    font-size:16px;font-weight:800;color:var(--ink,#2B2B2B);
+    letter-spacing:.2px;text-transform:capitalize;
+  }
+  .dia-cant{
+    font-size:13px;font-weight:700;color:var(--gold-deep);
+    background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px 11px;
+  }
+  /* El total va pegado al nombre del día (no al borde derecho): la tabla es más ancha
+     que la pantalla y si lo mando a la derecha queda fuera de vista. */
+  .dia-total{
+    font-size:19px;font-weight:800;color:var(--price-color);letter-spacing:.2px;
+    margin-left:6px;
+  }
+  .dia-total-lbl{font-size:12px;font-weight:700;color:var(--gold-deep);letter-spacing:.5px;text-transform:uppercase;}
+  tr.venta-de-dia td:first-child{padding-left:26px;}
+  tr.venta-de-dia.oculta{display:none;}
+  html[data-theme="dark"] tr.dia-header{background:#3A3020 !important;}
+  html[data-theme="dark"] tr.dia-header:hover{background:#463A26 !important;}
+  html[data-theme="dark"] .dia-fecha{color:#F5EEDF;}
+  html[data-theme="dark"] .dia-cant{background:#2B2419;color:#E8C97A;border-color:#5A4A2E;}
   td.num{text-align:right;font-weight:700;}
   td.prod-cell{white-space:normal;min-width:380px;font-weight:700;letter-spacing:.15px;font-size:13.5px;}
   td.num.price-cell{color:var(--price-color);font-weight:800;}
@@ -1763,6 +1802,9 @@ let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
 let ventasFiltroModo = 'hoy';
+/* Días que están desplegados en la tabla de Ventas cuando se agrupa por día.
+   Arrancan todos cerrados; se abren al hacer clic en la fila del día. */
+let diasAbiertosVentas = new Set();
 /* Filtros tipo Excel por columna en Ventas (declarado bien arriba para que esté listo apenas arranca la app) */
 let filtroColumnas = {
   fecha: new Set(),
@@ -3746,14 +3788,84 @@ function renderVentas(){
   renderStats(items);
 
   if(items.length===0){
+    tbody.classList.remove('agrupado');
     tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><span class="big">🧾</span>No hay ventas que coincidan con estos filtros.</div></td></tr>`;
     return;
   }
 
-  tbody.innerHTML = items.map(s=>{
+  // Cuando mirás varios días (Meses o Acumulado), la tabla se agrupa por día:
+  // una fila por día con el total, que se despliega al tocarla.
+  const agruparPorDia = (ventasFiltroModo === 'meses' || ventasFiltroModo === 'acumulado' || filtroColumnas.fecha.size > 1);
+
+  if(agruparPorDia){
+    tbody.classList.add('agrupado');
+    renderVentasAgrupadas(tbody, items);
+  } else {
+    tbody.classList.remove('agrupado');
+    tbody.innerHTML = items.map(s=>filaDeVenta(s)).join('');
+  }
+  updateBulkToolbarVentas();
+}
+
+// Nombre del día + fecha, como "Martes 15/09/2026"
+function etiquetaDeDia(fechaISO){
+  const partes = String(fechaISO||'').split('-');
+  if(partes.length !== 3) return fechaISO || 'Sin fecha';
+  const d = new Date(Number(partes[0]), Number(partes[1])-1, Number(partes[2]));
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const nombre = isNaN(d.getTime()) ? '' : dias[d.getDay()] + ' ';
+  return nombre + partes[2] + '/' + partes[1] + '/' + partes[0];
+}
+
+// ¿Hay una búsqueda o un filtro de columna puesto? Si sí, los días con resultados
+// se abren solos, para que no tengas que ir tocando uno por uno.
+function hayBusquedaActivaVentas(){
+  const term = (document.getElementById('searchHistorial').value || '').trim();
+  if(term) return true;
+  return ['producto','medioPago','cliente','facturado'].some(c => filtroColumnas[c] && filtroColumnas[c].size > 0);
+}
+
+function renderVentasAgrupadas(tbody, items){
+  const abrirTodo = hayBusquedaActivaVentas();
+
+  // Agrupo por día. Las ventas ya vienen ordenadas por la columna elegida, así que
+  // dentro de cada día se mantiene ese orden; los días van siempre por fecha
+  // (del más nuevo al más viejo, salvo que estés ordenando por fecha al revés).
+  const porDia = {};
+  items.forEach(s=>{
+    const dia = s.fecha || '';
+    if(!porDia[dia]) porDia[dia] = [];
+    porDia[dia].push(s);
+  });
+  const diasAscendente = (ventasSortField === 'fecha' && ventasSortDir === 'asc');
+  const orden = Object.keys(porDia).sort((a,b)=> diasAscendente ? (a<b?-1:a>b?1:0) : (a>b?-1:a<b?1:0));
+
+  let html = '';
+  orden.forEach(dia=>{
+    const ventasDelDia = porDia[dia];
+    const totalDia = ventasDelDia.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
+    const abierto = abrirTodo || diasAbiertosVentas.has(dia);
+    const n = ventasDelDia.length;
+    html += `<tr class="dia-header ${abierto?'abierto':''}" data-dia="${escapeHtml(dia)}">
+      <td colspan="10">
+        <div class="dia-head-inner">
+          <span class="dia-caret">▸</span>
+          <span class="dia-fecha">${escapeHtml(etiquetaDeDia(dia))}</span>
+          <span class="dia-cant">${n} venta${n===1?'':'s'}</span>
+          <span class="dia-total-lbl">${abrirTodo ? 'Total encontrado' : 'Total del día'}</span>
+          <span class="dia-total">${fmt(totalDia)}</span>
+        </div>
+      </td>
+    </tr>`;
+    html += ventasDelDia.map(s=>filaDeVenta(s, 'venta-de-dia' + (abierto?'':' oculta'))).join('');
+  });
+  tbody.innerHTML = html;
+}
+
+function filaDeVenta(s, clasesExtra){
     const subtotal = s.cantidad * s.precioUnitario;
     const esDebe = String(s.medioPago||'').trim().toLowerCase() === 'debe';
-    return `<tr data-id="${s.id}">
+    return `<tr class="${clasesExtra||''}" data-id="${s.id}">
       <td><input type="checkbox" class="row-check" data-id="${s.id}" ${selectedVentaIds.has(s.id)?'checked':''}></td>
       <td><input type="date" class="cell-edit" data-id="${s.id}" data-field="fecha" value="${s.fecha}"></td>
       <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="producto" value="${escapeHtml(s.producto)}"></td>
@@ -3776,11 +3888,24 @@ function renderVentas(){
       <td><input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="cliente" value="${escapeHtml(s.cliente)}"></td>
       <td><button class="btn-del link-btn danger" data-id="${s.id}" data-action="delete">Eliminar</button></td>
     </tr>`;
-  }).join('');
-  updateBulkToolbarVentas();
 }
 
 document.getElementById('ventasTbody').addEventListener('click', async (e)=>{
+  // Abrir / cerrar el día. Sólo cambio esas filas: no vuelvo a dibujar toda la tabla,
+  // así no se pierde lo que estés escribiendo en otra fila.
+  const diaHead = e.target.closest('tr.dia-header');
+  if(diaHead){
+    const dia = diaHead.dataset.dia;
+    const abrir = !diaHead.classList.contains('abierto');
+    if(abrir) diasAbiertosVentas.add(dia); else diasAbiertosVentas.delete(dia);
+    diaHead.classList.toggle('abierto', abrir);
+    let fila = diaHead.nextElementSibling;
+    while(fila && !fila.classList.contains('dia-header')){
+      fila.classList.toggle('oculta', !abrir);
+      fila = fila.nextElementSibling;
+    }
+    return;
+  }
   const toggleBtn = e.target.closest('[data-action="toggle-facturado"]');
   const delBtn = e.target.closest('[data-action="delete"]');
   const pagarBtn = e.target.closest('[data-action="pagar-rapido"]');
