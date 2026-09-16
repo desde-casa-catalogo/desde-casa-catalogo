@@ -1149,12 +1149,6 @@
   .estado-pill.neutro{background:var(--border);color:var(--ink-faint);}
   .medio-cell{display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
   .medio-cell input.cell-edit{flex:1 1 70px;min-width:70px;}
-  .pago-rapido{display:flex;gap:1px;flex:0 0 auto;flex-wrap:wrap;}
-  .pago-rapido button{
-    min-width:19px;height:19px;border-radius:5px;border:1.5px solid var(--border);background:var(--card);
-    font-size:9.5px;cursor:pointer;padding:0 1px;flex:0 0 auto;font-weight:700;
-  }
-  .pago-rapido button:hover{border-color:var(--gold);background:var(--gold-pale);}
 
   /* ---------- Toast ---------- */
   .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--dark-surface);color:#fff;padding:13px 20px;border-radius:12px;font-weight:600;font-size:14.5px;z-index:200;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:transform .25s ease;}
@@ -3875,13 +3869,6 @@ function filaDeVenta(s, clasesExtra){
       <td>
         <div class="medio-cell">
           <input type="text" class="cell-edit cell-edit-text ${esDebe?'medio-debe':''}" data-id="${s.id}" data-field="medio" value="${escapeHtml(s.medioPago)}">
-          ${esDebe ? `<div class="pago-rapido">
-            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Efectivo" title="Marcar pagado en Efectivo">💵</button>
-            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Transferencia" title="Marcar pagado por Transferencia">🏦</button>
-            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="QR" title="Marcar pagado por QR">📱</button>
-            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Débito" title="Marcar pagado con Débito">💳d</button>
-            <button data-action="pagar-rapido" data-id="${s.id}" data-medio="Crédito" title="Marcar pagado con Crédito">💳c</button>
-          </div>` : ''}
         </div>
       </td>
       <td><button class="estado-pill ${s.facturado?'pago':'neutro'}" data-id="${s.id}" data-action="toggle-facturado">${s.facturado?'Facturado':'—'}</button></td>
@@ -3908,16 +3895,6 @@ document.getElementById('ventasTbody').addEventListener('click', async (e)=>{
   }
   const toggleBtn = e.target.closest('[data-action="toggle-facturado"]');
   const delBtn = e.target.closest('[data-action="delete"]');
-  const pagarBtn = e.target.closest('[data-action="pagar-rapido"]');
-  if(pagarBtn){
-    const s = SALES.find(x=>x.id===pagarBtn.dataset.id);
-    if(!s) return;
-    s.medioPago = pagarBtn.dataset.medio;
-    await saveSales();
-    renderVentas();
-    showToast('Marcado como pagado ✓');
-    return;
-  }
   if(toggleBtn){
     const s = SALES.find(x=>x.id===toggleBtn.dataset.id);
     if(!s) return;
