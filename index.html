@@ -428,6 +428,14 @@
   .venta-item-qty button{width:24px;height:24px;border-radius:7px;border:1px solid var(--gold);background:var(--card);color:var(--gold-deep);font-weight:800;cursor:pointer;font-size:14px;line-height:1;}
   .venta-item-qty span{min-width:16px;text-align:center;font-weight:800;font-size:13px;}
   .venta-item-price{font-size:13px;font-weight:800;color:var(--price-color);white-space:nowrap;}
+  .venta-item-row.manual{background:var(--gold-pale);border:1.5px dashed var(--gold);}
+  .venta-item-row.manual .venta-item-name::before{content:"🖊️ ";}
+  .venta-item-remove{width:24px;height:24px;border-radius:7px;border:1px solid var(--red);background:var(--red-pale);color:var(--red);font-weight:800;cursor:pointer;font-size:14px;line-height:1;flex:0 0 auto;}
+  .field-label-row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px;}
+  .field-label-row .field-label{margin:0;}
+  .item-manual-form{display:flex;flex-direction:column;gap:8px;background:var(--gold-pale);border:1.5px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px;}
+  .item-manual-row{display:flex;gap:8px;}
+  .item-manual-row .field{flex:1;}
   .venta-empty{font-size:13px;color:var(--ink-faint);text-align:center;padding:14px 0;}
   .venta-total-row{display:flex;justify-content:space-between;align-items:baseline;margin:14px 0 12px;padding-top:12px;border-top:1px dashed var(--border);}
   .venta-total-row .lbl{font-size:13px;color:var(--ink-soft);font-weight:700;}
@@ -1249,6 +1257,7 @@
   </div>
   <div class="tabs-actions">
     <div class="action-bar-inline" data-for="ventas">
+      <button class="btn btn-gold btn-sm" id="btnVentaManual" title="Cargar a mano una venta que ya pasó (por ejemplo, si te olvidaste de anotarla)">＋ Venta manual</button>
       <button class="btn btn-outline btn-sm" id="btnImportarVentas" title="Siempre agrega filas nuevas, nunca actualiza ni reemplaza lo que ya tenés cargado. Si reimportás el mismo archivo dos veces, se duplica todo">📤 Importación VENTAS</button>
       <input type="file" id="fileExcelVentas" accept=".xlsx,.xls,.csv" style="display:none;">
       <button class="btn btn-outline btn-sm" id="btnDeshacerImport" title="Ver y eliminar una importación completa, sin tocar lo cargado a mano">🗂️ Deshacer una importación</button>
@@ -1301,7 +1310,17 @@
         </div>
         <div class="field-label">Fecha</div>
         <input type="date" class="field" id="ventaFecha">
-        <div class="field-label">Productos</div>
+        <div class="field-label-row">
+          <div class="field-label" style="margin:0;">Productos</div>
+          <button type="button" class="link-btn" id="btnItemManual">🖊️ Ítem manual</button>
+        </div>
+        <div class="item-manual-form" id="itemManualForm" style="display:none;">
+          <input type="text" class="field" id="itemManualDesc" placeholder="Descripción (ej: Flete, Bolsa, Descuento especial...)">
+          <div class="item-manual-row">
+            <input type="number" class="field" id="itemManualMonto" placeholder="Monto $">
+            <button type="button" class="btn btn-gold btn-sm" id="btnAgregarItemManual">Agregar</button>
+          </div>
+        </div>
         <div class="venta-items" id="ventaItems">
           <div class="venta-empty">Todavía no elegiste productos</div>
         </div>
@@ -1651,6 +1670,44 @@
   </div>
 </div>
 
+<!-- ===================== MODAL: VENTA MANUAL (atrasada) ===================== -->
+<div class="overlay" id="overlayVentaManual">
+  <div class="modal">
+    <h3>Cargar venta manual</h3>
+    <p style="font-size:13px;color:var(--ink-faint);font-weight:600;margin:-8px 0 14px;">Para anotar una venta que ya pasó, por ejemplo si te olvidaste de cargarla en su momento.</p>
+    <div class="field-label">Fecha</div>
+    <input type="date" class="field" id="vmFecha">
+    <div class="field-label">Producto / Detalle</div>
+    <input type="text" class="field" id="vmProducto" placeholder="Ej: Detergente 750ml">
+    <div class="np-header-row">
+      <div class="mini-field">
+        <label>Cantidad</label>
+        <input type="number" class="field" id="vmCantidad" value="1" min="1">
+      </div>
+      <div class="mini-field">
+        <label>Precio unitario</label>
+        <input type="number" class="field" id="vmPrecio" value="0">
+      </div>
+    </div>
+    <div class="field-label">Medio de pago</div>
+    <div class="btn-grid btn-grid-7" id="vmMedioGrid">
+      <button type="button" class="opt-btn" data-medio="Efectivo">Efectivo</button>
+      <button type="button" class="opt-btn" data-medio="Transferencia">Transferencia</button>
+      <button type="button" class="opt-btn" data-medio="QR">QR</button>
+      <button type="button" class="opt-btn" data-medio="Débito">Débito</button>
+      <button type="button" class="opt-btn" data-medio="Crédito">Crédito</button>
+      <button type="button" class="opt-btn opt-btn-debe" data-medio="Debe">Debe</button>
+    </div>
+    <div class="field-label">Cliente</div>
+    <input type="text" class="field" id="vmCliente" placeholder="Consumidor final">
+    <button type="button" class="opt-btn opt-btn-autoconsumo" id="btnVmFacturado" style="width:100%;margin-top:8px;">🧾 Marcar como facturado</button>
+    <div class="modal-actions">
+      <button class="btn btn-gold btn-lg btn-block" id="btnGuardarVentaManual">Guardar venta</button>
+      <button class="btn btn-outline btn-block" id="btnCancelarVentaManual">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== MODAL: NUEVO GASTO ===================== -->
 <div class="overlay" id="overlayNuevoGasto">
   <div class="modal">
@@ -1792,6 +1849,7 @@ let CONFIG = {pin:"1234"};
 let PHOTOS = {};
 let pendingPhotoProductId = null;
 let CART = {};
+let CART_MANUAL = []; // items sueltos de Cobrar, sin producto cargado en Productos: {id, descripcion, monto}
 // Poné esto en true para volver a mostrar el stock en toda la app (badges, listados, editores y ordenamientos).
 const MOSTRAR_STOCK = false;
 let currentCategoryCatalogo = 'Todos';
@@ -1812,6 +1870,9 @@ let filtroColumnas = {
 let ventasMesesElegidos = new Set();
 let ventasSortField = 'fecha';
 let ventasSortDir = 'desc';
+// Guarda en qué orden se cargó cada venta (según SALES), para que dos ventas del mismo
+// día/mismo valor no se reordenen solas por id — la más nueva queda siempre debajo de la anterior.
+let ventasOrdenMap = new Map();
 let selectedVentaIds = new Set();
 let ventaMedio = null;
 let ventaEsAutoconsumo = false;
@@ -2337,13 +2398,42 @@ function cartCountAndTotal(){
     count += CART[id];
     total += CART[id] * p.precio;
   }
+  CART_MANUAL.forEach(it=>{
+    count += 1;
+    total += it.monto;
+  });
   return {count, total};
 }
 
+document.getElementById('btnItemManual').addEventListener('click', ()=>{
+  const form = document.getElementById('itemManualForm');
+  const abrir = form.style.display === 'none';
+  form.style.display = abrir ? 'flex' : 'none';
+  if(abrir){
+    document.getElementById('itemManualDesc').value = '';
+    document.getElementById('itemManualMonto').value = '';
+    document.getElementById('itemManualDesc').focus();
+  }
+});
+
+document.getElementById('btnAgregarItemManual').addEventListener('click', ()=>{
+  const desc = document.getElementById('itemManualDesc').value.trim();
+  const monto = parseFloat(document.getElementById('itemManualMonto').value);
+  if(!desc){ showToast('Ponele una descripción al ítem'); return; }
+  if(isNaN(monto) || monto===0){ showToast('Ponele un monto'); return; }
+  CART_MANUAL.push({ id: uid(), descripcion: desc, monto });
+  document.getElementById('itemManualDesc').value = '';
+  document.getElementById('itemManualMonto').value = '';
+  document.getElementById('itemManualForm').style.display = 'none';
+  renderVentaSummary();
+  showToast('Ítem agregado ✓');
+});
+
 document.getElementById('btnVaciarCarrito').addEventListener('click', ()=>{
-  if(Object.keys(CART).length===0) return;
+  if(Object.keys(CART).length===0 && CART_MANUAL.length===0) return;
   if(!confirm('¿Vaciar todo el carrito? Se van a sacar todos los productos que elegiste.')) return;
   CART = {};
+  CART_MANUAL = [];
   renderCatalogo();
   renderVentaSummary();
   showToast('Carrito vaciado');
@@ -2353,10 +2443,10 @@ function renderVentaSummary(){
   const {count, total} = cartCountAndTotal();
   const itemsWrap = document.getElementById('ventaItems');
   const ids = Object.keys(CART);
-  if(ids.length===0){
+  if(ids.length===0 && CART_MANUAL.length===0){
     itemsWrap.innerHTML = '<div class="venta-empty">Todavía no elegiste productos</div>';
   } else {
-    itemsWrap.innerHTML = ids.map(id=>{
+    const filasProductos = ids.map(id=>{
       const p = PRODUCTS.find(x=>x.id===id);
       if(!p) return '';
       const qty = CART[id];
@@ -2370,6 +2460,14 @@ function renderVentaSummary(){
         <div class="venta-item-price">${fmt(qty*p.precio)}</div>
       </div>`;
     }).join('');
+    const filasManuales = CART_MANUAL.map(it=>{
+      return `<div class="venta-item-row manual" data-manual-id="${it.id}">
+        <div class="venta-item-name">${escapeHtml(it.descripcion)}</div>
+        <div class="venta-item-price">${fmt(it.monto)}</div>
+        <button class="venta-item-remove" data-action="quitar-manual" data-manual-id="${it.id}" title="Quitar">✕</button>
+      </div>`;
+    }).join('');
+    itemsWrap.innerHTML = filasProductos + filasManuales;
   }
 
   const ajusteVal = parseFloat(document.getElementById('ventaAjuste').value) || 0;
@@ -2397,6 +2495,13 @@ document.querySelectorAll('[data-ajuste-tipo]').forEach(btn=>{
 });
 
 document.getElementById('ventaItems').addEventListener('click', (e)=>{
+  const quitarManual = e.target.closest('[data-action="quitar-manual"]');
+  if(quitarManual){
+    const mid = quitarManual.dataset.manualId;
+    CART_MANUAL = CART_MANUAL.filter(it=>it.id!==mid);
+    renderVentaSummary();
+    return;
+  }
   const btn = e.target.closest('.venta-item-qty button');
   if(!btn) return;
   const id = btn.dataset.id;
@@ -2424,7 +2529,7 @@ document.getElementById('btnAutoconsumo').addEventListener('click', ()=>{
 });
 
 document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>{
-  if(Object.keys(CART).length===0){ showToast('Elegí al menos un producto'); return; }
+  if(Object.keys(CART).length===0 && CART_MANUAL.length===0){ showToast('Elegí al menos un producto'); return; }
   if(!ventaMedio){ showToast('Elegí un medio de pago'); return; }
   const cliente = document.getElementById('ventaCliente').value.trim() || 'Consumidor final';
   const fecha = document.getElementById('ventaFecha').value || todayISO();
@@ -2443,10 +2548,15 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
     SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual' });
     p.stock = (p.stock||0) - cant;
   }
+  CART_MANUAL.forEach(it=>{
+    const precioAjustado = Math.round(it.monto * ratio);
+    SALES.push({ id: uid(), fecha, producto: it.descripcion, cantidad: 1, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual' });
+  });
   await saveSales();
   await saveProducts();
 
   CART = {};
+  CART_MANUAL = [];
   ventaMedio = null;
   ventaEsAutoconsumo = false;
   ventaAjusteTipo = 'descuento';
@@ -3010,6 +3120,55 @@ document.getElementById('btnExportarTodo').addEventListener('click', ()=>{
   }catch(err){
     showToast('No se pudo exportar. Probá de nuevo.');
   }
+});
+
+/* ---- Venta manual (atrasada) ---- */
+let vmMedio = null;
+let vmFacturado = false;
+
+document.getElementById('btnVentaManual').addEventListener('click', ()=>{
+  document.getElementById('vmFecha').value = todayISO();
+  document.getElementById('vmProducto').value = '';
+  document.getElementById('vmCantidad').value = 1;
+  document.getElementById('vmPrecio').value = 0;
+  document.getElementById('vmCliente').value = '';
+  vmMedio = null;
+  vmFacturado = false;
+  document.querySelectorAll('#vmMedioGrid .opt-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('btnVmFacturado').classList.remove('selected');
+  document.getElementById('overlayVentaManual').classList.add('show');
+});
+
+document.getElementById('vmMedioGrid').addEventListener('click', (e)=>{
+  const b = e.target.closest('.opt-btn'); if(!b) return;
+  vmMedio = b.dataset.medio;
+  document.querySelectorAll('#vmMedioGrid .opt-btn').forEach(x=>x.classList.remove('selected'));
+  b.classList.add('selected');
+});
+
+document.getElementById('btnVmFacturado').addEventListener('click', ()=>{
+  vmFacturado = !vmFacturado;
+  document.getElementById('btnVmFacturado').classList.toggle('selected', vmFacturado);
+});
+
+document.getElementById('btnCancelarVentaManual').addEventListener('click', ()=>{
+  document.getElementById('overlayVentaManual').classList.remove('show');
+});
+
+document.getElementById('btnGuardarVentaManual').addEventListener('click', async ()=>{
+  const producto = document.getElementById('vmProducto').value.trim();
+  if(!producto){ showToast('Ponele un nombre o detalle a la venta'); return; }
+  if(!vmMedio){ showToast('Elegí un medio de pago'); return; }
+  const fecha = document.getElementById('vmFecha').value || todayISO();
+  const cantidad = parseInt(document.getElementById('vmCantidad').value, 10) || 1;
+  const precioUnitario = parseFloat(document.getElementById('vmPrecio').value) || 0;
+  const cliente = document.getElementById('vmCliente').value.trim() || 'Consumidor final';
+
+  SALES.push({ id: uid(), fecha, producto, cantidad, precioUnitario, medioPago: vmMedio, cliente, facturado: vmFacturado, origen: 'manual' });
+  await saveSales();
+  document.getElementById('overlayVentaManual').classList.remove('show');
+  renderVentas();
+  showToast('Venta agregada ✓');
 });
 
 document.getElementById('btnImportarVentas').addEventListener('click', ()=>{
@@ -3726,7 +3885,15 @@ function compareVentas(a, b){
     default: va = a.fecha||''; vb = b.fecha||'';
   }
   if(typeof va === 'string'){ va = va.toLowerCase(); vb = String(vb).toLowerCase(); }
-  let cmp = va < vb ? -1 : va > vb ? 1 : (a.id||'').localeCompare(b.id||'');
+  if(va === vb){
+    // Empate (ej: mismo día, o mismo medio de pago): mantenemos el orden en que se
+    // cargaron las ventas, siempre de más vieja a más nueva, sin importar la flechita
+    // de orden de la columna — así lo último que cobrás aparece debajo de lo anterior.
+    const oa = ventasOrdenMap.has(a.id) ? ventasOrdenMap.get(a.id) : 0;
+    const ob = ventasOrdenMap.has(b.id) ? ventasOrdenMap.get(b.id) : 0;
+    return oa - ob;
+  }
+  const cmp = va < vb ? -1 : 1;
   return ventasSortDir === 'asc' ? cmp : -cmp;
 }
 
@@ -3757,6 +3924,9 @@ function renderVentas(){
   const tbody = document.getElementById('ventasTbody');
   let items = SALES.slice();
   const todayStr = todayISO();
+
+  ventasOrdenMap = new Map();
+  SALES.forEach((s,i)=> ventasOrdenMap.set(s.id, i));
 
   if(filtroColumnas.fecha.size > 0){
     // Si tildaste días puntuales en el filtro de la columna Fecha, eso manda por sobre
