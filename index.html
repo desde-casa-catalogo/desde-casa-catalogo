@@ -566,7 +566,9 @@
   .costo-name-block{flex:1 1 180px;min-width:140px;}
   .costo-name{font-weight:800;font-size:15.5px;text-transform:uppercase;letter-spacing:.2px;}
   .costo-prov{font-size:12px;color:var(--ink-faint);font-weight:600;}
-  .ganancia-badge{font-weight:800;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap;align-self:center;flex:0 0 auto;}
+  .ganancia-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;align-self:center;}
+  .ganancia-label{font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.3px;}
+  .ganancia-badge{font-weight:800;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap;flex:0 0 auto;}
   .ganancia-badge.pos{background:var(--green-pale);color:var(--green);}
   .ganancia-badge.neg{background:var(--red-pale);color:var(--red);}
   .costo-inline-fields{display:flex;gap:8px;flex:0 0 auto;margin-bottom:12px;}
@@ -577,7 +579,7 @@
   @media(max-width:640px){
     .costo-inline-fields{flex-wrap:wrap;flex:1 1 100%;}
     .mini-field-sm{width:calc(33.33% - 6px);}
-    .ganancia-badge{flex:1 1 100%;text-align:center;}
+    .ganancia-wrap{flex:1 1 100%;}
   }
   .mini-field{display:flex;flex-direction:column;gap:4px;}
   .mini-field label{font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.3px;}
@@ -2586,7 +2588,10 @@ function renderCostos(){
           <div class="costo-name">${escapeHtml(p.nombre)}</div>
           <div class="costo-prov">${escapeHtml(p.proveedor ? titleCase(p.proveedor) : 'Sin proveedor')} · ${escapeHtml(titleCase(p.rubro))}${MOSTRAR_STOCK ? ` · Stock: ${p.stock}` : ''}</div>
         </div>
-        <div class="ganancia-badge ${pos?'pos':'neg'}">${fmt(gan)} · ${pct}</div>
+        <div class="ganancia-wrap">
+          <div class="ganancia-label">ganancia</div>
+          <div class="ganancia-badge ${pos?'pos':'neg'}">${fmt(gan)} · ${pct}</div>
+        </div>
         <span class="prov-caret costo-caret">▾</span>
       </button>
       <div class="costo-body" id="costo-body-${p.id}">
