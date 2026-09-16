@@ -2634,7 +2634,14 @@ document.getElementById('listCostos').addEventListener('click', (e)=>{
   if(!line) return;
   const id = line.dataset.toggleProd;
   const body = document.getElementById('costo-body-'+id);
-  const nowOpen = body.classList.toggle('show');
+  const nowOpen = !body.classList.contains('show');
+  document.querySelectorAll('#listCostos .costo-body.show').forEach(b=>{
+    if(b !== body) b.classList.remove('show');
+  });
+  document.querySelectorAll('#listCostos .costo-line.open').forEach(l=>{
+    if(l !== line) l.classList.remove('open');
+  });
+  body.classList.toggle('show', nowOpen);
   line.classList.toggle('open', nowOpen);
 });
 
