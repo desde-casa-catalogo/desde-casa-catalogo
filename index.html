@@ -71,7 +71,14 @@
       // Escucha en vivo: avisa apenas otra persona (u otra pestaña) cambia algo en Firebase.
       // Así la app se actualiza sola, sin tener que recargar la página a mano.
       escucharCambios: (onCambio) => {
+        let esElPrimerAviso = true;
         return onSnapshot(kvCol, (snap)=>{
+          // El primer aviso que manda Firebase apenas nos conectamos trae TODO lo que ya
+          // existe (como si fuera "recién cambiado"), no un cambio real de otra persona.
+          // Lo ignoramos entero para no mostrar carteles de sincronización al abrir la app.
+          const esPrimeraVez = esElPrimerAviso;
+          esElPrimerAviso = false;
+          if(esPrimeraVez) return;
           snap.docChanges().forEach(cambio=>{
             if(cambio.type === 'removed') return;
             const doc = cambio.doc;
@@ -82,6 +89,43 @@
           });
         }, (err)=>{
           console.warn('No se pudo mantener la sincronización en vivo:', err);
+        });
+      },
+      // ------------------------------------------------------------------
+      // Colecciones "de a un registro" (por ahora sólo se usa para Ventas).
+      // A diferencia de get/set de arriba (que guardan TODO junto en una sola
+      // clave y una pisa a la otra si dos compus cobran al mismo tiempo), acá
+      // cada venta es su propio documento: cobrar en una compu nunca puede
+      // borrar lo que se acaba de cobrar en la otra.
+      // ------------------------------------------------------------------
+      getColeccion: async (nombre) => {
+        const snap = await getDocs(collection(db, nombre));
+        const items = [];
+        snap.forEach(d => items.push(d.data()));
+        return items;
+      },
+      setEnColeccion: async (nombre, id, value) => {
+        await setDoc(doc(db, nombre, id), value);
+        return { id, value };
+      },
+      borrarDeColeccion: async (nombre, id) => {
+        await deleteDoc(doc(db, nombre, id));
+        return { id, deleted: true };
+      },
+      escucharColeccion: (nombre, onCambio) => {
+        let esElPrimerAviso = true;
+        return onSnapshot(collection(db, nombre), (snap)=>{
+          // Mismo motivo que en escucharCambios: el primer aviso trae todo lo que ya
+          // existe, no es un cambio real de otra persona — lo ignoramos.
+          const esPrimeraVez = esElPrimerAviso;
+          esElPrimerAviso = false;
+          if(esPrimeraVez) return;
+          snap.docChanges().forEach(cambio=>{
+            if(cambio.doc.metadata.hasPendingWrites) return;
+            onCambio(cambio.type, cambio.doc.id, cambio.doc.data());
+          });
+        }, (err)=>{
+          console.warn(`No se pudo mantener la sincronización en vivo de "${nombre}":`, err);
         });
       }
     };
@@ -428,6 +472,10 @@
   .venta-item-qty button{width:24px;height:24px;border-radius:7px;border:1px solid var(--gold);background:var(--card);color:var(--gold-deep);font-weight:800;cursor:pointer;font-size:14px;line-height:1;}
   .venta-item-qty span{min-width:16px;text-align:center;font-weight:800;font-size:13px;}
   .venta-item-price{font-size:13px;font-weight:800;color:var(--price-color);white-space:nowrap;}
+  .venta-item-price-wrap{display:flex;align-items:center;gap:2px;flex:0 0 auto;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:4px 6px;}
+  .venta-item-price-wrap .dollar{font-size:12.5px;font-weight:800;color:var(--price-color);}
+  .venta-item-price-input{width:72px;border:none;background:transparent;font-size:13.5px;font-weight:800;color:var(--price-color);padding:0;text-align:right;}
+  .venta-item-price-input:focus{outline:none;}
   .venta-item-row.manual{background:var(--gold-pale);border:1.5px dashed var(--gold);}
   .venta-item-row.manual .venta-item-name::before{content:"🖊️ ";}
   .venta-item-remove{width:24px;height:24px;border-radius:7px;border:1px solid var(--red);background:var(--red-pale);color:var(--red);font-weight:800;cursor:pointer;font-size:14px;line-height:1;flex:0 0 auto;}
@@ -1841,6 +1889,10 @@ const INITIAL_SALES = [{"id": "v1787169489191172220", "fecha": "2026-05-20", "pr
 let PRODUCTS = [];
 let PROV_INFO = {};
 let SALES = [];
+// Última versión de cada venta que sabemos que ya está guardada en la nube (id -> JSON de esa
+// venta). Sirve para que, al guardar, sólo se suba lo que realmente cambió — así cobrar en una
+// compu nunca pisa lo que se acaba de cobrar en la otra.
+let SALES_SYNCED = new Map();
 let GASTOS = [];
 let PRECIOS = [];
 let COMPRAS = []; // ya no se usa para nada nuevo — se mantiene solo por compatibilidad con datos viejos guardados
@@ -1850,6 +1902,7 @@ let PHOTOS = {};
 let pendingPhotoProductId = null;
 let CART = {};
 let CART_MANUAL = []; // items sueltos de Cobrar, sin producto cargado en Productos: {id, descripcion, monto}
+let CART_PRECIO_OVERRIDE = {}; // precio de línea editado a mano en Cobrar, por id de producto: {id: montoTotalDeEsaLinea}
 // Poné esto en true para volver a mostrar el stock en toda la app (badges, listados, editores y ordenamientos).
 const MOSTRAR_STOCK = false;
 let currentCategoryCatalogo = 'Todos';
@@ -1934,13 +1987,7 @@ async function loadAll(){
     PROV_INFO = JSON.parse(r.value);
   }catch(e){ PROV_INFO = {}; }
 
-  try{
-    const r = await window.storage.get('dc_sales', true);
-    SALES = JSON.parse(r.value);
-  }catch(e){
-    SALES = INITIAL_SALES.map(s => ({...s}));
-    try{ await window.storage.set('dc_sales', JSON.stringify(SALES), true); }catch(e2){}
-  }
+  await loadSales();
 
   try{
     const r = await window.storage.get('dc_gastos', true);
@@ -2179,7 +2226,89 @@ document.getElementById('fotoFileInput').addEventListener('change', async (e)=>{
 
 async function saveProducts(){ try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveProvInfo(){ try{ await window.storage.set('dc_providers_info', JSON.stringify(PROV_INFO), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
-async function saveSales(){ try{ await window.storage.set('dc_sales', JSON.stringify(SALES), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
+
+// Trae las ventas guardadas. Si tu base todavía tiene las ventas a la manera vieja (todas
+// juntas en una sola clave, de antes de este cambio) las pasa una sola vez a la colección
+// nueva, donde cada venta es su propio registro.
+async function loadSales(){
+  const puedeColecciones = window.storage && typeof window.storage.getColeccion === 'function';
+
+  if(!puedeColecciones){
+    // Compatibilidad, por si esta base todavía no tiene el soporte nuevo.
+    try{
+      const r = await window.storage.get('dc_sales', true);
+      SALES = JSON.parse(r.value);
+    }catch(e){
+      SALES = INITIAL_SALES.map(s => ({...s}));
+      try{ await window.storage.set('dc_sales', JSON.stringify(SALES), true); }catch(e2){}
+    }
+    actualizarSalesSincronizadas();
+    return;
+  }
+
+  try{
+    let items = await window.storage.getColeccion('sales');
+
+    if(items.length === 0){
+      // La colección nueva está vacía: puede ser que las ventas sigan guardadas
+      // a la manera vieja (las migramos una sola vez) o que sea una instalación nueva.
+      let viejas = null;
+      try{
+        const r = await window.storage.get('dc_sales', true);
+        const parsed = JSON.parse(r.value);
+        if(Array.isArray(parsed) && parsed.length > 0) viejas = parsed;
+      }catch(e){ /* no había ventas guardadas a la manera vieja */ }
+
+      const base = viejas || INITIAL_SALES.map(s => ({...s}));
+      for(const s of base){
+        if(!s.id) s.id = uid();
+        try{ await window.storage.setEnColeccion('sales', s.id, s); }catch(e){}
+      }
+      items = base;
+    }
+
+    SALES = items;
+  }catch(e){
+    SALES = INITIAL_SALES.map(s => ({...s}));
+  }
+  actualizarSalesSincronizadas();
+}
+
+function actualizarSalesSincronizadas(){
+  SALES_SYNCED = new Map();
+  SALES.forEach(s => SALES_SYNCED.set(s.id, JSON.stringify(s)));
+}
+
+// Guarda las ventas: sólo sube a la nube las que cambiaron desde la última vez (nuevas,
+// editadas o borradas), cada una como su propio registro. Así, si cobrás en dos compus
+// casi al mismo tiempo, cada una sube únicamente lo suyo y no pisa lo de la otra.
+async function saveSales(){
+  if(!window.storage || typeof window.storage.setEnColeccion !== 'function'){
+    // Compatibilidad, por si esta base todavía no tiene el soporte nuevo.
+    try{ await window.storage.set('dc_sales', JSON.stringify(SALES), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); }
+    return;
+  }
+  try{
+    const idsActuales = new Set();
+    for(const s of SALES){
+      idsActuales.add(s.id);
+      const json = JSON.stringify(s);
+      if(SALES_SYNCED.get(s.id) !== json){
+        await window.storage.setEnColeccion('sales', s.id, s);
+        SALES_SYNCED.set(s.id, json);
+      }
+    }
+    for(const id of Array.from(SALES_SYNCED.keys())){
+      if(!idsActuales.has(id)){
+        await window.storage.borrarDeColeccion('sales', id);
+        SALES_SYNCED.delete(id);
+      }
+    }
+  }catch(e){
+    showToast('No se pudo guardar. Revisá tu conexión.');
+  }
+}
+
 async function saveGastos(){ try{ await window.storage.set('dc_gastos', JSON.stringify(GASTOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function savePrecios(){ try{ await window.storage.set('dc_precios', JSON.stringify(PRECIOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveCompras(){ try{ await window.storage.set('dc_compras', JSON.stringify(COMPRAS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
@@ -2377,6 +2506,7 @@ document.getElementById('listCatalogo').addEventListener('click', (e)=>{
     const action = stepBtn.dataset.action;
     let q = CART[id] || 1;
     if(action==='plus') q++; else q--;
+    delete CART_PRECIO_OVERRIDE[id]; // cambió la cantidad: volvemos al precio real para esta línea
     if(q<=0){ delete CART[id]; } else { CART[id] = q; }
     renderCatalogo();
     renderVentaSummary();
@@ -2384,11 +2514,18 @@ document.getElementById('listCatalogo').addEventListener('click', (e)=>{
   }
   if(card){
     const id = card.dataset.id;
+    delete CART_PRECIO_OVERRIDE[id];
     if(CART[id]){ delete CART[id]; } else { CART[id] = 1; }
     renderCatalogo();
     renderVentaSummary();
   }
 });
+
+// Precio de línea (total, no unitario) de un producto en el carrito: el editado a mano
+// si hay uno cargado, o el real (cantidad × precio de lista) por defecto.
+function precioLineaProducto(id, qty, precioLista){
+  return CART_PRECIO_OVERRIDE.hasOwnProperty(id) ? CART_PRECIO_OVERRIDE[id] : qty*precioLista;
+}
 
 function cartCountAndTotal(){
   let count = 0, total = 0;
@@ -2396,7 +2533,7 @@ function cartCountAndTotal(){
     const p = PRODUCTS.find(x=>x.id===id);
     if(!p) continue;
     count += CART[id];
-    total += CART[id] * p.precio;
+    total += precioLineaProducto(id, CART[id], p.precio);
   }
   CART_MANUAL.forEach(it=>{
     count += 1;
@@ -2434,13 +2571,13 @@ document.getElementById('btnVaciarCarrito').addEventListener('click', ()=>{
   if(!confirm('¿Vaciar todo el carrito? Se van a sacar todos los productos que elegiste.')) return;
   CART = {};
   CART_MANUAL = [];
+  CART_PRECIO_OVERRIDE = {};
   renderCatalogo();
   renderVentaSummary();
   showToast('Carrito vaciado');
 });
 
 function renderVentaSummary(){
-  const {count, total} = cartCountAndTotal();
   const itemsWrap = document.getElementById('ventaItems');
   const ids = Object.keys(CART);
   if(ids.length===0 && CART_MANUAL.length===0){
@@ -2450,6 +2587,7 @@ function renderVentaSummary(){
       const p = PRODUCTS.find(x=>x.id===id);
       if(!p) return '';
       const qty = CART[id];
+      const precioLinea = precioLineaProducto(id, qty, p.precio);
       return `<div class="venta-item-row" data-id="${id}">
         <div class="venta-item-name">${escapeHtml(p.nombre)}</div>
         <div class="venta-item-qty">
@@ -2457,19 +2595,31 @@ function renderVentaSummary(){
           <span>${qty}</span>
           <button data-action="plus" data-id="${id}">+</button>
         </div>
-        <div class="venta-item-price">${fmt(qty*p.precio)}</div>
+        <div class="venta-item-price-wrap">
+          <span class="dollar">$</span>
+          <input type="number" class="venta-item-price-input" data-price-id="${id}" value="${precioLinea}">
+        </div>
       </div>`;
     }).join('');
     const filasManuales = CART_MANUAL.map(it=>{
       return `<div class="venta-item-row manual" data-manual-id="${it.id}">
         <div class="venta-item-name">${escapeHtml(it.descripcion)}</div>
-        <div class="venta-item-price">${fmt(it.monto)}</div>
+        <div class="venta-item-price-wrap">
+          <span class="dollar">$</span>
+          <input type="number" class="venta-item-price-input" data-manual-price-id="${it.id}" value="${it.monto}">
+        </div>
         <button class="venta-item-remove" data-action="quitar-manual" data-manual-id="${it.id}" title="Quitar">✕</button>
       </div>`;
     }).join('');
     itemsWrap.innerHTML = filasProductos + filasManuales;
   }
+  actualizarTotalesVenta();
+}
 
+// Sólo recalcula los números de total (no vuelve a dibujar las filas), para no
+// interrumpir a alguien que está escribiendo en un precio editado a mano.
+function actualizarTotalesVenta(){
+  const {total} = cartCountAndTotal();
   const ajusteVal = parseFloat(document.getElementById('ventaAjuste').value) || 0;
   const signo = ventaAjusteTipo === 'recargo' ? 1 : -1;
   const totalFinal = total + (signo * ajusteVal);
@@ -2483,14 +2633,29 @@ function renderVentaSummary(){
   document.getElementById('ventaTotalSummary').textContent = fmt(totalFinal);
 }
 
-document.getElementById('ventaAjuste').addEventListener('input', renderVentaSummary);
+document.getElementById('ventaItems').addEventListener('input', (e)=>{
+  const inp = e.target.closest('.venta-item-price-input');
+  if(!inp) return;
+  const val = parseFloat(inp.value);
+  if(inp.dataset.priceId){
+    const id = inp.dataset.priceId;
+    if(inp.value.trim()==='' || isNaN(val)){ delete CART_PRECIO_OVERRIDE[id]; }
+    else { CART_PRECIO_OVERRIDE[id] = val; }
+  } else if(inp.dataset.manualPriceId){
+    const it = CART_MANUAL.find(x=>x.id===inp.dataset.manualPriceId);
+    if(it) it.monto = isNaN(val) ? 0 : val;
+  }
+  actualizarTotalesVenta();
+});
+
+document.getElementById('ventaAjuste').addEventListener('input', actualizarTotalesVenta);
 
 document.querySelectorAll('[data-ajuste-tipo]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     ventaAjusteTipo = btn.dataset.ajusteTipo;
     document.querySelectorAll('[data-ajuste-tipo]').forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
-    renderVentaSummary();
+    actualizarTotalesVenta();
   });
 });
 
@@ -2507,6 +2672,7 @@ document.getElementById('ventaItems').addEventListener('click', (e)=>{
   const id = btn.dataset.id;
   let q = CART[id] || 1;
   if(btn.dataset.action==='plus') q++; else q--;
+  delete CART_PRECIO_OVERRIDE[id]; // cambió la cantidad: volvemos al precio real para esta línea
   if(q<=0){ delete CART[id]; } else { CART[id] = q; }
   renderCatalogo();
   renderVentaSummary();
@@ -2544,7 +2710,8 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
     const p = PRODUCTS.find(x=>x.id===id);
     if(!p) continue;
     const cant = CART[id];
-    const precioAjustado = Math.round(p.precio * ratio);
+    const precioLista = precioLineaProducto(id, cant, p.precio) / cant; // precio unitario real o el editado a mano
+    const precioAjustado = Math.round(precioLista * ratio);
     SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual' });
     p.stock = (p.stock||0) - cant;
   }
@@ -2557,6 +2724,7 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
 
   CART = {};
   CART_MANUAL = [];
+  CART_PRECIO_OVERRIDE = {};
   ventaMedio = null;
   ventaEsAutoconsumo = false;
   ventaAjusteTipo = 'descuento';
@@ -5628,12 +5796,6 @@ function aplicarCambioRemoto(clave, valorCrudo){
       renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
       avisarSincronizacion('Productos actualizados');
       break;
-    case 'dc_sales':
-      if(editandoAhora) return;
-      SALES = datos;
-      renderVentas(); renderAdmin();
-      avisarSincronizacion('Ventas actualizadas');
-      break;
     case 'dc_gastos':
       if(editandoAhora) return;
       GASTOS = datos;
@@ -5660,6 +5822,26 @@ function aplicarCambioRemoto(clave, valorCrudo){
   }
 }
 
+// Cambio remoto en una venta puntual (la colección nueva, de a un registro por venta).
+// "tipo" es 'added', 'modified' o 'removed'; llega uno por cada venta que cambió, así que
+// nunca hace falta reemplazar la lista entera.
+function aplicarCambioRemotoVenta(tipo, id, datos){
+  const editandoAhora = document.activeElement &&
+    (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'TEXTAREA');
+  if(editandoAhora) return;
+
+  if(tipo === 'removed'){
+    SALES = SALES.filter(s => s.id !== id);
+    SALES_SYNCED.delete(id);
+  } else {
+    const idx = SALES.findIndex(s => s.id === id);
+    if(idx >= 0) SALES[idx] = datos; else SALES.push(datos);
+    SALES_SYNCED.set(id, JSON.stringify(datos));
+  }
+  renderVentas(); renderAdmin();
+  avisarSincronizacion('Ventas actualizadas');
+}
+
 let avisoSincroTimer = null;
 function avisarSincronizacion(texto){
   const aviso = document.getElementById('avisoSincro');
@@ -5672,9 +5854,14 @@ function avisarSincronizacion(texto){
 
 function iniciarSincronizacion(){
   if(sincronizacionActiva) return;
-  if(!window.storage || typeof window.storage.escucharCambios !== 'function') return;
+  if(!window.storage) return;
   try{
-    window.storage.escucharCambios(aplicarCambioRemoto);
+    if(typeof window.storage.escucharCambios === 'function'){
+      window.storage.escucharCambios(aplicarCambioRemoto);
+    }
+    if(typeof window.storage.escucharColeccion === 'function'){
+      window.storage.escucharColeccion('sales', aplicarCambioRemotoVenta);
+    }
     sincronizacionActiva = true;
   }catch(e){
     console.warn('No se pudo iniciar la sincronización en vivo:', e);
