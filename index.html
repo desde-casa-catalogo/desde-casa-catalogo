@@ -71,14 +71,7 @@
       // Escucha en vivo: avisa apenas otra persona (u otra pestaña) cambia algo en Firebase.
       // Así la app se actualiza sola, sin tener que recargar la página a mano.
       escucharCambios: (onCambio) => {
-        let esElPrimerAviso = true;
         return onSnapshot(kvCol, (snap)=>{
-          // El primer aviso que manda Firebase apenas nos conectamos trae TODO lo que ya
-          // existe (como si fuera "recién cambiado"), no un cambio real de otra persona.
-          // Lo ignoramos entero para no mostrar carteles de sincronización al abrir la app.
-          const esPrimeraVez = esElPrimerAviso;
-          esElPrimerAviso = false;
-          if(esPrimeraVez) return;
           snap.docChanges().forEach(cambio=>{
             if(cambio.type === 'removed') return;
             const doc = cambio.doc;
@@ -113,13 +106,7 @@
         return { id, deleted: true };
       },
       escucharColeccion: (nombre, onCambio) => {
-        let esElPrimerAviso = true;
         return onSnapshot(collection(db, nombre), (snap)=>{
-          // Mismo motivo que en escucharCambios: el primer aviso trae todo lo que ya
-          // existe, no es un cambio real de otra persona — lo ignoramos.
-          const esPrimeraVez = esElPrimerAviso;
-          esElPrimerAviso = false;
-          if(esPrimeraVez) return;
           snap.docChanges().forEach(cambio=>{
             if(cambio.doc.metadata.hasPendingWrites) return;
             onCambio(cambio.type, cambio.doc.id, cambio.doc.data());
