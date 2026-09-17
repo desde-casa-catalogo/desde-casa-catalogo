@@ -1926,6 +1926,10 @@ let ventasSortDir = 'desc';
 // Guarda en qué orden se cargó cada venta (según SALES), para que dos ventas del mismo
 // día/mismo valor no se reordenen solas por id — la más nueva queda siempre debajo de la anterior.
 let ventasOrdenMap = new Map();
+// Si en algún momento no se pudieron traer bien las ventas guardadas (por ejemplo
+// sin conexión), acá queda el detalle del error para poder avisar en pantalla en
+// vez de mostrar la lista vacía sin explicación.
+let ULTIMO_ERROR_VENTAS = null;
 let selectedVentaIds = new Set();
 let ventaMedio = null;
 let ventaEsAutoconsumo = false;
@@ -2231,6 +2235,10 @@ async function saveProvInfo(){ try{ await window.storage.set('dc_providers_info'
 // juntas en una sola clave, de antes de este cambio) las pasa una sola vez a la colección
 // nueva, donde cada venta es su propio registro.
 async function loadSales(){
+  // Si algo falla de verdad al traer las ventas, queda anotado acá para poder
+  // avisar en pantalla (en vez de mostrar la lista vacía sin explicación).
+  ULTIMO_ERROR_VENTAS = null;
+
   const puedeColecciones = window.storage && typeof window.storage.getColeccion === 'function';
 
   if(!puedeColecciones){
@@ -2259,14 +2267,20 @@ async function loadSales(){
     coleccionOk = true;
   }catch(e){
     coleccionOk = false;
+    ULTIMO_ERROR_VENTAS = 'No se pudo leer la colección nueva de ventas (' + (e && e.message ? e.message : e) + ').';
   }
 
   if(!coleccionOk){
     try{
       const r = await window.storage.get('dc_sales', true);
       SALES = JSON.parse(r.value);
+      ULTIMO_ERROR_VENTAS = null; // se pudo igual, por la manera vieja
     }catch(e){
-      SALES = INITIAL_SALES.map(s => ({...s}));
+      // Ni la colección nueva ni la manera vieja funcionaron: no inventamos datos
+      // (nada de resguardo de fábrica acá), dejamos la lista vacía con el aviso
+      // puesto para no confundir "no se pudo traer" con "no hay ventas".
+      SALES = [];
+      ULTIMO_ERROR_VENTAS = (ULTIMO_ERROR_VENTAS || 'No se pudieron traer las ventas.') + ' Tampoco se pudo leer la manera vieja (' + (e && e.message ? e.message : e) + ').';
     }
     actualizarSalesSincronizadas();
     return;
@@ -2297,7 +2311,14 @@ async function loadSales(){
         // "not found" = confirmado que no hay ventas guardadas a la manera vieja.
         // Cualquier otro error (por ejemplo sin conexión) NO lo confirma, así que
         // no lo marcamos como revisado y lo reintentamos en la próxima carga.
-        if(e && e.message === 'not found') lecturaOk = true;
+        if(e && e.message === 'not found'){
+          lecturaOk = true;
+        } else if(items.length === 0){
+          // La colección nueva está vacía y encima no pudimos revisar si había
+          // algo a la manera vieja: mejor avisar que hay un problema real, en
+          // vez de arriesgarnos a sembrar el resguardo de fábrica por las dudas.
+          ULTIMO_ERROR_VENTAS = 'No se pudieron revisar las ventas guardadas (' + (e && e.message ? e.message : e) + ').';
+        }
       }
 
       if(lecturaOk){
@@ -2328,7 +2349,11 @@ async function loadSales(){
 
     SALES = items;
   }catch(e){
-    SALES = INITIAL_SALES.map(s => ({...s}));
+    // Un problema inesperado acá NO debe hacer que se pierdan de vista las
+    // ventas que ya habíamos logrado traer de la colección nueva: nos quedamos
+    // con esas (items) en vez de reemplazarlas por el resguardo de fábrica.
+    SALES = items || [];
+    ULTIMO_ERROR_VENTAS = 'Hubo un problema al preparar las ventas (' + (e && e.message ? e.message : e) + ').';
   }
   actualizarSalesSincronizadas();
 }
@@ -4192,7 +4217,11 @@ function renderVentas(){
 
   if(items.length===0){
     tbody.classList.remove('agrupado');
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><span class="big">🧾</span>No hay ventas que coincidan con estos filtros.</div></td></tr>`;
+    if(SALES.length===0 && ULTIMO_ERROR_VENTAS){
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><span class="big">⚠️</span>No se pudieron cargar las ventas.<br>${ULTIMO_ERROR_VENTAS}<br>Probá recargar la página (F5). Si sigue igual, avisá para revisarlo.</div></td></tr>`;
+    } else {
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><span class="big">🧾</span>No hay ventas que coincidan con estos filtros.</div></td></tr>`;
+    }
     return;
   }
 
