@@ -71,7 +71,14 @@
       // Escucha en vivo: avisa apenas otra persona (u otra pestaña) cambia algo en Firebase.
       // Así la app se actualiza sola, sin tener que recargar la página a mano.
       escucharCambios: (onCambio) => {
+        let esElPrimerAviso = true;
         return onSnapshot(kvCol, (snap)=>{
+          // El primer aviso que manda Firebase apenas nos conectamos trae TODO lo que ya
+          // existe (como si fuera "recién cambiado"), no un cambio real de otra persona.
+          // Lo ignoramos entero para no mostrar carteles de sincronización al abrir la app.
+          const esPrimeraVez = esElPrimerAviso;
+          esElPrimerAviso = false;
+          if(esPrimeraVez) return;
           snap.docChanges().forEach(cambio=>{
             if(cambio.type === 'removed') return;
             const doc = cambio.doc;
@@ -106,7 +113,13 @@
         return { id, deleted: true };
       },
       escucharColeccion: (nombre, onCambio) => {
+        let esElPrimerAviso = true;
         return onSnapshot(collection(db, nombre), (snap)=>{
+          // Mismo motivo que en escucharCambios: el primer aviso trae todo lo que ya
+          // existe, no es un cambio real de otra persona — lo ignoramos.
+          const esPrimeraVez = esElPrimerAviso;
+          esElPrimerAviso = false;
+          if(esPrimeraVez) return;
           snap.docChanges().forEach(cambio=>{
             if(cambio.doc.metadata.hasPendingWrites) return;
             onCambio(cambio.type, cambio.doc.id, cambio.doc.data());
@@ -2233,25 +2246,84 @@ async function loadSales(){
     return;
   }
 
+  // Primero probamos si se puede usar la colección nueva (un documento por venta).
+  // Si por lo que sea no se puede leer todavía (por ejemplo, un permiso que falta
+  // configurar en Firebase para esa parte nueva), NUNCA mostramos el resguardo
+  // viejo de fábrica: mostramos las ventas reales, leyéndolas de la manera vieja
+  // (la misma que usan las versiones anteriores de la app), para no perder de
+  // vista ni una venta mientras se termina de habilitar la parte nueva.
+  let items = null;
+  let coleccionOk = false;
   try{
-    let items = await window.storage.getColeccion('sales');
+    items = await window.storage.getColeccion('sales');
+    coleccionOk = true;
+  }catch(e){
+    coleccionOk = false;
+  }
 
-    if(items.length === 0){
-      // La colección nueva está vacía: puede ser que las ventas sigan guardadas
-      // a la manera vieja (las migramos una sola vez) o que sea una instalación nueva.
+  if(!coleccionOk){
+    try{
+      const r = await window.storage.get('dc_sales', true);
+      SALES = JSON.parse(r.value);
+    }catch(e){
+      SALES = INITIAL_SALES.map(s => ({...s}));
+    }
+    actualizarSalesSincronizadas();
+    return;
+  }
+
+  try{
+    // Mientras no quede confirmado que ya se revisaron las ventas guardadas
+    // a la manera vieja (todas juntas en la clave "dc_sales"), en cada carga
+    // nos fijamos si falta traer alguna. Así, si esa revisión llegó a fallar
+    // a medias alguna vez (por ejemplo por un corte de conexión justo al
+    // abrir la app), se termina sola la próxima vez — sin duplicar ni volver
+    // a pisar con datos viejos lo que ya está bien guardado en la colección.
+    let yaRevisado = false;
+    try{
+      const m = await window.storage.get('dc_sales_revisado', true);
+      yaRevisado = m.value === 'true';
+    }catch(e){ /* todavía no está marcado: lo revisamos */ }
+
+    if(!yaRevisado){
       let viejas = null;
+      let lecturaOk = false;
       try{
         const r = await window.storage.get('dc_sales', true);
+        lecturaOk = true;
         const parsed = JSON.parse(r.value);
         if(Array.isArray(parsed) && parsed.length > 0) viejas = parsed;
-      }catch(e){ /* no había ventas guardadas a la manera vieja */ }
-
-      const base = viejas || INITIAL_SALES.map(s => ({...s}));
-      for(const s of base){
-        if(!s.id) s.id = uid();
-        try{ await window.storage.setEnColeccion('sales', s.id, s); }catch(e){}
+      }catch(e){
+        // "not found" = confirmado que no hay ventas guardadas a la manera vieja.
+        // Cualquier otro error (por ejemplo sin conexión) NO lo confirma, así que
+        // no lo marcamos como revisado y lo reintentamos en la próxima carga.
+        if(e && e.message === 'not found') lecturaOk = true;
       }
-      items = base;
+
+      if(lecturaOk){
+        if(viejas){
+          // Agregamos a la colección nueva sólo las ventas viejas que todavía
+          // no estén ahí (por id), sin tocar ni duplicar las que ya están.
+          const idsActuales = new Set(items.map(s => s.id));
+          for(const s of viejas){
+            if(!s.id) s.id = uid();
+            if(!idsActuales.has(s.id)){
+              try{ await window.storage.setEnColeccion('sales', s.id, s); }catch(e){}
+              items.push(s);
+              idsActuales.add(s.id);
+            }
+          }
+        } else if(items.length === 0){
+          // Instalación realmente nueva: ni colección nueva ni ventas a la manera vieja.
+          const base = INITIAL_SALES.map(s => ({...s}));
+          for(const s of base){
+            if(!s.id) s.id = uid();
+            try{ await window.storage.setEnColeccion('sales', s.id, s); }catch(e){}
+          }
+          items = base;
+        }
+        try{ await window.storage.set('dc_sales_revisado', 'true', true); }catch(e){}
+      }
     }
 
     SALES = items;
