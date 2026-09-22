@@ -1017,6 +1017,15 @@
   }
   .vfs-filters .chip-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:0;}
   #gastosPeriodoChips.chip-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;max-width:420px;margin:12px 0;}
+  #gastosPeriodoChips.gastos-periodo-row{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:none;margin:12px 0;
+  }
+  #gastosPeriodoChips.gastos-periodo-row .chip-v{flex:0 0 auto;}
+  .gastos-search-wrap{flex:1 1 220px;min-width:200px;margin-bottom:0;}
+  @media(max-width:640px){
+    #gastosPeriodoChips.gastos-periodo-row{flex-direction:column;align-items:stretch;}
+    .gastos-search-wrap{flex:1 1 100%;}
+  }
   .vfs-filters .chip-v{padding:9px 8px;font-size:12px;border-radius:9px;text-align:center;white-space:nowrap;}
   .vfs-medio-select{font-size:12.5px;padding:7px 8px;}
 
@@ -1144,6 +1153,14 @@
   table.gastos-cat-table input[type="date"]::-webkit-calendar-picker-indicator{
     opacity:.85;cursor:pointer;font-size:15px;padding:2px;
   }
+  /* Columnas Fecha y $ Monto centradas: quedaban desfasadas respecto al encabezado */
+  table.gastos-cat-table th:nth-child(2), table.gastos-cat-table td:nth-child(2),
+  table.gastos-cat-table th:nth-child(5), table.gastos-cat-table td:nth-child(5),
+  table.gastos-cat-table th:nth-child(6), table.gastos-cat-table td:nth-child(6){
+    text-align:center;
+  }
+  table.gastos-cat-table td.price-cell .price-input{justify-content:center;}
+  table.gastos-cat-table td.price-cell input.price{text-align:center;}
 
   table.ventas-table td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
@@ -1562,7 +1579,7 @@
     </div>
     <div class="fin-months-grid" id="finMonthsGrid"></div>
 
-    <h3 class="fin-subtitle">📅 Vencimientos y gastos fijos</h3>
+    <h3 class="fin-subtitle">📅 Vencimientos</h3>
     <div class="cal-gastos-layout">
       <div class="venc-card cal-side">
         <div class="venc-cal-nav">
@@ -1601,21 +1618,19 @@
 
     <h3 class="fin-subtitle">Detalle de lo pagado</h3>
     <div class="search-row">
-      <div class="search-wrap">
-        <input type="text" class="search" id="searchGastos" placeholder="Buscar en detalle o medio de pago...">
-      </div>
       <div class="gastos-col-filtros">
         <span class="col-filter-icon-standalone" data-filter-field="fecha">📅 Fecha <span class="col-filter-icon" data-gfilter-field="fecha">🔽</span></span>
         <span class="col-filter-icon-standalone" data-filter-field="detalle">📝 Detalle <span class="col-filter-icon" data-gfilter-field="detalle">🔽</span></span>
-        <span class="col-filter-icon-standalone" data-filter-field="monto">💲 Monto <span class="col-filter-icon" data-gfilter-field="monto">🔽</span></span>
-        <span class="col-filter-icon-standalone" data-filter-field="medioPago">💳 Medio de pago <span class="col-filter-icon" data-gfilter-field="medioPago">🔽</span></span>
       </div>
     </div>
 
-    <div class="chip-row chip-row-3" id="gastosPeriodoChips">
+    <div class="chip-row chip-row-3 gastos-periodo-row" id="gastosPeriodoChips">
       <button class="chip-v" data-gf="mes">Este mes</button>
       <button class="chip-v" data-gf="meses">Meses</button>
       <button class="chip-v active" data-gf="acumulado">Acumulado</button>
+      <div class="search-wrap gastos-search-wrap">
+        <input type="text" class="search" id="searchGastos" placeholder="Buscar palabra en el detalle...">
+      </div>
     </div>
     <div class="venc-card vfs-float" id="gastosMesesBox" style="display:none;padding:12px;position:static;box-shadow:none;margin:8px 0 0;">
       <div class="vfs-float-head">
@@ -4524,6 +4539,7 @@ function populateFinMesFiltro(){
 let gastosFiltroModo = 'acumulado';
 let gastosMesesElegidos = new Set();
 let categoriasAbiertas = new Set();
+let categoriasAbiertasInit = new Set(); // para abrir "Gastos fijos"/"Proveedores" solo la primera vez
 let selectedGastoIds = new Set();
 
 /* ---- Filtros tipo Excel por columna en Detalle de lo pagado ---- */
@@ -4709,7 +4725,7 @@ function gastosFiltradosActuales(){
   const term = document.getElementById('searchGastos').value.trim().toLowerCase();
   let items = gastosDelPeriodo();
 
-  ['fecha','detalle','monto','medioPago'].forEach(campo=>{
+  ['fecha','detalle'].forEach(campo=>{
     if(filtroColumnasGastos[campo].size > 0){
       items = items.filter(g => filtroColumnasGastos[campo].has(valorColumnaDeGasto(g, campo)));
     }
@@ -4722,6 +4738,14 @@ function gastosFiltradosActuales(){
     );
   }
   return items;
+}
+
+// Clasifica un gasto en su "categoría visual": Gastos fijos, Proveedores, o su categoría tal cual.
+function categoriaKeyDeGasto(g){
+  if(g.origenVencimientoId) return { key:'gastos-fijos', label:'Gastos fijos' };
+  if(esCategoriaProveedor(g.categoria)) return { key:'proveedores', label:'Proveedores' };
+  const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
+  return { key: normalizeForMatch(catCruda).toLowerCase(), label: titleCase(catCruda) };
 }
 
 function renderGastosTabla(){
@@ -4739,18 +4763,27 @@ function renderGastosTabla(){
     return;
   }
 
-  const porCategoria = {}; // clave normalizada (sin importar mayúsculas/tildes) → { label, gastos }
+  const porCategoria = {}; // clave normalizada → { label, gastos }
   items.forEach(g=>{
-    const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
-    const key = normalizeForMatch(catCruda).toLowerCase();
-    if(!porCategoria[key]) porCategoria[key] = { label: titleCase(catCruda), gastos: [] };
+    const { key, label } = categoriaKeyDeGasto(g);
+    if(!porCategoria[key]) porCategoria[key] = { label, gastos: [] };
     porCategoria[key].gastos.push(g);
   });
+  // Orden por defecto: Gastos fijos y Proveedores primero (desglosadas), el resto por monto total
+  const ORDEN_FIJO = ['gastos-fijos','proveedores'];
   const categorias = Object.keys(porCategoria).sort((a,b)=>{
+    const idxA = ORDEN_FIJO.indexOf(a), idxB = ORDEN_FIJO.indexOf(b);
+    if(idxA!==-1 || idxB!==-1){
+      if(idxA===-1) return 1;
+      if(idxB===-1) return -1;
+      return idxA - idxB;
+    }
     const totalA = porCategoria[a].gastos.reduce((s,g)=>s+(g.monto||0),0);
     const totalB = porCategoria[b].gastos.reduce((s,g)=>s+(g.monto||0),0);
     return totalB - totalA; // categoría con más gasto primero
   });
+  // Gastos fijos y Proveedores empiezan desglosados (abiertos) la primera vez que aparecen
+  ORDEN_FIJO.forEach(k=>{ if(porCategoria[k] && !categoriasAbiertasInit.has(k)){ categoriasAbiertas.add(k); categoriasAbiertasInit.add(k); } });
 
   box.innerHTML = categorias.map(key=>{
     const cat = porCategoria[key].label;
@@ -4778,7 +4811,7 @@ function renderGastosTabla(){
                 <td><input type="date" class="cell-edit cell-edit-fecha" data-id="${g.id}" data-field="fecha" value="${g.fecha}"></td>
                 <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="detalle" value="${escapeHtml(g.detalle||'')}"></td>
                 <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="categoria" value="${escapeHtml(g.categoria||'')}" list="categoriasList"></td>
-                <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${g.monto||0}" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
+                <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${g.id}" data-field="monto" value="${Math.round(g.monto||0)}" step="1" ${ligado?'disabled title="Se edita desde Gastos fijos"':''}></div></td>
                 <td><input type="text" class="cell-edit cell-edit-text" data-id="${g.id}" data-field="medioPago" value="${escapeHtml(g.medioPago||'')}"></td>
                 <td><button class="btn-del link-btn danger" data-id="${g.id}" data-action="delete-gasto">Eliminar</button></td>
               </tr>`;
@@ -4796,13 +4829,10 @@ document.getElementById('gastosPorCategoria').addEventListener('click', async (e
   const vaciarBtn = e.target.closest('[data-vaciar-cat]');
   if(vaciarBtn){
     const key = vaciarBtn.dataset.vaciarCat;
-    const items = gastosFiltradosActuales().filter(g => {
-      const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
-      return normalizeForMatch(catCruda).toLowerCase() === key;
-    });
+    const items = gastosFiltradosActuales().filter(g => categoriaKeyDeGasto(g).key === key);
     const n = items.length;
     if(n===0) return;
-    const nombreLindo = items[0].categoria && items[0].categoria.trim() ? titleCase(items[0].categoria.trim()) : 'Sin categoría';
+    const nombreLindo = categoriaKeyDeGasto(items[0]).label;
     if(!confirm(`¿Borrar los ${n} gastos de "${nombreLindo}" que ves en el período elegido arriba (${document.querySelector('#gastosPeriodoChips .chip-v.active').textContent})? Esto NO se puede deshacer.`)) return;
     if(!confirm(`Última confirmación: se van a borrar ${n} gastos de "${nombreLindo}". ¿Estás segura?`)) return;
     const idsABorrar = new Set(items.map(g=>g.id));
@@ -4987,10 +5017,10 @@ document.getElementById('fileExcelGastos').addEventListener('change', (e)=>{
 function calcularUrgenciaVencimiento(diaDelMes){
   const hoy = new Date();
   const diaHoy = hoy.getDate();
-  let diff = diaDelMes - diaHoy;
-  // si ya pasó por poco este mes, lo tratamos como "por vencer pronto" (ciclo próximo) salvo que haya pasado hace mucho
-  if(diff < -5) diff += 30; // asumimos que ya se pagó y se acerca el próximo ciclo
-  if(diff <= 2) return 'urgente';
+  const diff = diaDelMes - diaHoy;
+  // Avisa desde 1 día antes de la fecha, y se mantiene "urgente" el resto del mes
+  // (aunque ya haya pasado la fecha) hasta que se marque como pagado.
+  if(diff <= 1) return 'urgente';
   if(diff <= 7) return 'proximo';
   return 'normal';
 }
