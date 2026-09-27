@@ -1617,19 +1617,12 @@
     </div>
 
     <h3 class="fin-subtitle">Detalle de lo pagado</h3>
-    <div class="search-row">
-      <div class="gastos-col-filtros">
-        <span class="col-filter-icon-standalone" data-filter-field="fecha">📅 Fecha <span class="col-filter-icon" data-gfilter-field="fecha">🔽</span></span>
-        <span class="col-filter-icon-standalone" data-filter-field="detalle">📝 Detalle <span class="col-filter-icon" data-gfilter-field="detalle">🔽</span></span>
-      </div>
-    </div>
-
     <div class="chip-row chip-row-3 gastos-periodo-row" id="gastosPeriodoChips">
       <button class="chip-v" data-gf="mes">Este mes</button>
       <button class="chip-v" data-gf="meses">Meses</button>
       <button class="chip-v active" data-gf="acumulado">Acumulado</button>
       <div class="search-wrap gastos-search-wrap">
-        <input type="text" class="search" id="searchGastos" placeholder="Buscar palabra en el detalle...">
+        <input type="text" class="search" id="searchGastos" placeholder="Buscar en toda la tabla...">
       </div>
     </div>
     <div class="venc-card vfs-float" id="gastosMesesBox" style="display:none;padding:12px;position:static;box-shadow:none;margin:8px 0 0;">
@@ -4074,7 +4067,12 @@ function aplicarFiltrosSecundarios(items){
     items = items.filter(s =>
       (s.producto||'').toLowerCase().includes(term) ||
       (s.cliente||'').toLowerCase().includes(term) ||
-      (s.medioPago||'').toLowerCase().includes(term)
+      (s.medioPago||'').toLowerCase().includes(term) ||
+      (s.facturado ? 'facturado' : 'no facturado').includes(term) ||
+      (s.fecha ? s.fecha.split('-').reverse().join('/') : '').includes(term) ||
+      String(s.cantidad||'').includes(term) ||
+      String(s.precioUnitario||'').includes(term) ||
+      String((s.cantidad||0)*(s.precioUnitario||0)).includes(term)
     );
   }
   return items;
@@ -4539,7 +4537,6 @@ function populateFinMesFiltro(){
 let gastosFiltroModo = 'acumulado';
 let gastosMesesElegidos = new Set();
 let categoriasAbiertas = new Set();
-let categoriasAbiertasInit = new Set(); // para abrir "Gastos fijos"/"Proveedores" solo la primera vez
 let selectedGastoIds = new Set();
 
 /* ---- Filtros tipo Excel por columna en Detalle de lo pagado ---- */
@@ -4621,23 +4618,10 @@ function toggleColumnFilterDropdownGastos(campo, anchorEl){
 
 function cerrarColumnFilterDropdownGastos(){
   document.querySelectorAll('.col-filter-dropdown').forEach(el=>{
-    if(el.closest('.gastos-col-filtros')) el.remove();
+    if(el.closest('#gastosPorCategoria')) el.remove();
   });
   columnaFiltroGastosAbierta = null;
 }
-
-document.querySelector('.gastos-col-filtros').addEventListener('click', (e)=>{
-  const icon = e.target.closest('.col-filter-icon');
-  if(!icon) return;
-  e.stopPropagation();
-  const campo = icon.dataset.gfilterField;
-  const anchor = icon.closest('.col-filter-icon-standalone');
-  toggleColumnFilterDropdownGastos(campo, anchor);
-});
-document.addEventListener('click', (e)=>{
-  if(e.target.closest('.gastos-col-filtros')) return;
-  cerrarColumnFilterDropdownGastos();
-});
 
 function cerrarPanelesGastos(){
   document.getElementById('gastosMesesBox').style.display = 'none';
@@ -4725,16 +4709,13 @@ function gastosFiltradosActuales(){
   const term = document.getElementById('searchGastos').value.trim().toLowerCase();
   let items = gastosDelPeriodo();
 
-  ['fecha','detalle'].forEach(campo=>{
-    if(filtroColumnasGastos[campo].size > 0){
-      items = items.filter(g => filtroColumnasGastos[campo].has(valorColumnaDeGasto(g, campo)));
-    }
-  });
   if(term){
     items = items.filter(g =>
       (g.detalle||'').toLowerCase().includes(term) ||
       (g.medioPago||'').toLowerCase().includes(term) ||
-      (g.categoria||'').toLowerCase().includes(term)
+      (g.categoria||'').toLowerCase().includes(term) ||
+      String(g.monto||'').includes(term) ||
+      (g.fecha ? g.fecha.split('-').reverse().join('/') : '').includes(term)
     );
   }
   return items;
@@ -4751,11 +4732,6 @@ function categoriaKeyDeGasto(g){
 function renderGastosTabla(){
   const box = document.getElementById('gastosPorCategoria');
   let items = gastosFiltradosActuales();
-
-  document.querySelectorAll('.gastos-col-filtros .col-filter-icon').forEach(icon=>{
-    const campo = icon.dataset.gfilterField;
-    icon.classList.toggle('activo', filtroColumnasGastos[campo] && filtroColumnasGastos[campo].size > 0);
-  });
 
   if(items.length===0){
     box.innerHTML = `<div class="empty-state"><span class="big">🧾</span>No hay gastos que coincidan con estos filtros.</div>`;
@@ -4782,8 +4758,7 @@ function renderGastosTabla(){
     const totalB = porCategoria[b].gastos.reduce((s,g)=>s+(g.monto||0),0);
     return totalB - totalA; // categoría con más gasto primero
   });
-  // Gastos fijos y Proveedores empiezan desglosados (abiertos) la primera vez que aparecen
-  ORDEN_FIJO.forEach(k=>{ if(porCategoria[k] && !categoriasAbiertasInit.has(k)){ categoriasAbiertas.add(k); categoriasAbiertasInit.add(k); } });
+
 
   box.innerHTML = categorias.map(key=>{
     const cat = porCategoria[key].label;
