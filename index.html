@@ -854,6 +854,9 @@
     .fin-months-grid.fin-tier-sm, .fin-months-grid.fin-tier-xs{grid-template-columns:repeat(auto-fit,minmax(120px,1fr)) !important;}
   }
   .fin-subtitle{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--gold-deep);margin:6px 0 14px;}
+  .fin-subtitle-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .fin-subtitle-row .fin-subtitle{margin-bottom:0;}
+  .fin-subtitle-row .link-btn{font-size:13px;white-space:nowrap;}
 
   /* ---------- Calendario de vencimientos (horizontal, una sola fila) ---------- */
   .venc-cal-nav{display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:14px;}
@@ -1068,6 +1071,7 @@
     box-shadow:0 10px 28px rgba(0,0,0,.18);z-index:60;max-height:280px;overflow-y:auto;
   }
   .deben-hover-card:hover .deben-tooltip{display:block;}
+  .stat-compact-gold .deben-tooltip{border-color:var(--gold);}
   .deben-tooltip-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12.5px;font-weight:700;border-bottom:1px dashed var(--border);}
   .deben-tooltip-row:last-child{border-bottom:none;}
   .deben-tooltip-empty{font-size:12px;color:var(--ink-faint);text-align:center;padding:6px;font-weight:600;}
@@ -1398,8 +1402,8 @@
           <button class="opt-btn" data-medio="Efectivo">Efectivo</button>
           <button class="opt-btn" data-medio="Transferencia">Transferencia</button>
           <button class="opt-btn" data-medio="QR">QR</button>
-          <button class="opt-btn" data-medio="Débito">Débito</button>
-          <button class="opt-btn" data-medio="Crédito">Crédito</button>
+          <button class="opt-btn" data-medio="Debito">Debito</button>
+          <button class="opt-btn" data-medio="Credito">Credito</button>
           <button class="opt-btn opt-btn-debe" data-medio="Debe">Debe</button>
         </div>
         <button class="opt-btn opt-btn-autoconsumo" id="btnAutoconsumo" style="width:100%;margin-top:8px;display:none;">🏠 Es autoconsumo (uso propio, no cobra nada)</button>
@@ -1449,9 +1453,10 @@
         <span class="stat-compact-val" id="totalDia">$ 0</span>
         <span class="stat-compact-sub" id="ventasFiltroLabel">TOTAL DE HOY</span>
       </div>
-      <div class="stat-compact stat-compact-gold" data-icon="💰">
+      <div class="stat-compact stat-compact-gold deben-hover-card" data-icon="💰">
         <span class="stat-compact-lbl">Facturado</span>
         <span class="stat-compact-val" id="statFacturadoMes">$ 0</span>
+        <div class="deben-tooltip" id="facturadoTooltip"></div>
       </div>
       <div class="stat-compact stat-compact-red deben-hover-card" data-icon="⚠️">
         <span class="stat-compact-lbl">Clientes que deben</span>
@@ -1616,7 +1621,10 @@
       </div>
     </div>
 
-    <h3 class="fin-subtitle">Detalle de lo pagado</h3>
+    <div class="fin-subtitle-row">
+      <h3 class="fin-subtitle">Detalle de lo pagado</h3>
+      <button type="button" class="link-btn" id="btnToggleTodasCat">Abrir todo</button>
+    </div>
     <div class="chip-row chip-row-3 gastos-periodo-row" id="gastosPeriodoChips">
       <button class="chip-v" data-gf="mes">Este mes</button>
       <button class="chip-v" data-gf="meses">Meses</button>
@@ -1713,7 +1721,7 @@
     <div class="field-label">Monto de este mes ($, opcional)</div>
     <input type="number" class="field" id="vcMonto" value="0">
     <div class="field-label">Medio de pago habitual (opcional)</div>
-    <input type="text" class="field" id="vcNotas" placeholder="Ej: Débito automático, Efectivo...">
+    <input type="text" class="field" id="vcNotas" placeholder="Ej: Debito automatico, Efectivo...">
     <label class="vc-repetir-check">
       <input type="checkbox" id="vcRepetir">
       Repetir este mismo monto en los próximos meses
@@ -1754,8 +1762,8 @@
       <button type="button" class="opt-btn" data-medio="Efectivo">Efectivo</button>
       <button type="button" class="opt-btn" data-medio="Transferencia">Transferencia</button>
       <button type="button" class="opt-btn" data-medio="QR">QR</button>
-      <button type="button" class="opt-btn" data-medio="Débito">Débito</button>
-      <button type="button" class="opt-btn" data-medio="Crédito">Crédito</button>
+      <button type="button" class="opt-btn" data-medio="Debito">Debito</button>
+      <button type="button" class="opt-btn" data-medio="Credito">Credito</button>
       <button type="button" class="opt-btn opt-btn-debe" data-medio="Debe">Debe</button>
     </div>
     <div class="field-label">Cliente</div>
@@ -1782,7 +1790,7 @@
     <div class="field-label">Monto ($)</div>
     <input type="number" class="field" id="ngMonto" value="0">
     <div class="field-label">Medio de pago</div>
-    <input type="text" class="field" id="ngMedio" placeholder="Ej: Efectivo, Débito automático...">
+    <input type="text" class="field" id="ngMedio" placeholder="Ej: Efectivo, Debito automatico...">
     <div class="modal-actions">
       <button class="btn btn-gold btn-lg btn-block" id="btnGuardarGasto">Guardar gasto</button>
       <button class="btn btn-outline btn-block" id="btnCancelarGasto">Cancelar</button>
@@ -2009,6 +2017,14 @@ async function loadAll(){
     const r = await window.storage.get('dc_gastos', true);
     GASTOS = JSON.parse(r.value);
   }catch(e){ GASTOS = []; }
+  {
+    let migradosGastos = false;
+    GASTOS.forEach(g=>{
+      if(g.medioPago === 'Débito'){ g.medioPago = 'Debito'; migradosGastos = true; }
+      if(g.medioPago === 'Crédito'){ g.medioPago = 'Credito'; migradosGastos = true; }
+    });
+    if(migradosGastos){ try{ await window.storage.set('dc_gastos', JSON.stringify(GASTOS), true); }catch(e){} }
+  }
 
   try{
     const r = await window.storage.get('dc_precios', true);
@@ -2040,6 +2056,8 @@ async function loadAll(){
       s.facturado = false;
       migrated = true;
     }
+    if(s.medioPago === 'Débito'){ s.medioPago = 'Debito'; migrated = true; }
+    if(s.medioPago === 'Crédito'){ s.medioPago = 'Credito'; migrated = true; }
   });
   if(migrated){ try{ await saveSales(); }catch(e){} }
 
@@ -3295,8 +3313,8 @@ function parseFechaCell(val){
 function normMedioCell(val){
   const s = normalizeAccents(String(val||'')).trim().toLowerCase();
   if(!s) return ''; // vacío se queda vacío, no se asume nada
-  if(s.includes('debit')) return 'Débito';
-  if(s.includes('credit')) return 'Crédito';
+  if(s.includes('debit')) return 'Debito';
+  if(s.includes('credit')) return 'Credito';
   if(s.includes('compensad')) return 'Compensado';
   if(s.startsWith('deb')) return 'Debe';
   if(s.startsWith('efec')) return 'Efectivo';
@@ -4112,10 +4130,21 @@ document.getElementById('btnBulkDeleteVentas').addEventListener('click', async (
 });
 
 function renderStats(items){
-  const facturado = items
-    .filter(s => s.facturado)
-    .reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
+  const facturadas = items.filter(s => s.facturado);
+  const facturado = facturadas.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
   document.getElementById('statFacturadoMes').textContent = fmt(facturado);
+
+  const tooltipFact = document.getElementById('facturadoTooltip');
+  if(facturadas.length === 0){
+    tooltipFact.innerHTML = '<div class="deben-tooltip-empty">No hay ventas facturadas en este período.</div>';
+  } else {
+    const ordenadas = facturadas.slice().sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||''));
+    tooltipFact.innerHTML = ordenadas.map(s=>{
+      const [y,m,d] = (s.fecha||'').split('-');
+      const fechaLinda = (y&&m&&d) ? `${d}/${m}/${y}` : (s.fecha||'');
+      return `<div class="deben-tooltip-row"><span>${escapeHtml(fechaLinda)}</span><span>${fmt(s.cantidad*s.precioUnitario)}</span></div>`;
+    }).join('');
+  }
 
   const debtors = {};
   items.forEach(s=>{
@@ -4797,8 +4826,24 @@ function renderGastosTabla(){
     </div>`;
   }).join('');
 
+  const btnToggleTodas = document.getElementById('btnToggleTodasCat');
+  const todasAbiertas = categorias.length>0 && categorias.every(k=>categoriasAbiertas.has(k));
+  btnToggleTodas.textContent = todasAbiertas ? 'Cerrar todo' : 'Abrir todo';
+  btnToggleTodas.dataset.categorias = categorias.join(',');
+
   updateBulkToolbarGastos();
 }
+
+document.getElementById('btnToggleTodasCat').addEventListener('click', ()=>{
+  const categorias = (document.getElementById('btnToggleTodasCat').dataset.categorias || '').split(',').filter(Boolean);
+  const todasAbiertas = categorias.length>0 && categorias.every(k=>categoriasAbiertas.has(k));
+  if(todasAbiertas){
+    categoriasAbiertas.clear();
+  } else {
+    categorias.forEach(k=>categoriasAbiertas.add(k));
+  }
+  renderGastosTabla();
+});
 
 document.getElementById('gastosPorCategoria').addEventListener('click', async (e)=>{
   const vaciarBtn = e.target.closest('[data-vaciar-cat]');
@@ -5582,8 +5627,8 @@ function renderAnalisis(){
   const items = getAnalisisSales();
 
   // Medios de pago — "Debe" no cuenta acá (no es un pago concretado). Lo vacío/sin reconocer va a "Otros"
-  const MEDIOS_CANONICOS = ['Efectivo','Transferencia','QR','Débito','Crédito'];
-  const ALIAS_MEDIOS = { 'tarjeta debito':'Débito', 'tarjeta débito':'Débito', 'tarjeta credito':'Crédito', 'tarjeta crédito':'Crédito', 'qr debito':'QR', 'qr débito':'QR', 'qr credito':'QR', 'qr crédito':'QR', 'tarjeta':'Débito' };
+  const MEDIOS_CANONICOS = ['Efectivo','Transferencia','QR','Debito','Credito'];
+  const ALIAS_MEDIOS = { 'tarjeta debito':'Debito', 'tarjeta débito':'Debito', 'tarjeta credito':'Credito', 'tarjeta crédito':'Credito', 'qr debito':'QR', 'qr débito':'QR', 'qr credito':'QR', 'qr crédito':'QR', 'tarjeta':'Debito' };
   const gMedios = {};
   items.forEach(s=>{
     const raw = String(s.medioPago||'').trim();
