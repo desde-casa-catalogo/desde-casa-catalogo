@@ -1231,6 +1231,11 @@
   .estado-pill.debe{background:var(--red-pale);color:var(--red);}
   .estado-pill.neutro{background:var(--border);color:var(--ink-faint);}
   .medio-cell{display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
+  .cliente-cell{display:flex;flex-direction:column;gap:3px;min-width:120px;}
+  .cliente-total-badge{
+    font-size:10.5px;font-weight:800;color:var(--gold-deep);background:var(--gold-pale);
+    border-radius:6px;padding:2px 6px;white-space:nowrap;align-self:flex-start;
+  }
   .medio-cell input.cell-edit{flex:1 1 70px;min-width:70px;}
 
   /* ---------- Toast ---------- */
@@ -1469,8 +1474,9 @@
     <div class="ventas-main-full">
       <div class="search-row">
         <div class="search-wrap">
-          <input type="text" class="search" id="searchHistorial" placeholder="Buscar en producto, cliente o medio de pago...">
+          <input type="text" class="search" id="searchHistorial" placeholder="Buscar en toda la tabla...">
         </div>
+        <button class="btn btn-outline btn-sm" id="btnToggleTodosDias">Abrir todo</button>
         <button class="btn btn-outline btn-sm" id="btnQuitarFiltros">✕ Quitar filtros</button>
       </div>
       <div class="bulk-toolbar" id="bulkToolbarVentas">
@@ -2813,6 +2819,7 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
   if(!ventaMedio){ showToast('Elegí un medio de pago'); return; }
   const cliente = document.getElementById('ventaCliente').value.trim() || 'Consumidor final';
   const fecha = document.getElementById('ventaFecha').value || todayISO();
+  const grupoVentaId = uid(); // agrupa todas las líneas de este mismo "Cobrar" como una sola venta
 
   const {total: rawTotal} = cartCountAndTotal();
   const ajusteVal = parseFloat(document.getElementById('ventaAjuste').value) || 0;
@@ -2826,12 +2833,12 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
     const cant = CART[id];
     const precioLista = precioLineaProducto(id, cant, p.precio) / cant; // precio unitario real o el editado a mano
     const precioAjustado = Math.round(precioLista * ratio);
-    SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual' });
+    SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual', grupoVentaId });
     p.stock = (p.stock||0) - cant;
   }
   CART_MANUAL.forEach(it=>{
     const precioAjustado = Math.round(it.monto * ratio);
-    SALES.push({ id: uid(), fecha, producto: it.descripcion, cantidad: 1, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual' });
+    SALES.push({ id: uid(), fecha, producto: it.descripcion, cantidad: 1, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual', grupoVentaId });
   });
   await saveSales();
   await saveProducts();
@@ -3992,10 +3999,11 @@ function getValoresColumna(campo){
   const vals = new Set();
   SALES.forEach(s=>{
     if(campo==='facturado'){
-      vals.add(s.facturado ? 'Facturado' : 'No facturado');
+      vals.add(s.facturado ? 'FACTURADO' : 'SIN FACTURAR');
     } else {
-      const v = String(s[campo]||'').trim();
-      vals.add(v || '(vacío)');
+      // Mayúscula y sin importar tilde/caja: "efectivo" y "Efectivo" son la misma opción.
+      const v = String(s[campo]||'').trim().toUpperCase();
+      vals.add(v || '(VACÍO)');
     }
   });
   return Array.from(vals).sort((a,b)=>a.localeCompare(b));
@@ -4069,9 +4077,9 @@ document.getElementById('ventasTheadRow').addEventListener('click', (e)=>{
 });
 
 function valorColumnaDeVenta(s, campo){
-  if(campo==='facturado') return s.facturado ? 'Facturado' : 'No facturado';
-  if(campo==='fecha') return s.fecha ? s.fecha.split('-').reverse().join('/') : '(vacío)';
-  return String(s[campo]||'').trim() || '(vacío)';
+  if(campo==='facturado') return s.facturado ? 'FACTURADO' : 'SIN FACTURAR';
+  if(campo==='fecha') return s.fecha ? s.fecha.split('-').reverse().join('/') : '(VACÍO)';
+  return String(s[campo]||'').trim().toUpperCase() || '(VACÍO)';
 }
 
 function aplicarFiltrosSecundarios(items){
@@ -4086,7 +4094,7 @@ function aplicarFiltrosSecundarios(items){
       (s.producto||'').toLowerCase().includes(term) ||
       (s.cliente||'').toLowerCase().includes(term) ||
       (s.medioPago||'').toLowerCase().includes(term) ||
-      (s.facturado ? 'facturado' : 'no facturado').includes(term) ||
+      (s.facturado ? 'facturado' : 'sin facturar').includes(term) ||
       (s.fecha ? s.fecha.split('-').reverse().join('/') : '').includes(term) ||
       String(s.cantidad||'').includes(term) ||
       String(s.precioUnitario||'').includes(term) ||
@@ -4218,6 +4226,70 @@ document.getElementById('ventasTheadRow').addEventListener('click', (e)=>{
   renderVentas();
 });
 
+function itemsFiltradosVentas(){
+  let items = SALES.slice();
+  const todayStr = todayISO();
+  if(filtroColumnas.fecha.size > 0){
+    // el filtro de fecha se aplica más abajo, en aplicarFiltrosSecundarios
+  } else if(ventasFiltroModo === 'hoy'){
+    items = items.filter(s=>s.fecha===todayStr);
+  } else if(ventasFiltroModo === 'meses'){
+    items = items.filter(s=>s.fecha && ventasMesesElegidos.has(s.fecha.slice(0,7)));
+  }
+  return aplicarFiltrosSecundarios(items);
+}
+
+function actualizarLabelFiltroVentas(){
+  if(filtroColumnas.fecha.size > 0){
+    // Si tildaste días puntuales en el filtro de la columna Fecha, eso manda por sobre
+    // el botón de período (Hoy/Meses/Acumulado) — así podés ver cualquier día, aunque
+    // no sea "hoy" ni esté en los meses elegidos arriba.
+    const n = filtroColumnas.fecha.size;
+    document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${n} DÍA${n===1?'':'S'} ELEGIDO${n===1?'':'S'} (FILTRO DE FECHA)`;
+  } else if(ventasFiltroModo === 'hoy'){
+    document.getElementById('ventasFiltroLabel').textContent = 'TOTAL DE HOY';
+  } else if(ventasFiltroModo === 'meses'){
+    const n = ventasMesesElegidos.size;
+    document.getElementById('ventasFiltroLabel').textContent = n>0
+      ? `TOTAL DE ${n} MES${n===1?'':'ES'} ELEGIDO${n===1?'':'S'}`
+      : 'ELEGÍ UN MES ABAJO';
+  } else if(ventasFiltroModo === 'acumulado'){
+    document.getElementById('ventasFiltroLabel').textContent = 'TOTAL ACUMULADO';
+  }
+}
+
+// Recalcula totales/stats/badges de cliente sin reordenar ni volver a abrir/cerrar
+// las filas — así una acción puntual (como marcar Facturado) no mueve nada de lugar.
+function refrescarStatsYBadgesVentas(){
+  const items = itemsFiltradosVentas();
+  actualizarLabelFiltroVentas();
+  const total = items.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
+  document.getElementById('totalDia').textContent = fmt(total);
+  renderStats(items);
+  actualizarBotonToggleDias(items);
+  const totalesGrupo = totalesPorGrupoEn(items);
+  document.querySelectorAll('#ventasTbody tr[data-id]').forEach(tr=>{
+    const s = SALES.find(x=>x.id===tr.dataset.id);
+    if(!s) return;
+    const badge = totalesGrupo[claveGrupoVenta(s)];
+    const cell = tr.querySelector('.cliente-cell');
+    if(!cell) return;
+    let span = cell.querySelector('.cliente-total-badge');
+    if(badge && badge.count > 1){
+      const texto = `Total de esta venta: ${fmt(badge.total)} (${badge.count} productos)`;
+      if(!span){
+        span = document.createElement('span');
+        span.className = 'cliente-total-badge';
+        span.title = 'Suma de todos los productos que cobraste juntos en esta venta';
+        cell.appendChild(span);
+      }
+      span.textContent = texto;
+    } else if(span){
+      span.remove();
+    }
+  });
+}
+
 function renderVentas(){
   const tbody = document.getElementById('ventasTbody');
   let items = SALES.slice();
@@ -4226,24 +4298,7 @@ function renderVentas(){
   ventasOrdenMap = new Map();
   SALES.forEach((s,i)=> ventasOrdenMap.set(s.id, i));
 
-  if(filtroColumnas.fecha.size > 0){
-    // Si tildaste días puntuales en el filtro de la columna Fecha, eso manda por sobre
-    // el botón de período (Hoy/Meses/Acumulado) — así podés ver cualquier día, aunque
-    // no sea "hoy" ni esté en los meses elegidos arriba.
-    const n = filtroColumnas.fecha.size;
-    document.getElementById('ventasFiltroLabel').textContent = `TOTAL DE ${n} DÍA${n===1?'':'S'} ELEGIDO${n===1?'':'S'} (FILTRO DE FECHA)`;
-  } else if(ventasFiltroModo === 'hoy'){
-    items = items.filter(s=>s.fecha===todayStr);
-    document.getElementById('ventasFiltroLabel').textContent = 'TOTAL DE HOY';
-  } else if(ventasFiltroModo === 'meses'){
-    items = items.filter(s=>s.fecha && ventasMesesElegidos.has(s.fecha.slice(0,7)));
-    const n = ventasMesesElegidos.size;
-    document.getElementById('ventasFiltroLabel').textContent = n>0
-      ? `TOTAL DE ${n} MES${n===1?'':'ES'} ELEGIDO${n===1?'':'S'}`
-      : 'ELEGÍ UN MES ABAJO';
-  } else if(ventasFiltroModo === 'acumulado'){
-    document.getElementById('ventasFiltroLabel').textContent = 'TOTAL ACUMULADO';
-  }
+  actualizarLabelFiltroVentas();
 
   items = aplicarFiltrosSecundarios(items);
 
@@ -4263,6 +4318,7 @@ function renderVentas(){
 
   if(items.length===0){
     tbody.classList.remove('agrupado');
+    document.getElementById('btnToggleTodosDias').style.display = 'none';
     if(SALES.length===0 && ULTIMO_ERROR_VENTAS){
       tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><span class="big">⚠️</span>No se pudieron cargar las ventas.<br>${ULTIMO_ERROR_VENTAS}<br>Probá recargar la página (F5). Si sigue igual, avisá para revisarlo.</div></td></tr>`;
     } else {
@@ -4280,10 +4336,37 @@ function renderVentas(){
     renderVentasAgrupadas(tbody, items);
   } else {
     tbody.classList.remove('agrupado');
-    tbody.innerHTML = items.map(s=>filaDeVenta(s)).join('');
+    const totalesGrupo = totalesPorGrupoEn(items);
+    tbody.innerHTML = items.map(s=>filaDeVenta(s, '', totalesGrupo[claveGrupoVenta(s)])).join('');
   }
+  actualizarBotonToggleDias(items);
   updateBulkToolbarVentas();
 }
+
+// Muestra/oculta el botón "Abrir/Cerrar todo" (solo tiene sentido cuando hay días
+// agrupados) y actualiza su texto según si están todos abiertos o no.
+function actualizarBotonToggleDias(items){
+  const btn = document.getElementById('btnToggleTodosDias');
+  const agrupado = document.getElementById('ventasTbody').classList.contains('agrupado');
+  btn.style.display = agrupado ? '' : 'none';
+  if(!agrupado) return;
+  const dias = Array.from(new Set(items.map(s=>s.fecha||'')));
+  btn.dataset.dias = dias.join(',');
+  const todosAbiertos = dias.length>0 && dias.every(d=>diasAbiertosVentas.has(d));
+  btn.textContent = todosAbiertos ? 'Cerrar todo' : 'Abrir todo';
+}
+
+document.getElementById('btnToggleTodosDias').addEventListener('click', ()=>{
+  const btn = document.getElementById('btnToggleTodosDias');
+  const dias = (btn.dataset.dias || '').split(',').filter(Boolean);
+  const todosAbiertos = dias.length>0 && dias.every(d=>diasAbiertosVentas.has(d));
+  if(todosAbiertos){
+    diasAbiertosVentas.clear();
+  } else {
+    dias.forEach(d=>diasAbiertosVentas.add(d));
+  }
+  renderVentas();
+});
 
 // Nombre del día + fecha, como "Martes 15/09/2026"
 function etiquetaDeDia(fechaISO){
@@ -4324,6 +4407,7 @@ function renderVentasAgrupadas(tbody, items){
     const totalDia = ventasDelDia.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
     const abierto = abrirTodo || diasAbiertosVentas.has(dia);
     const n = ventasDelDia.length;
+    const totalesGrupo = totalesPorGrupoEn(ventasDelDia);
     html += `<tr class="dia-header ${abierto?'abierto':''}" data-dia="${escapeHtml(dia)}">
       <td colspan="10">
         <div class="dia-head-inner">
@@ -4335,14 +4419,17 @@ function renderVentasAgrupadas(tbody, items){
         </div>
       </td>
     </tr>`;
-    html += ventasDelDia.map(s=>filaDeVenta(s, 'venta-de-dia' + (abierto?'':' oculta'))).join('');
+    html += ventasDelDia.map(s=>filaDeVenta(s, 'venta-de-dia' + (abierto?'':' oculta'), totalesGrupo[claveGrupoVenta(s)])).join('');
   });
   tbody.innerHTML = html;
 }
 
-function filaDeVenta(s, clasesExtra){
+function filaDeVenta(s, clasesExtra, badgeVenta){
     const subtotal = s.cantidad * s.precioUnitario;
     const esDebe = String(s.medioPago||'').trim().toLowerCase() === 'debe';
+    const badgeHtml = (badgeVenta && badgeVenta.count > 1)
+      ? `<span class="cliente-total-badge" title="Suma de todos los productos que cobraste juntos en esta venta">Total de esta venta: ${fmt(badgeVenta.total)} (${badgeVenta.count} productos)</span>`
+      : '';
     return `<tr class="${clasesExtra||''}" data-id="${s.id}">
       <td><input type="checkbox" class="row-check" data-id="${s.id}" ${selectedVentaIds.has(s.id)?'checked':''}></td>
       <td><input type="date" class="cell-edit" data-id="${s.id}" data-field="fecha" value="${s.fecha}"></td>
@@ -4356,9 +4443,37 @@ function filaDeVenta(s, clasesExtra){
         </div>
       </td>
       <td><button class="estado-pill ${s.facturado?'pago':'neutro'}" data-id="${s.id}" data-action="toggle-facturado">${s.facturado?'Facturado':'—'}</button></td>
-      <td><input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="cliente" value="${escapeHtml(s.cliente)}"></td>
+      <td>
+        <div class="cliente-cell">
+          <input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="cliente" value="${escapeHtml(s.cliente)}">
+          ${badgeHtml}
+        </div>
+      </td>
       <td><button class="btn-del link-btn danger" data-id="${s.id}" data-action="delete">Eliminar</button></td>
     </tr>`;
+}
+
+// Clave para agrupar "la misma persona" sin importar mayúsculas/tildes/espacios
+function claveCliente(nombre){
+  return normalizeForMatch(nombre||'').toLowerCase();
+}
+
+// Agrupa por la venta real: todos los productos que cobraste juntos en un mismo
+// "Cobrar" comparten grupoVentaId, así el total no depende de si escribiste el
+// nombre del cliente o no. Las ventas viejas (sin grupoVentaId) o cargadas sueltas
+// no se agrupan con nada (cada una queda sola, sin cartelito).
+function totalesPorGrupoEn(ventas){
+  const mapa = {};
+  ventas.forEach(s=>{
+    const clave = s.grupoVentaId || ('__sola__' + s.id);
+    if(!mapa[clave]) mapa[clave] = { total: 0, count: 0 };
+    mapa[clave].total += s.cantidad * s.precioUnitario;
+    mapa[clave].count += 1;
+  });
+  return mapa;
+}
+function claveGrupoVenta(s){
+  return s.grupoVentaId || ('__sola__' + s.id);
 }
 
 document.getElementById('ventasTbody').addEventListener('click', async (e)=>{
@@ -4384,7 +4499,11 @@ document.getElementById('ventasTbody').addEventListener('click', async (e)=>{
     if(!s) return;
     s.facturado = !s.facturado;
     await saveSales();
-    renderVentas();
+    // Actualizo solo el botón y las stats: la fila se queda donde está, no salta de lugar.
+    toggleBtn.classList.toggle('pago', s.facturado);
+    toggleBtn.classList.toggle('neutro', !s.facturado);
+    toggleBtn.textContent = s.facturado ? 'Facturado' : '—';
+    refrescarStatsYBadgesVentas();
     return;
   }
   if(delBtn){
