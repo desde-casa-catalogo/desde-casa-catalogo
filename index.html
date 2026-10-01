@@ -1519,6 +1519,11 @@
         <option value="ganancia-desc">Ganancia % (mayor a menor)</option>
       </select>
     </div>
+    <div class="chip-row chip-row-3" id="chipsStockCostos">
+      <button class="chip-v" data-stock="todos">Todos</button>
+      <button class="chip-v active" data-stock="con">Con stock</button>
+      <button class="chip-v" data-stock="sin">Sin stock</button>
+    </div>
     <div class="prod-count-row">
       <div class="chips" id="chipsCostos"></div>
       <div class="prod-count-badge" id="prodDisponiblesCount"></div>
@@ -1919,6 +1924,8 @@ let SALES = [];
 // venta). Sirve para que, al guardar, sólo se suba lo que realmente cambió — así cobrar en una
 // compu nunca pisa lo que se acaba de cobrar en la otra.
 let SALES_SYNCED = new Map();
+let PRODUCTS_SYNCED = new Map();
+let GASTOS_SYNCED = new Map();
 let GASTOS = [];
 let PRECIOS = [];
 let COMPRAS = []; // ya no se usa para nada nuevo — se mantiene solo por compatibilidad con datos viejos guardados
@@ -1934,6 +1941,7 @@ const MOSTRAR_STOCK = false;
 let currentCategoryCatalogo = 'Todos';
 let catalogViewMode = 'grid';
 let currentCategoryCostos = 'Todos';
+let filtroStockCostos = 'con'; // 'todos' | 'con' | 'sin' — qué productos se ven en la pestaña Productos
 let ventasFiltroModo = 'hoy';
 /* Días que están desplegados en la tabla de Ventas cuando se agrupa por día.
    Arrancan todos cerrados; se abren al hacer clic en la fila del día. */
@@ -1985,88 +1993,52 @@ function showToast(msg){
    STORAGE
    ============================================================ */
 async function loadAll(){
-  try{
-    const r = await window.storage.get('dc_products', true);
-    PRODUCTS = JSON.parse(r.value);
-  }catch(e){
-    PRODUCTS = INITIAL_PRODUCTS.map(p => ({...p}));
-    try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e2){}
-  }
+  // Todas estas cargas son independientes entre sí, así que las pedimos en paralelo
+  // en vez de una atrás de la otra — antes esto hacía ~8 viajes seguidos a internet
+  // al abrir la app, uno esperando al anterior; así se piden todos de una.
+  await Promise.all([
+    cargarProductos(),
+    cargarProveedoresInfo(),
+    loadSales(),
+    cargarGastos(),
+    cargarPrecios(),
+    cargarCompras(),
+    cargarVencimientos(),
+    cargarConfig(),
+  ]);
 
-  // Reparación: si hay productos que quedaron con el mismo id (pasaba al importar muchos de una vez),
-  // le damos uno nuevo a los repetidos. Sin esto, marcar/editar uno afectaba al otro sin querer.
-  {
-    const vistos = new Set();
-    let reparados = 0;
-    PRODUCTS.forEach(p=>{
-      if(!p.id || vistos.has(p.id)){
-        const idViejo = p.id;
-        p.id = uidProducto();
-        if(idViejo && PHOTOS[idViejo] === undefined){ /* sin foto asociada, nada que mover */ }
-        reparados++;
-      }
-      vistos.add(p.id);
-    });
-    if(reparados > 0){
-      try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e){}
-      console.log(`Se repararon ${reparados} productos que tenían el mismo identificador.`);
-    }
-  }
+  PHOTOS = {};
+}
+
+async function cargarProveedoresInfo(){
   try{
     const r = await window.storage.get('dc_providers_info', true);
     PROV_INFO = JSON.parse(r.value);
   }catch(e){ PROV_INFO = {}; }
+}
 
-  await loadSales();
-
-  try{
-    const r = await window.storage.get('dc_gastos', true);
-    GASTOS = JSON.parse(r.value);
-  }catch(e){ GASTOS = []; }
-  {
-    let migradosGastos = false;
-    GASTOS.forEach(g=>{
-      if(g.medioPago === 'Débito'){ g.medioPago = 'Debito'; migradosGastos = true; }
-      if(g.medioPago === 'Crédito'){ g.medioPago = 'Credito'; migradosGastos = true; }
-    });
-    if(migradosGastos){ try{ await window.storage.set('dc_gastos', JSON.stringify(GASTOS), true); }catch(e){} }
-  }
-
+async function cargarPrecios(){
   try{
     const r = await window.storage.get('dc_precios', true);
     PRECIOS = JSON.parse(r.value);
   }catch(e){ PRECIOS = []; }
+}
 
+async function cargarCompras(){
   try{
     const r = await window.storage.get('dc_compras', true);
     COMPRAS = JSON.parse(r.value);
   }catch(e){ COMPRAS = []; }
+}
 
+async function cargarVencimientos(){
   try{
     const r = await window.storage.get('dc_vencimientos', true);
     VENCIMIENTOS = JSON.parse(r.value);
   }catch(e){ VENCIMIENTOS = []; }
+}
 
-  // Migración: ventas viejas tenían "estado" (Pagó/Debe) separado del medio de pago.
-  // Ahora "Debe" es una opción más dentro de medio de pago, y se suma "facturado".
-  let migrated = false;
-  SALES.forEach(s=>{
-    if(s.estado !== undefined){
-      if(s.estado === 'Debe' && String(s.medioPago||'').trim().toLowerCase() !== 'debe'){
-        s.medioPago = 'Debe';
-      }
-      delete s.estado;
-      migrated = true;
-    }
-    if(s.facturado === undefined){
-      s.facturado = false;
-      migrated = true;
-    }
-    if(s.medioPago === 'Débito'){ s.medioPago = 'Debito'; migrated = true; }
-    if(s.medioPago === 'Crédito'){ s.medioPago = 'Credito'; migrated = true; }
-  });
-  if(migrated){ try{ await saveSales(); }catch(e){} }
-
+async function cargarConfig(){
   try{
     const r = await window.storage.get('dc_config', true);
     CONFIG = JSON.parse(r.value);
@@ -2074,8 +2046,6 @@ async function loadAll(){
     CONFIG = {pin:"1234"};
     try{ await window.storage.set('dc_config', JSON.stringify(CONFIG), true); }catch(e2){}
   }
-
-  PHOTOS = {};
 }
 
 /* Carga las fotos subidas (base64) en segundo plano, de a tandas chicas,
@@ -2264,134 +2234,187 @@ document.getElementById('fotoFileInput').addEventListener('change', async (e)=>{
   }
 });
 
-async function saveProducts(){ try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
+async function cargarProductos(){
+  const { items } = await cargarColeccionGenerica('products', 'dc_products', 'dc_products_revisado', INITIAL_PRODUCTS);
+  PRODUCTS = items;
+
+  // Guardamos cómo llegaron (antes de reparar ids) como base de comparación, así la
+  // reparación de abajo queda detectada como "cambio" y se sube sola al guardar.
+  PRODUCTS_SYNCED = new Map();
+  PRODUCTS.forEach(p => PRODUCTS_SYNCED.set(p.id, JSON.stringify(p)));
+
+  // Reparación: si hay productos que quedaron con el mismo id (pasaba al importar muchos de una vez),
+  // le damos uno nuevo a los repetidos. Sin esto, marcar/editar uno afectaba al otro sin querer.
+  const vistos = new Set();
+  let reparados = 0;
+  PRODUCTS.forEach(p=>{
+    if(!p.id || vistos.has(p.id)){
+      p.id = uidProducto();
+      reparados++;
+    }
+    vistos.add(p.id);
+  });
+  if(reparados > 0){
+    console.log(`Se repararon ${reparados} productos que tenían el mismo identificador.`);
+    try{ await saveProducts(); }catch(e){}
+  }
+}
+
+// Guarda los productos: sólo sube a la nube los que cambiaron desde la última vez (nuevos,
+// editados o borrados), cada uno como su propio registro — igual que Ventas, para que
+// editar productos en dos compus a la vez no se pisen entre sí.
+async function saveProducts(){
+  if(!window.storage || typeof window.storage.setEnColeccion !== 'function'){
+    // Compatibilidad, por si esta base todavía no tiene el soporte nuevo.
+    try{ await window.storage.set('dc_products', JSON.stringify(PRODUCTS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); }
+    return;
+  }
+  try{
+    const idsActuales = new Set();
+    for(const p of PRODUCTS){
+      idsActuales.add(p.id);
+      const json = JSON.stringify(p);
+      if(PRODUCTS_SYNCED.get(p.id) !== json){
+        await window.storage.setEnColeccion('products', p.id, p);
+        PRODUCTS_SYNCED.set(p.id, json);
+      }
+    }
+    for(const id of Array.from(PRODUCTS_SYNCED.keys())){
+      if(!idsActuales.has(id)){
+        await window.storage.borrarDeColeccion('products', id);
+        PRODUCTS_SYNCED.delete(id);
+      }
+    }
+  }catch(e){
+    showToast('No se pudo guardar. Revisá tu conexión.');
+  }
+}
 async function saveProvInfo(){ try{ await window.storage.set('dc_providers_info', JSON.stringify(PROV_INFO), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 
 // Trae las ventas guardadas. Si tu base todavía tiene las ventas a la manera vieja (todas
 // juntas en una sola clave, de antes de este cambio) las pasa una sola vez a la colección
 // nueva, donde cada venta es su propio registro.
-async function loadSales(){
-  // Si algo falla de verdad al traer las ventas, queda anotado acá para poder
-  // avisar en pantalla (en vez de mostrar la lista vacía sin explicación).
-  ULTIMO_ERROR_VENTAS = null;
-
+// Carga genérica "de a un documento por registro" (la misma idea que ya usa Ventas),
+// reutilizable para Productos, Gastos fijos y cualquier otra colección futura.
+// Nunca tira error: devuelve { items, error }. 'datosIniciales' es el resguardo de
+// fábrica a sembrar SOLO si no hay nada ni en la colección nueva ni en la clave vieja
+// (instalación realmente nueva); pasar null si no corresponde sembrar nada (ej: Gastos).
+async function cargarColeccionGenerica(nombreColeccion, claveVieja, claveRevisadoKey, datosIniciales){
   const puedeColecciones = window.storage && typeof window.storage.getColeccion === 'function';
 
   if(!puedeColecciones){
     // Compatibilidad, por si esta base todavía no tiene el soporte nuevo.
     try{
-      const r = await window.storage.get('dc_sales', true);
-      SALES = JSON.parse(r.value);
+      const r = await window.storage.get(claveVieja, true);
+      return { items: JSON.parse(r.value), error: null };
     }catch(e){
-      SALES = INITIAL_SALES.map(s => ({...s}));
-      try{ await window.storage.set('dc_sales', JSON.stringify(SALES), true); }catch(e2){}
+      const items = (datosIniciales || []).map(x => ({...x}));
+      try{ await window.storage.set(claveVieja, JSON.stringify(items), true); }catch(e2){}
+      return { items, error: null };
     }
-    actualizarSalesSincronizadas();
-    return;
   }
 
-  // Primero probamos si se puede usar la colección nueva (un documento por venta).
-  // Si por lo que sea no se puede leer todavía (por ejemplo, un permiso que falta
-  // configurar en Firebase para esa parte nueva), NUNCA mostramos el resguardo
-  // viejo de fábrica: mostramos las ventas reales, leyéndolas de la manera vieja
-  // (la misma que usan las versiones anteriores de la app), para no perder de
-  // vista ni una venta mientras se termina de habilitar la parte nueva.
   let items = null;
   let coleccionOk = false;
+  let error = null;
   try{
-    items = await window.storage.getColeccion('sales');
+    items = await window.storage.getColeccion(nombreColeccion);
     coleccionOk = true;
   }catch(e){
     coleccionOk = false;
-    ULTIMO_ERROR_VENTAS = 'No se pudo leer la colección nueva de ventas (' + (e && e.message ? e.message : e) + ').';
+    error = `No se pudo leer la colección nueva de "${nombreColeccion}" (` + (e && e.message ? e.message : e) + ').';
   }
 
   if(!coleccionOk){
+    // Igual que en Ventas: nunca mostramos el resguardo de fábrica por una falla de lectura;
+    // mostramos los datos reales leyéndolos a la manera vieja, mientras se habilita la nueva.
     try{
-      const r = await window.storage.get('dc_sales', true);
-      SALES = JSON.parse(r.value);
-      ULTIMO_ERROR_VENTAS = null; // se pudo igual, por la manera vieja
+      const r = await window.storage.get(claveVieja, true);
+      return { items: JSON.parse(r.value), error: null };
     }catch(e){
-      // Ni la colección nueva ni la manera vieja funcionaron: no inventamos datos
-      // (nada de resguardo de fábrica acá), dejamos la lista vacía con el aviso
-      // puesto para no confundir "no se pudo traer" con "no hay ventas".
-      SALES = [];
-      ULTIMO_ERROR_VENTAS = (ULTIMO_ERROR_VENTAS || 'No se pudieron traer las ventas.') + ' Tampoco se pudo leer la manera vieja (' + (e && e.message ? e.message : e) + ').';
+      return { items: [], error: (error || 'No se pudieron traer los datos.') + ' Tampoco se pudo leer la manera vieja (' + (e && e.message ? e.message : e) + ').' };
     }
-    actualizarSalesSincronizadas();
-    return;
   }
 
   try{
-    // Mientras no quede confirmado que ya se revisaron las ventas guardadas
-    // a la manera vieja (todas juntas en la clave "dc_sales"), en cada carga
-    // nos fijamos si falta traer alguna. Así, si esa revisión llegó a fallar
-    // a medias alguna vez (por ejemplo por un corte de conexión justo al
-    // abrir la app), se termina sola la próxima vez — sin duplicar ni volver
-    // a pisar con datos viejos lo que ya está bien guardado en la colección.
     let yaRevisado = false;
     try{
-      const m = await window.storage.get('dc_sales_revisado', true);
+      const m = await window.storage.get(claveRevisadoKey, true);
       yaRevisado = m.value === 'true';
     }catch(e){ /* todavía no está marcado: lo revisamos */ }
 
     if(!yaRevisado){
-      let viejas = null;
+      let viejos = null;
       let lecturaOk = false;
       try{
-        const r = await window.storage.get('dc_sales', true);
+        const r = await window.storage.get(claveVieja, true);
         lecturaOk = true;
         const parsed = JSON.parse(r.value);
-        if(Array.isArray(parsed) && parsed.length > 0) viejas = parsed;
+        if(Array.isArray(parsed) && parsed.length > 0) viejos = parsed;
       }catch(e){
-        // "not found" = confirmado que no hay ventas guardadas a la manera vieja.
-        // Cualquier otro error (por ejemplo sin conexión) NO lo confirma, así que
-        // no lo marcamos como revisado y lo reintentamos en la próxima carga.
         if(e && e.message === 'not found'){
           lecturaOk = true;
         } else if(items.length === 0){
-          // La colección nueva está vacía y encima no pudimos revisar si había
-          // algo a la manera vieja: mejor avisar que hay un problema real, en
-          // vez de arriesgarnos a sembrar el resguardo de fábrica por las dudas.
-          ULTIMO_ERROR_VENTAS = 'No se pudieron revisar las ventas guardadas (' + (e && e.message ? e.message : e) + ').';
+          error = 'No se pudieron revisar los datos guardados (' + (e && e.message ? e.message : e) + ').';
         }
       }
 
       if(lecturaOk){
-        if(viejas){
-          // Agregamos a la colección nueva sólo las ventas viejas que todavía
-          // no estén ahí (por id), sin tocar ni duplicar las que ya están.
-          const idsActuales = new Set(items.map(s => s.id));
-          for(const s of viejas){
-            if(!s.id) s.id = uid();
-            if(!idsActuales.has(s.id)){
-              try{ await window.storage.setEnColeccion('sales', s.id, s); }catch(e){}
-              items.push(s);
-              idsActuales.add(s.id);
+        if(viejos){
+          const idsActuales = new Set(items.map(x => x.id));
+          for(const it of viejos){
+            if(!it.id) it.id = uid();
+            if(!idsActuales.has(it.id)){
+              try{ await window.storage.setEnColeccion(nombreColeccion, it.id, it); }catch(e){}
+              items.push(it);
+              idsActuales.add(it.id);
             }
           }
-        } else if(items.length === 0){
-          // Instalación realmente nueva: ni colección nueva ni ventas a la manera vieja.
-          const base = INITIAL_SALES.map(s => ({...s}));
-          for(const s of base){
-            if(!s.id) s.id = uid();
-            try{ await window.storage.setEnColeccion('sales', s.id, s); }catch(e){}
+        } else if(items.length === 0 && datosIniciales){
+          const base = datosIniciales.map(x => ({...x}));
+          for(const it of base){
+            if(!it.id) it.id = uid();
+            try{ await window.storage.setEnColeccion(nombreColeccion, it.id, it); }catch(e){}
           }
           items = base;
         }
-        try{ await window.storage.set('dc_sales_revisado', 'true', true); }catch(e){}
+        try{ await window.storage.set(claveRevisadoKey, 'true', true); }catch(e){}
       }
     }
 
-    SALES = items;
+    return { items, error };
   }catch(e){
-    // Un problema inesperado acá NO debe hacer que se pierdan de vista las
-    // ventas que ya habíamos logrado traer de la colección nueva: nos quedamos
-    // con esas (items) en vez de reemplazarlas por el resguardo de fábrica.
-    SALES = items || [];
-    ULTIMO_ERROR_VENTAS = 'Hubo un problema al preparar las ventas (' + (e && e.message ? e.message : e) + ').';
+    return { items: items || [], error: `Hubo un problema al preparar los datos de "${nombreColeccion}" (` + (e && e.message ? e.message : e) + ').' };
   }
+}
+
+async function loadSales(){
+  const { items, error } = await cargarColeccionGenerica('sales', 'dc_sales', 'dc_sales_revisado', INITIAL_SALES);
+  SALES = items;
+  ULTIMO_ERROR_VENTAS = error;
   actualizarSalesSincronizadas();
+
+  // Migración: ventas viejas tenían "estado" (Pagó/Debe) separado del medio de pago.
+  // Ahora "Debe" es una opción más dentro de medio de pago, se suma "facturado", y
+  // Débito/Crédito quedan sin tilde. Se arma DESPUÉS del baseline de arriba para que
+  // el guardado note el cambio y lo suba.
+  let migrated = false;
+  SALES.forEach(s=>{
+    if(s.estado !== undefined){
+      if(s.estado === 'Debe' && String(s.medioPago||'').trim().toLowerCase() !== 'debe'){
+        s.medioPago = 'Debe';
+      }
+      delete s.estado;
+      migrated = true;
+    }
+    if(s.facturado === undefined){
+      s.facturado = false;
+      migrated = true;
+    }
+    if(s.medioPago === 'Débito'){ s.medioPago = 'Debito'; migrated = true; }
+    if(s.medioPago === 'Crédito'){ s.medioPago = 'Credito'; migrated = true; }
+  });
+  if(migrated){ try{ await saveSales(); }catch(e){} }
 }
 
 function actualizarSalesSincronizadas(){
@@ -2429,7 +2452,51 @@ async function saveSales(){
   }
 }
 
-async function saveGastos(){ try{ await window.storage.set('dc_gastos', JSON.stringify(GASTOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
+async function cargarGastos(){
+  const { items } = await cargarColeccionGenerica('gastos', 'dc_gastos', 'dc_gastos_revisado', null);
+  GASTOS = items;
+  actualizarGastosSincronizados();
+
+  let migrados = false;
+  GASTOS.forEach(g=>{
+    if(g.medioPago === 'Débito'){ g.medioPago = 'Debito'; migrados = true; }
+    if(g.medioPago === 'Crédito'){ g.medioPago = 'Credito'; migrados = true; }
+  });
+  if(migrados){ try{ await saveGastos(); }catch(e){} }
+}
+
+function actualizarGastosSincronizados(){
+  GASTOS_SYNCED = new Map();
+  GASTOS.forEach(g => GASTOS_SYNCED.set(g.id, JSON.stringify(g)));
+}
+
+// Guarda los gastos: sólo sube a la nube los que cambiaron, cada uno como su propio
+// registro — igual que Ventas y Productos, para que no se pisen entre dos compus.
+async function saveGastos(){
+  if(!window.storage || typeof window.storage.setEnColeccion !== 'function'){
+    try{ await window.storage.set('dc_gastos', JSON.stringify(GASTOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); }
+    return;
+  }
+  try{
+    const idsActuales = new Set();
+    for(const g of GASTOS){
+      idsActuales.add(g.id);
+      const json = JSON.stringify(g);
+      if(GASTOS_SYNCED.get(g.id) !== json){
+        await window.storage.setEnColeccion('gastos', g.id, g);
+        GASTOS_SYNCED.set(g.id, json);
+      }
+    }
+    for(const id of Array.from(GASTOS_SYNCED.keys())){
+      if(!idsActuales.has(id)){
+        await window.storage.borrarDeColeccion('gastos', id);
+        GASTOS_SYNCED.delete(id);
+      }
+    }
+  }catch(e){
+    showToast('No se pudo guardar. Revisá tu conexión.');
+  }
+}
 async function savePrecios(){ try{ await window.storage.set('dc_precios', JSON.stringify(PRECIOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveCompras(){ try{ await window.storage.set('dc_compras', JSON.stringify(COMPRAS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
 async function saveVencimientos(){ try{ await window.storage.set('dc_vencimientos', JSON.stringify(VENCIMIENTOS), true); }catch(e){ showToast('No se pudo guardar. Revisá tu conexión.'); } }
@@ -2951,7 +3018,9 @@ function renderCostos(){
       (p.proveedor||'').toLowerCase().includes(term) ||
       (p.rubro||'').toLowerCase().includes(term);
     const matchCat = currentCategoryCostos==='Todos' || p.rubro===currentCategoryCostos;
-    return matchTerm && matchCat;
+    const activo = p.activo !== false;
+    const matchStock = filtroStockCostos==='todos' || (filtroStockCostos==='con' ? activo : !activo);
+    return matchTerm && matchCat && matchStock;
   });
 
   const orden = document.getElementById('sortCostos').value;
@@ -3026,6 +3095,14 @@ function renderCostos(){
 }
 
 document.getElementById('searchCostos').addEventListener('input', renderCostos);
+document.getElementById('chipsStockCostos').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip-v');
+  if(!chip) return;
+  document.querySelectorAll('#chipsStockCostos .chip-v').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  filtroStockCostos = chip.dataset.stock;
+  renderCostos();
+});
 document.getElementById('sortCostos').addEventListener('change', renderCostos);
 
 document.getElementById('listCostos').addEventListener('click', (e)=>{
@@ -4292,15 +4369,13 @@ function refrescarStatsYBadgesVentas(){
 
 function renderVentas(){
   const tbody = document.getElementById('ventasTbody');
-  let items = SALES.slice();
-  const todayStr = todayISO();
 
   ventasOrdenMap = new Map();
   SALES.forEach((s,i)=> ventasOrdenMap.set(s.id, i));
 
   actualizarLabelFiltroVentas();
 
-  items = aplicarFiltrosSecundarios(items);
+  let items = itemsFiltradosVentas();
 
   items.sort(compareVentas);
 
@@ -6052,12 +6127,15 @@ function aplicarCambioRemoto(clave, valorCrudo){
 
   switch(clave){
     case 'dc_products':
+      // Solo se dispara en el modo viejo (sin colecciones); con colecciones, los
+      // cambios de productos llegan por aplicarCambioRemotoProducto más abajo.
       if(editandoAhora) return;
       PRODUCTS = datos;
       renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
       avisarSincronizacion('Productos actualizados');
       break;
     case 'dc_gastos':
+      // Igual que arriba: solo en el modo viejo (sin colecciones).
       if(editandoAhora) return;
       GASTOS = datos;
       renderAdmin(); renderProveedores();
@@ -6103,6 +6181,42 @@ function aplicarCambioRemotoVenta(tipo, id, datos){
   avisarSincronizacion('Ventas actualizadas');
 }
 
+// Cambio remoto en un producto puntual — mismo mecanismo que Ventas.
+function aplicarCambioRemotoProducto(tipo, id, datos){
+  const editandoAhora = document.activeElement &&
+    (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'TEXTAREA');
+  if(editandoAhora) return;
+
+  if(tipo === 'removed'){
+    PRODUCTS = PRODUCTS.filter(p => p.id !== id);
+    PRODUCTS_SYNCED.delete(id);
+  } else {
+    const idx = PRODUCTS.findIndex(p => p.id === id);
+    if(idx >= 0) PRODUCTS[idx] = datos; else PRODUCTS.push(datos);
+    PRODUCTS_SYNCED.set(id, JSON.stringify(datos));
+  }
+  renderChipsCatalogo(); renderCatalogo(); renderChipsCostos(); renderCostos(); renderProveedores();
+  avisarSincronizacion('Productos actualizados');
+}
+
+// Cambio remoto en un gasto puntual — mismo mecanismo que Ventas.
+function aplicarCambioRemotoGasto(tipo, id, datos){
+  const editandoAhora = document.activeElement &&
+    (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'TEXTAREA');
+  if(editandoAhora) return;
+
+  if(tipo === 'removed'){
+    GASTOS = GASTOS.filter(g => g.id !== id);
+    GASTOS_SYNCED.delete(id);
+  } else {
+    const idx = GASTOS.findIndex(g => g.id === id);
+    if(idx >= 0) GASTOS[idx] = datos; else GASTOS.push(datos);
+    GASTOS_SYNCED.set(id, JSON.stringify(datos));
+  }
+  renderAdmin(); renderProveedores();
+  avisarSincronizacion('Gastos actualizados');
+}
+
 let avisoSincroTimer = null;
 function avisarSincronizacion(texto){
   const aviso = document.getElementById('avisoSincro');
@@ -6122,6 +6236,8 @@ function iniciarSincronizacion(){
     }
     if(typeof window.storage.escucharColeccion === 'function'){
       window.storage.escucharColeccion('sales', aplicarCambioRemotoVenta);
+      window.storage.escucharColeccion('products', aplicarCambioRemotoProducto);
+      window.storage.escucharColeccion('gastos', aplicarCambioRemotoGasto);
     }
     sincronizacionActiva = true;
   }catch(e){
