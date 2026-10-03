@@ -352,6 +352,10 @@
   .view-toggle{display:flex;gap:4px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:4px;box-shadow:var(--shadow);flex:0 0 auto;}
   .view-btn{width:40px;height:40px;border:none;background:transparent;border-radius:9px;font-size:17px;color:var(--ink-faint);cursor:pointer;}
   .view-btn.active{background:var(--gold-grad);color:#fff;}
+  /* Filtro de stock en Productos: mismo estilo compacto que view-toggle, pero con texto chico */
+  .stock-toggle{display:flex;gap:4px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:4px;box-shadow:var(--shadow);flex:0 0 auto;}
+  .stock-toggle-btn{padding:7px 11px;border:none;background:transparent;border-radius:9px;font-size:11.5px;font-weight:800;color:var(--ink-faint);cursor:pointer;white-space:nowrap;}
+  .stock-toggle-btn.active{background:var(--gold-grad);color:#fff;}
   input[type="text"].search{
     width:100%;padding:15px 44px 15px 44px;border-radius:14px;border:1.5px solid var(--border);
     background:var(--card);font-size:17px;color:var(--ink);box-shadow:var(--shadow);
@@ -1019,16 +1023,8 @@
     background:var(--card);border:2px solid var(--border);border-radius:15px;padding:10px;
   }
   .vfs-filters .chip-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:0;}
+  /* Chips de período de "Detalle de lo pagado": una sola fila compacta, como en Ventas */
   #gastosPeriodoChips.chip-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;max-width:420px;margin:12px 0;}
-  #gastosPeriodoChips.gastos-periodo-row{
-    display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:none;margin:12px 0;
-  }
-  #gastosPeriodoChips.gastos-periodo-row .chip-v{flex:0 0 auto;}
-  .gastos-search-wrap{flex:1 1 220px;min-width:200px;margin-bottom:0;}
-  @media(max-width:640px){
-    #gastosPeriodoChips.gastos-periodo-row{flex-direction:column;align-items:stretch;}
-    .gastos-search-wrap{flex:1 1 100%;}
-  }
   .vfs-filters .chip-v{padding:9px 8px;font-size:12px;border-radius:9px;text-align:center;white-space:nowrap;}
   .vfs-medio-select{font-size:12.5px;padding:7px 8px;}
 
@@ -1232,10 +1228,6 @@
   .estado-pill.neutro{background:var(--border);color:var(--ink-faint);}
   .medio-cell{display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
   .cliente-cell{display:flex;flex-direction:column;gap:3px;min-width:120px;}
-  .cliente-total-badge{
-    font-size:10.5px;font-weight:800;color:var(--gold-deep);background:var(--gold-pale);
-    border-radius:6px;padding:2px 6px;white-space:nowrap;align-self:flex-start;
-  }
   .medio-cell input.cell-edit{flex:1 1 70px;min-width:70px;}
 
   /* ---------- Toast ---------- */
@@ -1519,13 +1511,13 @@
         <option value="ganancia-desc">Ganancia % (mayor a menor)</option>
       </select>
     </div>
-    <div class="chip-row chip-row-3" id="chipsStockCostos">
-      <button class="chip-v" data-stock="todos">Todos</button>
-      <button class="chip-v active" data-stock="con">Con stock</button>
-      <button class="chip-v" data-stock="sin">Sin stock</button>
-    </div>
     <div class="prod-count-row">
       <div class="chips" id="chipsCostos"></div>
+      <div class="stock-toggle" id="chipsStockCostos">
+        <button class="stock-toggle-btn" data-stock="todos" title="Mostrar todos">Todos</button>
+        <button class="stock-toggle-btn active" data-stock="con" title="Mostrar solo con stock">Con stock</button>
+        <button class="stock-toggle-btn" data-stock="sin" title="Mostrar solo sin stock">Sin stock</button>
+      </div>
       <div class="prod-count-badge" id="prodDisponiblesCount"></div>
     </div>
     <div id="listCostos"></div>
@@ -1636,11 +1628,13 @@
       <h3 class="fin-subtitle">Detalle de lo pagado</h3>
       <button type="button" class="link-btn" id="btnToggleTodasCat">Abrir todo</button>
     </div>
-    <div class="chip-row chip-row-3 gastos-periodo-row" id="gastosPeriodoChips">
+    <div class="chip-row chip-row-3" id="gastosPeriodoChips">
       <button class="chip-v" data-gf="mes">Este mes</button>
       <button class="chip-v" data-gf="meses">Meses</button>
       <button class="chip-v active" data-gf="acumulado">Acumulado</button>
-      <div class="search-wrap gastos-search-wrap">
+    </div>
+    <div class="search-row">
+      <div class="search-wrap">
         <input type="text" class="search" id="searchGastos" placeholder="Buscar en toda la tabla...">
       </div>
     </div>
@@ -3096,9 +3090,9 @@ function renderCostos(){
 
 document.getElementById('searchCostos').addEventListener('input', renderCostos);
 document.getElementById('chipsStockCostos').addEventListener('click', (e)=>{
-  const chip = e.target.closest('.chip-v');
+  const chip = e.target.closest('.stock-toggle-btn');
   if(!chip) return;
-  document.querySelectorAll('#chipsStockCostos .chip-v').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('#chipsStockCostos .stock-toggle-btn').forEach(c=>c.classList.remove('active'));
   chip.classList.add('active');
   filtroStockCostos = chip.dataset.stock;
   renderCostos();
@@ -3450,35 +3444,49 @@ document.getElementById('btnExportarTodo').addEventListener('click', ()=>{
   try{
     const wb = XLSX.utils.book_new();
 
+    // PRODUCTOS: sin fecha, así que el "detalle" (producto) va primero y los montos al final.
     const productosData = PRODUCTS.map(p=>({
-      PRODUCTO: p.nombre, PROVEEDOR: p.proveedor||'', COSTO: p.costo, VENTA: p.precio,
-      RUBRO: p.rubro, STOCK: p.stock, FOTO: p.foto||''
+      PRODUCTO: p.nombre, PROVEEDOR: p.proveedor||'', RUBRO: p.rubro, STOCK: p.stock, FOTO: p.foto||'',
+      COSTO: p.costo, VENTA: p.precio
     }));
     const wsProductos = XLSX.utils.json_to_sheet(productosData);
     XLSX.utils.book_append_sheet(wb, wsProductos, 'PRODUCTOS');
 
+    // VENTAS: fecha primero, producto segundo, montos (precio/subtotal) al final.
     const ventasData = SALES.map(s=>({
-      FECHA: s.fecha, PRODUCTO: s.producto, CANTIDAD: s.cantidad, PRECIO: s.precioUnitario,
-      SUBTOTAL: s.cantidad * s.precioUnitario,
-      'MEDIO DE PAGO': s.medioPago||'', CLIENTE: s.cliente, FACTURADO: s.facturado ? 'FACTURADO' : ''
+      FECHA: s.fecha, PRODUCTO: s.producto, CANTIDAD: s.cantidad,
+      'MEDIO DE PAGO': s.medioPago||'', CLIENTE: s.cliente, FACTURADO: s.facturado ? 'FACTURADO' : '',
+      PRECIO: s.precioUnitario, SUBTOTAL: s.cantidad * s.precioUnitario
     }));
     const wsVentas = XLSX.utils.json_to_sheet(ventasData);
     XLSX.utils.book_append_sheet(wb, wsVentas, 'VENTAS');
 
-    const proveedoresData = Object.keys(PROV_INFO).sort().map(nombre=>({
-      PROVEEDOR: nombre,
-      TELEFONO: PROV_INFO[nombre].telefono || '',
-      CONTACTO: PROV_INFO[nombre].contacto || '',
-      NOTAS: PROV_INFO[nombre].notas || ''
-    }));
-    const wsProveedores = XLSX.utils.json_to_sheet(proveedoresData);
+    // PROVEEDORES: una fila por cada compra registrada (categoría "Proveedor" en Gastos),
+    // con fecha primero, el proveedor como "detalle" y el monto al final.
+    const comprasData = GASTOS
+      .filter(g => esCategoriaProveedor(g.categoria))
+      .slice()
+      .sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||''))
+      .map(g=>({
+        FECHA: g.fecha ? g.fecha.split('-').reverse().join('/') : '',
+        PROVEEDOR: g.detalle || '',
+        MONTO: g.monto || 0
+      }));
+    const wsProveedores = XLSX.utils.json_to_sheet(comprasData);
     XLSX.utils.book_append_sheet(wb, wsProveedores, 'PROVEEDORES');
 
-    const preciosData = PRECIOS.map(pr=>({
-      PRODUCTO: pr.producto, PROVEEDOR: pr.proveedor, COSTO: pr.costo, FECHA: pr.fecha
-    }));
-    const wsPrecios = XLSX.utils.json_to_sheet(preciosData);
-    XLSX.utils.book_append_sheet(wb, wsPrecios, 'PRECIOS PROVEEDORES');
+    // ADMINISTRACION: todos los gastos (de cualquier categoría, incluida Proveedor),
+    // con el mes, el detalle tal cual lo cargaste, y el monto al final.
+    const administracionData = GASTOS
+      .slice()
+      .sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||''))
+      .map(g=>({
+        MES: g.fecha ? `${MESES_NOMBRES[parseInt(g.fecha.slice(5,7),10)-1]} ${g.fecha.slice(0,4)}` : '',
+        DETALLE: g.detalle || '',
+        MONTO: g.monto || 0
+      }));
+    const wsAdministracion = XLSX.utils.json_to_sheet(administracionData);
+    XLSX.utils.book_append_sheet(wb, wsAdministracion, 'ADMINISTRACION');
 
     const fecha = todayISO();
     XLSX.writeFile(wb, `Desde Casa - Backup ${fecha}.xlsx`);
@@ -3655,6 +3663,13 @@ function normalizeForMatch(s){
 function esCategoriaProveedor(categoria){
   const c = normalizeForMatch(categoria).toLowerCase();
   return c === 'proveedor' || c === 'proveedores';
+}
+
+// Mismo criterio para "Alquiler", para que quede en su propio grupo separado de
+// "Gastos fijos" (que junta todo el resto: Impuestos, Arca, Sueldos, Extraordinario, etc.)
+function esCategoriaAlquiler(categoria){
+  const c = normalizeForMatch(categoria).toLowerCase();
+  return c === 'alquiler';
 }
 
 // Si el proveedor que se escribió ya existe (aunque tenga otras mayúsculas/minúsculas),
@@ -4335,8 +4350,8 @@ function actualizarLabelFiltroVentas(){
   }
 }
 
-// Recalcula totales/stats/badges de cliente sin reordenar ni volver a abrir/cerrar
-// las filas — así una acción puntual (como marcar Facturado) no mueve nada de lugar.
+// Recalcula totales/stats sin reordenar ni volver a abrir/cerrar las filas — así
+// una acción puntual (como marcar Facturado) no mueve nada de lugar.
 function refrescarStatsYBadgesVentas(){
   const items = itemsFiltradosVentas();
   actualizarLabelFiltroVentas();
@@ -4344,27 +4359,6 @@ function refrescarStatsYBadgesVentas(){
   document.getElementById('totalDia').textContent = fmt(total);
   renderStats(items);
   actualizarBotonToggleDias(items);
-  const totalesGrupo = totalesPorGrupoEn(items);
-  document.querySelectorAll('#ventasTbody tr[data-id]').forEach(tr=>{
-    const s = SALES.find(x=>x.id===tr.dataset.id);
-    if(!s) return;
-    const badge = totalesGrupo[claveGrupoVenta(s)];
-    const cell = tr.querySelector('.cliente-cell');
-    if(!cell) return;
-    let span = cell.querySelector('.cliente-total-badge');
-    if(badge && badge.count > 1){
-      const texto = `Total de esta venta: ${fmt(badge.total)} (${badge.count} productos)`;
-      if(!span){
-        span = document.createElement('span');
-        span.className = 'cliente-total-badge';
-        span.title = 'Suma de todos los productos que cobraste juntos en esta venta';
-        cell.appendChild(span);
-      }
-      span.textContent = texto;
-    } else if(span){
-      span.remove();
-    }
-  });
 }
 
 function renderVentas(){
@@ -4411,8 +4405,7 @@ function renderVentas(){
     renderVentasAgrupadas(tbody, items);
   } else {
     tbody.classList.remove('agrupado');
-    const totalesGrupo = totalesPorGrupoEn(items);
-    tbody.innerHTML = items.map(s=>filaDeVenta(s, '', totalesGrupo[claveGrupoVenta(s)])).join('');
+    tbody.innerHTML = items.map(s=>filaDeVenta(s)).join('');
   }
   actualizarBotonToggleDias(items);
   updateBulkToolbarVentas();
@@ -4482,7 +4475,6 @@ function renderVentasAgrupadas(tbody, items){
     const totalDia = ventasDelDia.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
     const abierto = abrirTodo || diasAbiertosVentas.has(dia);
     const n = ventasDelDia.length;
-    const totalesGrupo = totalesPorGrupoEn(ventasDelDia);
     html += `<tr class="dia-header ${abierto?'abierto':''}" data-dia="${escapeHtml(dia)}">
       <td colspan="10">
         <div class="dia-head-inner">
@@ -4494,17 +4486,14 @@ function renderVentasAgrupadas(tbody, items){
         </div>
       </td>
     </tr>`;
-    html += ventasDelDia.map(s=>filaDeVenta(s, 'venta-de-dia' + (abierto?'':' oculta'), totalesGrupo[claveGrupoVenta(s)])).join('');
+    html += ventasDelDia.map(s=>filaDeVenta(s, 'venta-de-dia' + (abierto?'':' oculta'))).join('');
   });
   tbody.innerHTML = html;
 }
 
-function filaDeVenta(s, clasesExtra, badgeVenta){
+function filaDeVenta(s, clasesExtra){
     const subtotal = s.cantidad * s.precioUnitario;
     const esDebe = String(s.medioPago||'').trim().toLowerCase() === 'debe';
-    const badgeHtml = (badgeVenta && badgeVenta.count > 1)
-      ? `<span class="cliente-total-badge" title="Suma de todos los productos que cobraste juntos en esta venta">Total de esta venta: ${fmt(badgeVenta.total)} (${badgeVenta.count} productos)</span>`
-      : '';
     return `<tr class="${clasesExtra||''}" data-id="${s.id}">
       <td><input type="checkbox" class="row-check" data-id="${s.id}" ${selectedVentaIds.has(s.id)?'checked':''}></td>
       <td><input type="date" class="cell-edit" data-id="${s.id}" data-field="fecha" value="${s.fecha}"></td>
@@ -4521,34 +4510,10 @@ function filaDeVenta(s, clasesExtra, badgeVenta){
       <td>
         <div class="cliente-cell">
           <input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="cliente" value="${escapeHtml(s.cliente)}">
-          ${badgeHtml}
         </div>
       </td>
       <td><button class="btn-del link-btn danger" data-id="${s.id}" data-action="delete">Eliminar</button></td>
     </tr>`;
-}
-
-// Clave para agrupar "la misma persona" sin importar mayúsculas/tildes/espacios
-function claveCliente(nombre){
-  return normalizeForMatch(nombre||'').toLowerCase();
-}
-
-// Agrupa por la venta real: todos los productos que cobraste juntos en un mismo
-// "Cobrar" comparten grupoVentaId, así el total no depende de si escribiste el
-// nombre del cliente o no. Las ventas viejas (sin grupoVentaId) o cargadas sueltas
-// no se agrupan con nada (cada una queda sola, sin cartelito).
-function totalesPorGrupoEn(ventas){
-  const mapa = {};
-  ventas.forEach(s=>{
-    const clave = s.grupoVentaId || ('__sola__' + s.id);
-    if(!mapa[clave]) mapa[clave] = { total: 0, count: 0 };
-    mapa[clave].total += s.cantidad * s.precioUnitario;
-    mapa[clave].count += 1;
-  });
-  return mapa;
-}
-function claveGrupoVenta(s){
-  return s.grupoVentaId || ('__sola__' + s.id);
 }
 
 document.getElementById('ventasTbody').addEventListener('click', async (e)=>{
@@ -4683,14 +4648,17 @@ function getPromedioDiarioMes(year, mes){
 }
 
 function getCategoriaBreakdown(year, mes){
-  // mes = null significa "todo el año" (para la tarjeta Acumulado)
+  // mes = null significa "todo el año" (para la tarjeta Acumulado).
+  // Usa el mismo agrupado de 3 categorías que "Detalle de lo pagado" (Alquiler /
+  // Proveedores / Gastos fijos), para que el hover de Gastos no muestre una lista
+  // larga de categorías sueltas (Impuestos, Arca, Sueldos, etc. quedan dentro de
+  // "Gastos fijos").
   let items = GASTOS.filter(g => g.fecha && g.fecha.slice(0,4) == year);
   if(mes) items = items.filter(g => parseInt(g.fecha.slice(5,7),10) === mes);
-  const porCat = {}; // clave normalizada → { label, total }
+  const porCat = {}; // clave → { label, total }
   items.forEach(g=>{
-    const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
-    const key = normalizeForMatch(catCruda).toLowerCase();
-    if(!porCat[key]) porCat[key] = { label: titleCase(catCruda), total: 0 };
+    const { key, label } = categoriaKeyDeGasto(g);
+    if(!porCat[key]) porCat[key] = { label, total: 0 };
     porCat[key].total += (g.monto||0);
   });
   return Object.values(porCat).sort((a,b)=>b.total-a.total).map(v=>[v.label, v.total]);
@@ -4945,11 +4913,14 @@ function gastosFiltradosActuales(){
 }
 
 // Clasifica un gasto en su "categoría visual": Gastos fijos, Proveedores, o su categoría tal cual.
+// Siempre devuelve una de exactamente 3 categorías: Alquiler, Proveedores o Gastos
+// fijos (esta última junta todo lo demás: Impuestos, Arca, Sueldos, Extraordinario,
+// cualquier otra). Se usa tanto en "Detalle de lo pagado" como en el desglose de
+// Administración, para que ambos lugares agrupen siempre igual.
 function categoriaKeyDeGasto(g){
-  if(g.origenVencimientoId) return { key:'gastos-fijos', label:'Gastos fijos' };
+  if(esCategoriaAlquiler(g.categoria)) return { key:'alquiler', label:'Alquiler' };
   if(esCategoriaProveedor(g.categoria)) return { key:'proveedores', label:'Proveedores' };
-  const catCruda = g.categoria && g.categoria.trim() ? g.categoria.trim() : 'Sin categoría';
-  return { key: normalizeForMatch(catCruda).toLowerCase(), label: titleCase(catCruda) };
+  return { key:'gastos-fijos', label:'Gastos fijos' };
 }
 
 function renderGastosTabla(){
