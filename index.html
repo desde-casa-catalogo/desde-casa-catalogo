@@ -1992,7 +1992,15 @@ let pinBuffer = '';
 
 const fmt = (n) => '$ ' + Math.round(n).toLocaleString('es-AR');
 const fmtNum = (n) => Math.round(n).toLocaleString('es-AR');
-const todayISO = () => new Date().toISOString().slice(0,10);
+// Usa la fecha/hora LOCAL del dispositivo (no UTC), para que el día cambie a medianoche
+// hora Argentina y no a las 21:00 hs como pasaba con toISOString().
+const todayISO = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
 // Contador interno: garantiza ids únicos aunque se generen muchos en el mismo milisegundo.
 // (Antes, al importar 313 productos de una vez, era casi seguro que dos quedaran con el mismo id.)
 let __uidContador = 0;
