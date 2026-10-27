@@ -2974,45 +2974,6 @@ function renderChipsCostos(){
   });
 }
 
-function buildPrintCatalog(){
-  let items = PRODUCTS.filter(p => p.activo !== false);
-  if(currentCategoryCostos && currentCategoryCostos !== 'Todos'){
-    items = items.filter(p => p.rubro === currentCategoryCostos);
-  }
-
-  const grupos = {};
-  items.forEach(p=>{
-    const key = titleCase(p.rubro || 'Sin categoría');
-    if(!grupos[key]) grupos[key] = [];
-    grupos[key].push(p);
-  });
-  Object.values(grupos).forEach(arr => arr.sort((a,b)=>a.nombre.localeCompare(b.nombre)));
-
-  const fecha = new Date().toLocaleDateString('es-AR');
-  const alcance = (currentCategoryCostos && currentCategoryCostos !== 'Todos') ? titleCase(currentCategoryCostos) : 'Catálogo completo';
-
-  let html = `
-    <div class="print-header">
-      <h1>Desde Casa — Catálogo de Precios</h1>
-      <div class="print-sub">Limpieza y Deco · ${escapeHtml(alcance)} · Generado el ${fecha}</div>
-    </div>`;
-
-  Object.keys(grupos).sort().forEach(rubro=>{
-    html += `<div class="print-rubro">${escapeHtml(rubro)}</div><div class="print-grid">`;
-    grupos[rubro].forEach(p=>{
-      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
-    });
-    html += `</div>`;
-  });
-
-  document.getElementById('printCatalog').innerHTML = html;
-}
-
-document.getElementById('btnExportarCatalogoPDF').addEventListener('click', ()=>{
-  buildPrintCatalog();
-  setTimeout(()=>window.print(), 150);
-});
-
 document.getElementById('btnEliminarTodosProductos').addEventListener('click', async ()=>{
   const total = PRODUCTS.length;
   if(total===0){ showToast('No hay productos cargados'); return; }
