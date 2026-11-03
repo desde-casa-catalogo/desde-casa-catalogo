@@ -1162,7 +1162,7 @@
   table.gastos-cat-table td.price-cell .price-input{justify-content:center;}
   table.gastos-cat-table td.price-cell input.price{text-align:center;}
 
-  table.ventas-table td{padding:12px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  table.ventas-table td{padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.ventas-table tbody tr:hover{background:var(--gold-pale);}
   table.ventas-table tbody tr:nth-child(even){background:var(--cream-deep);}
   table.ventas-table tbody tr:nth-child(even):hover{background:var(--gold-pale);}
@@ -1222,7 +1222,7 @@
   td.prod-cell input.cell-edit-text{min-width:360px;}
   input.cell-edit.cell-edit-text.medio-debe{color:var(--stat-red);font-weight:800;}
   input.cell-edit[type="date"]{font-weight:600;min-width:130px;}
-  .venta-hora{font-size:10.5px;color:var(--ink-faint);text-align:center;margin-top:2px;}
+  .venta-hora{font-size:10.5px;color:var(--ink-faint);text-align:center;margin-top:2px;height:13px;line-height:13px;}
   .estado-pill{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;border:none;}
   .estado-pill.pago{background:var(--green-pale);color:var(--green);}
   .estado-pill.debe{background:var(--red-pale);color:var(--red);}
@@ -4539,7 +4539,7 @@ function filaDeVenta(s, clasesExtra){
       <td><input type="checkbox" class="row-check" data-id="${s.id}" ${selectedVentaIds.has(s.id)?'checked':''}></td>
       <td>
         <input type="date" class="cell-edit" data-id="${s.id}" data-field="fecha" value="${s.fecha}">
-        ${s.hora ? `<div class="venta-hora">${escapeHtml(s.hora)}</div>` : ''}
+        <div class="venta-hora">${s.hora ? escapeHtml(s.hora) : ''}</div>
       </td>
       <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="producto" value="${escapeHtml(s.producto)}"></td>
       <td class="num"><input type="number" class="cell-edit cell-edit-num" data-id="${s.id}" data-field="cantidad" value="${s.cantidad}" min="1"></td>
