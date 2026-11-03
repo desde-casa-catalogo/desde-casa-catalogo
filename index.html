@@ -1222,6 +1222,7 @@
   td.prod-cell input.cell-edit-text{min-width:360px;}
   input.cell-edit.cell-edit-text.medio-debe{color:var(--stat-red);font-weight:800;}
   input.cell-edit[type="date"]{font-weight:600;min-width:130px;}
+  .venta-hora{font-size:10.5px;color:var(--ink-faint);text-align:center;margin-top:2px;}
   .estado-pill{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;border:none;}
   .estado-pill.pago{background:var(--green-pale);color:var(--green);}
   .estado-pill.debe{background:var(--red-pale);color:var(--red);}
@@ -2000,6 +2001,11 @@ const todayISO = () => {
   const m = String(d.getMonth()+1).padStart(2,'0');
   const day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
+};
+// Hora local del dispositivo (HH:MM), para registrar a qué hora se hizo una venta en Cobrar.
+const horaActual = () => {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
 };
 // Contador interno: garantiza ids únicos aunque se generen muchos en el mismo milisegundo.
 // (Antes, al importar 313 productos de una vez, era casi seguro que dos quedaran con el mismo id.)
@@ -2914,6 +2920,7 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
   if(!ventaMedio){ showToast('Elegí un medio de pago'); return; }
   const cliente = document.getElementById('ventaCliente').value.trim() || 'Consumidor final';
   const fecha = document.getElementById('ventaFecha').value || todayISO();
+  const hora = horaActual(); // hora real en la que se cobró, para mostrarla chiquita bajo la fecha
   const grupoVentaId = uid(); // agrupa todas las líneas de este mismo "Cobrar" como una sola venta
 
   const {total: rawTotal} = cartCountAndTotal();
@@ -2928,12 +2935,12 @@ document.getElementById('btnVenderConfirm').addEventListener('click', async ()=>
     const cant = CART[id];
     const precioLista = precioLineaProducto(id, cant, p.precio) / cant; // precio unitario real o el editado a mano
     const precioAjustado = Math.round(precioLista * ratio);
-    SALES.push({ id: uid(), fecha, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual', grupoVentaId });
+    SALES.push({ id: uid(), fecha, hora, producto: p.nombre, cantidad: cant, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual', grupoVentaId });
     p.stock = (p.stock||0) - cant;
   }
   CART_MANUAL.forEach(it=>{
     const precioAjustado = Math.round(it.monto * ratio);
-    SALES.push({ id: uid(), fecha, producto: it.descripcion, cantidad: 1, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual', grupoVentaId });
+    SALES.push({ id: uid(), fecha, hora, producto: it.descripcion, cantidad: 1, precioUnitario: precioAjustado, medioPago: ventaMedio, cliente, facturado: false, origen: 'manual', grupoVentaId });
   });
   await saveSales();
   await saveProducts();
@@ -2973,6 +2980,45 @@ function renderChipsCostos(){
     wrap.appendChild(c);
   });
 }
+
+function buildPrintCatalog(){
+  let items = PRODUCTS.filter(p => p.activo !== false);
+  if(currentCategoryCostos && currentCategoryCostos !== 'Todos'){
+    items = items.filter(p => p.rubro === currentCategoryCostos);
+  }
+
+  const grupos = {};
+  items.forEach(p=>{
+    const key = titleCase(p.rubro || 'Sin categoría');
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(p);
+  });
+  Object.values(grupos).forEach(arr => arr.sort((a,b)=>a.nombre.localeCompare(b.nombre)));
+
+  const fecha = new Date().toLocaleDateString('es-AR');
+  const alcance = (currentCategoryCostos && currentCategoryCostos !== 'Todos') ? titleCase(currentCategoryCostos) : 'Catálogo completo';
+
+  let html = `
+    <div class="print-header">
+      <h1>Desde Casa — Catálogo de Precios</h1>
+      <div class="print-sub">Limpieza y Deco · ${escapeHtml(alcance)} · Generado el ${fecha}</div>
+    </div>`;
+
+  Object.keys(grupos).sort().forEach(rubro=>{
+    html += `<div class="print-rubro">${escapeHtml(rubro)}</div><div class="print-grid">`;
+    grupos[rubro].forEach(p=>{
+      html += `<div class="print-item"><span class="print-item-name">${escapeHtml(p.nombre)}</span><span class="print-item-price">${fmt(p.precio)}</span></div>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById('printCatalog').innerHTML = html;
+}
+
+document.getElementById('btnExportarCatalogoPDF').addEventListener('click', ()=>{
+  buildPrintCatalog();
+  setTimeout(()=>window.print(), 150);
+});
 
 document.getElementById('btnEliminarTodosProductos').addEventListener('click', async ()=>{
   const total = PRODUCTS.length;
@@ -4491,7 +4537,10 @@ function filaDeVenta(s, clasesExtra){
     const esDebe = String(s.medioPago||'').trim().toLowerCase() === 'debe';
     return `<tr class="${clasesExtra||''}" data-id="${s.id}">
       <td><input type="checkbox" class="row-check" data-id="${s.id}" ${selectedVentaIds.has(s.id)?'checked':''}></td>
-      <td><input type="date" class="cell-edit" data-id="${s.id}" data-field="fecha" value="${s.fecha}"></td>
+      <td>
+        <input type="date" class="cell-edit" data-id="${s.id}" data-field="fecha" value="${s.fecha}">
+        ${s.hora ? `<div class="venta-hora">${escapeHtml(s.hora)}</div>` : ''}
+      </td>
       <td class="prod-cell"><input type="text" class="cell-edit cell-edit-text" data-id="${s.id}" data-field="producto" value="${escapeHtml(s.producto)}"></td>
       <td class="num"><input type="number" class="cell-edit cell-edit-num" data-id="${s.id}" data-field="cantidad" value="${s.cantidad}" min="1"></td>
       <td class="num price-cell"><div class="price-input"><span class="dollar">$</span><input type="number" class="cell-edit cell-edit-num price" data-id="${s.id}" data-field="precio" value="${s.precioUnitario}"></div></td>
