@@ -1597,6 +1597,11 @@
       <button class="chip-v fin-year-btn" id="btnFinYearPrev">‹</button>
       <div class="fin-year-label" id="finYearLabel">2026</div>
       <button class="chip-v fin-year-btn" id="btnFinYearNext">›</button>
+      <button class="btn btn-outline btn-sm" id="btnMesesVisiblesFin" style="margin-left:10px;">👁️ Meses visibles</button>
+    </div>
+    <div class="venc-card vfs-float" id="mesesVisiblesFinBox" style="display:none;padding:14px;position:relative;top:0;right:0;margin-bottom:10px;box-shadow:none;">
+      <div class="price-lookup-title" style="font-size:13px;margin-bottom:8px;">Tildá los meses que querés ver (el Acumulado siempre suma todos)</div>
+      <div id="mesesVisiblesFinChecklist" class="analisis-meses-checklist"></div>
     </div>
     <div class="fin-months-grid" id="finMonthsGrid"></div>
 
@@ -4675,20 +4680,35 @@ function getMonthlyFinance(year){
   return rows;
 }
 
+// Días del mes en los que realmente hubo ventas (con monto > 0). Los días sin ventas
+// (domingos, feriados, etc.) no cuentan para el promedio diario.
+function getDiasConVentasMes(year, mes){
+  const prefix = `${year}-${String(mes).padStart(2,'0')}`;
+  const dias = new Set();
+  SALES.forEach(s=>{
+    if(s.fecha && s.fecha.slice(0,7) === prefix && (s.cantidad*s.precioUnitario) > 0){
+      dias.add(s.fecha);
+    }
+  });
+  return dias.size;
+}
+
+// Lista (ordenada) de los días del mes con ventas, para mostrar cuáles se cuentan en el promedio.
+function getListaDiasConVentasMes(year, mes){
+  const prefix = `${year}-${String(mes).padStart(2,'0')}`;
+  const dias = new Set();
+  SALES.forEach(s=>{
+    if(s.fecha && s.fecha.slice(0,7) === prefix && (s.cantidad*s.precioUnitario) > 0) dias.add(s.fecha);
+  });
+  return Array.from(dias).sort();
+}
+
 function getPromedioDiarioMes(year, mes){
   const prefix = `${year}-${String(mes).padStart(2,'0')}`;
   const ventasDelMes = SALES.filter(s => s.fecha && s.fecha.slice(0,7) === prefix);
   const totalIngresos = ventasDelMes.reduce((acc,s)=>acc + s.cantidad*s.precioUnitario, 0);
-
-  const hoy = new Date();
-  const esMesActual = hoy.getFullYear()===year && (hoy.getMonth()+1)===mes;
-  let diasDelPeriodo;
-  if(esMesActual){
-    diasDelPeriodo = hoy.getDate();
-  } else {
-    diasDelPeriodo = new Date(year, mes, 0).getDate();
-  }
-  return diasDelPeriodo > 0 ? totalIngresos / diasDelPeriodo : 0;
+  const diasConVentas = getDiasConVentasMes(year, mes);
+  return diasConVentas > 0 ? totalIngresos / diasConVentas : 0;
 }
 
 function getCategoriaBreakdown(year, mes){
@@ -4715,17 +4735,65 @@ function tooltipGastosHtml(breakdown){
   `).join('');
 }
 
+/* ---- Meses visibles en las tarjetas de Administración (se guarda la elección) ---- */
+function getMesesVisiblesFin(){
+  try{
+    const guardado = JSON.parse(localStorage.getItem('fin_meses_visibles') || 'null');
+    if(Array.isArray(guardado) && guardado.length > 0) return new Set(guardado);
+  }catch(e){}
+  return new Set([1,2,3,4,5,6,7,8,9,10,11,12]);
+}
+let mesesVisiblesFin = getMesesVisiblesFin();
+
+function populateMesesVisiblesFinChecklist(){
+  document.getElementById('mesesVisiblesFinChecklist').innerHTML = MESES_NOMBRES.map((nombre, i)=>{
+    const m = i+1;
+    const checked = mesesVisiblesFin.has(m);
+    return `<label class="analisis-mes-check ${checked?'checked':''}">
+      <input type="checkbox" data-mes-fin="${m}" ${checked?'checked':''}>
+      ${nombre}
+    </label>`;
+  }).join('');
+}
+document.getElementById('mesesVisiblesFinChecklist').addEventListener('change', (e)=>{
+  const input = e.target.closest('input[data-mes-fin]');
+  if(!input) return;
+  const m = parseInt(input.dataset.mesFin, 10);
+  if(input.checked) mesesVisiblesFin.add(m);
+  else {
+    if(mesesVisiblesFin.size === 1){ input.checked = true; showToast('Dejá al menos un mes visible'); return; }
+    mesesVisiblesFin.delete(m);
+  }
+  input.closest('.analisis-mes-check').classList.toggle('checked', input.checked);
+  try{ localStorage.setItem('fin_meses_visibles', JSON.stringify(Array.from(mesesVisiblesFin))); }catch(e2){}
+  renderAdminDashboard();
+});
+document.getElementById('btnMesesVisiblesFin').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const box = document.getElementById('mesesVisiblesFinBox');
+  const abierta = box.style.display !== 'none';
+  box.style.display = abierta ? 'none' : 'block';
+  if(!abierta) populateMesesVisiblesFinChecklist();
+});
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('#mesesVisiblesFinBox') || e.target.closest('#btnMesesVisiblesFin')) return;
+  document.getElementById('mesesVisiblesFinBox').style.display = 'none';
+});
+
 function renderAdminDashboard(){
   document.getElementById('finYearLabel').textContent = finYear;
   const rows = getMonthlyFinance(finYear).filter(r => r.ingresos !== 0 || r.gastos !== 0);
+  const rowsVisibles = rows.filter(r => mesesVisiblesFin.has(r.mes));
   const grid = document.getElementById('finMonthsGrid');
   if(rows.length===0){
     grid.innerHTML = '<div class="empty-state" style="padding:16px;"><span class="big">📊</span>No hay actividad registrada en '+finYear+'.</div>';
     return;
   }
-  let html = rows.map(r=>{
+  let html = rowsVisibles.map(r=>{
     const resClass = r.resultado >= 0 ? 'pos' : 'neg';
     const promedio = getPromedioDiarioMes(finYear, r.mes);
+    const diasLista = getListaDiasConVentasMes(finYear, r.mes);
+    const tipDias = `${diasLista.length} día${diasLista.length===1?'':'s'} con ventas: ` + diasLista.map(d=>d.slice(8,10)+'/'+d.slice(5,7)).join(', ');
     return `<div class="fin-month-card">
       <div class="fin-month-name">${MESES_NOMBRES[r.mes-1]}</div>
       <div class="fin-row"><span>Ingresos</span><span class="fin-val pos">${fmt(r.ingresos)}</span></div>
@@ -4733,18 +4801,14 @@ function renderAdminDashboard(){
         <div class="deben-tooltip">${tooltipGastosHtml(getCategoriaBreakdown(finYear, r.mes))}</div>
       </div>
       <div class="fin-row fin-result"><span>Resultado</span><span class="fin-val ${resClass}">${fmt(r.resultado)}</span></div>
-      <div class="fin-row fin-promedio"><span>Promedio diario</span><span class="fin-val">${fmt(promedio)}</span></div>
+      <div class="fin-row fin-promedio" title="${escapeHtml(tipDias)}"><span>Prom. diario</span><span class="fin-val">${fmt(promedio)}</span></div>
     </div>`;
   }).join('');
 
   const totIngresos = rows.reduce((a,r)=>a+r.ingresos,0);
   const totGastos = rows.reduce((a,r)=>a+r.gastos,0);
   const totResultado = totIngresos - totGastos;
-  const totDias = rows.reduce((a,r)=>{
-    const hoy = new Date();
-    const esMesActual = hoy.getFullYear()===finYear && (hoy.getMonth()+1)===r.mes;
-    return a + (esMesActual ? hoy.getDate() : new Date(finYear, r.mes, 0).getDate());
-  }, 0);
+  const totDias = rows.reduce((a,r)=> a + getDiasConVentasMes(finYear, r.mes), 0);
   const promedioAcum = totDias>0 ? totIngresos/totDias : 0;
   html += `<div class="fin-month-card acumulado">
     <div class="fin-month-name">📊 Acumulado ${finYear}</div>
@@ -4753,12 +4817,12 @@ function renderAdminDashboard(){
       <div class="deben-tooltip">${tooltipGastosHtml(getCategoriaBreakdown(finYear, null))}</div>
     </div>
     <div class="fin-row fin-result"><span>Resultado</span><span class="fin-val ${totResultado>=0?'pos':'neg'}">${fmt(totResultado)}</span></div>
-    <div class="fin-row fin-promedio"><span>Promedio diario</span><span class="fin-val">${fmt(promedioAcum)}</span></div>
+    <div class="fin-row fin-promedio" title="${totDias} días con ventas en total"><span>Prom. diario</span><span class="fin-val">${fmt(promedioAcum)}</span></div>
   </div>`;
 
   grid.innerHTML = html;
 
-  const totalCards = rows.length + 1; // + Acumulado
+  const totalCards = rowsVisibles.length + 1; // + Acumulado
   grid.style.setProperty('--fin-cols', totalCards);
   grid.classList.remove('fin-tier-sm', 'fin-tier-xs');
   if(totalCards > 9) grid.classList.add('fin-tier-xs');
